@@ -1,0 +1,135 @@
+html,body {
+  background: #EEEEEE;
+}
+#banner {
+  font-family: 'Maven Pro', sans-serif;
+  width: 100%;
+  text-align: center;
+  font-size: 24pt;
+  background: #EEEEEE;
+  letter-spacing: 0px;
+  text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+}
+#puzzleInterface {
+  text-align: center;
+}
+#canvasDiv {
+  display:inline-block;
+  background: white;
+  border: 2px solid black;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+  user-select: none;
+  box-shadow: 1px 1px 5px 2px #888888;
+  margin: 10px;
+}
+#puzzleCanvas {
+  vertical-align: bottom;
+}
+#buttonsDiv {
+  margin-bottom: 100px;
+}
+#tabContainer {
+  margin-left: auto;
+  margin-right: auto;
+}
+#tabs {
+  font-family: 'Maven Pro', sans-serif;
+  font-size: 14pt;
+  padding-top: 5px;
+  padding-bottom: 3px;
+  margin-bottom: 0px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+#tabs li {
+  display: inline;
+  box-shadow: 1px 1px 5px 1px #888888;
+}
+#tabs li a {
+  color: white;
+  border: 1px solid black;
+  padding: 4px 6px;
+  margin: 2px;
+  text-decoration: none;
+  background: black;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #454545), color-stop(1, #000000) );
+  background:-moz-linear-gradient( center top, #454545 5%, #000000 100% );
+  background:-ms-linear-gradient(top, #454545 5%, #000000 100%);
+  background:-o-linear-gradient(top, #454545 5%, #000000 100%);
+  border-bottom: none;
+  outline: none;
+
+}
+#tabs li a:hover {
+  background: #BCD0D6;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #BCD0D6), color-stop(1, #2C5969) );
+  background:-moz-linear-gradient( center top, #BCD0D6 5%, #2C5969 100% );
+  background: -ms-linear-gradient(top, #BCD0D6 5%, #2C5969 100%);
+  background: -o-linear-gradient(top, #BCD0D6 5%, #2C5969 100%);
+}
+#tabs li.active a {
+  background: #BCD0D6;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #BCD0D6), color-stop(1, #2C5969) );
+  background:-moz-linear-gradient( center top, #BCD0D6 5%, #2C5969 100% );
+  background: -ms-linear-gradient(top, #BCD0D6 5%, #2C5969 100%);
+  background: -o-linear-gradient(top, #BCD0D6 5%, #2C5969 100%);
+  border-bottom: none;
+}
+
+#tabsContent {
+  background-color: #CEDCE0;
+  border: 1px solid black;
+  padding: 8px;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  box-shadow: 1px 1px 5px 2px #888888;
+}
+.tab_content {
+  display: none;
+  margin: 2px;
+}
+.button {
+  background: black;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #454545), color-stop(1, #000000) );
+  background:-moz-linear-gradient( center top, #454545 5%, #000000 100% );
+  background:-ms-linear-gradient(top, #454545 5%, #000000 100%);
+  background:-o-linear-gradient(top, #454545 5%, #000000 100%);
+  border: 1px solid black;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 4px;
+  margin: 5px;
+  color: white;
+  box-shadow: 1px 1px 5px 0px #BBBBBB;
+}
+.button:hover {
+  background: #2C5969;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #BCD0D6), color-stop(1, #2C5969) );
+  background:-moz-linear-gradient( center top, #BCD0D6 5%, #2C5969 100% );
+  background: -ms-linear-gradient(top, #BCD0D6 5%,#2C5969 100%);
+  background: -o-linear-gradient(top, #BCD0D6 5%,#2C5969 100%);
+  text-decoration: none;
+}
+.button:active {
+  position: relative;
+  top: 1px;
+}
+.button:disabled {
+  top: 0px;
+}
+.small {
+  border: 1px solid black;
+  font-size: 12px;
+  padding: 3px 16px 4px;
+}
+#tab1,#tab2,#tab4 {
+  text-align: left;
+}
