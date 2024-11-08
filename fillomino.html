@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!-- saved from https://www.kakuro-online.com/fillomino/ -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./fillomino.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./fpuzzles.js"></script>
+    <script type="text/javascript" src="./fillomino.js"></script>
+    <script src="./jquery.js"></script>
+    <title>Fillomino Solver and Generator</title>
+  </head>
+  <body>
+    <div id="banner">
+      Fillomino Solver and Generator
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">About       </a></li>
+        <li>               <a href="#tab4">Puzzles     </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>To play, click on a cell and enter a digit. Once selected, arrow keys can be
+        used to move around the canvas. Use keys 1-9, or A-Z for double digit values
+        10-35. Bold digits are the initial puzzle values; digits turn red if the
+        rules of the game are violated. You can click on borders between cells to
+        make a note of expected numeric separations, though no error checking is made.
+        The canvas border will turn green if the grid is completed without error.</p>
+        <center>
+        Enter puzzle code (1-<span id='puzzlecount1'>0</span>) or descriptor
+        (see "Puzzles" tab):<br/>
+        <input type="text"                          id="userPuzzle"    size="40" />
+        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+        </center>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        The full set of rules for Fillomino can be found online. The simple description
+        includes two basic rules. 1) The grid canvas is divided into a collection of
+        number clusters, where each cluster has like-numbered numerical values (1-35)
+        grouped in horizontally- and vertically-adjacent cells, and, when completed,
+        contains the number of cells of the numerical value itself. For instance, a
+        legal collection of '4' digits has four adjacent cells of any configuration.
+        2) Collections of like-numbered digits cannot border other collections of
+        the same digit. For instance, a legal collection of 4-digits cannot border
+        another collection of 4 digits. Put another way, a collection of 5 or more
+        adjacent '4' digits is illegal. The canvas will indicate this with red-colored
+        digits once the collection is in error. Similarly a collection that has
+        no chance of growing as large as needed to make it of legal size turns
+        that collection's digits red. You can type 'space' or 'backspace' to clear
+        an entered digit, or you can click the "Undo" button on the bottom of the
+        page. On the "Enter Puzzle" tab, select puzzle 0 to see a completed
+        sample grid.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. More later.
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        Puzzles can be invoked by either a numerical entry from
+        1-<span id='puzzlecount2'>0</span>, or through a character
+        description of the puzzle itself. The numbered puzzles are
+        hand-crafted of varying difficulty, roughly easy to hard.
+        To describe a puzzle, the character string must be of the
+        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+        the width of the grid, and H the height.  The descriptor is a
+        definition of the grid contents from left to right, then top
+        to bottom. A dash '-' can indicate an empty cell. For easier
+        description of sparse puzzles, letter values from 'a' to 'z'
+        can indicate 1 to 26 empty cells, respectively. A dot '.'
+        can be used as a separator, for example between rows. Cell
+        contents for values greater than '9' should use capital 'A'
+        to 'Z' for 10 through 35. An example descriptor is as follows:
+        "6x10:--3---.b3c.12d.77a89A.f.f.b4b5.c321.Ce.CCc1".
+      </div>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Clear" id="clearButton" />
+      </div>
+    </div>
+    <br />
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
