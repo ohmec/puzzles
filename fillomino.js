@@ -75,6 +75,10 @@ function puzzleInit() {
     $(this).addClass("active");     
     $(".tab_content").hide();
     $($(this).find("a").attr("href")).show();
+    clicking = false;
+    activeNumber = "-";
+    lastVert = "";
+    lastHorz = "";
     return false;
   });
   
@@ -94,6 +98,15 @@ function puzzleInit() {
     initStructures(puzzle);
     calculateGroups();
     refreshPuzzle();
+  });
+
+  // click (down) within puzzle number entry, remove clicking
+  // effect on canvas
+  $("#userPuzzle").mousedown(function(evnt) {
+    clicking = false;
+    activeNumber = "-";
+    lastVert = "";
+    lastHorz = "";
   });
 
   // click (down) within puzzle frame, find out if contains number already
@@ -492,7 +505,7 @@ function drawFinishedLines() {
 function modifyGroup(x, y, inputNumber, oldNumber) {
   if ((puzzleState[x][y] == "-") &&
       (inputNumber!=oldNumber) &&
-      (inputNumber == "-" || !inputNumber.search(/[A-Z0-9]/))) {
+      (inputNumber == "-" || (isNaN(inputNumber) == false) || !inputNumber.search(/[A-Z0-9]/))) {
     for (let i=numberGroups.length-1;i>-1;i--) {
       // look for (x,y) or its NSEW neighbors in numberGroups[i].
       // if found, add (splice) into that number group
@@ -627,57 +640,59 @@ function handleClick(evnt) {
     let number = convertToNum(solveState[vertCell][horzCell]);
     tileColor = numberColor[number];
   }
-  if (horzDistFromEdgeL < 2*lineWidthFat) {
-    if (vertDistFromEdgeU < 2*lineWidthFat) {
-      return;
-    }
-    if (vertDistFromEdgeD < 2*lineWidthFat) {
-      return;
-    }
-    let wallX = 2*horzCell-2;
-    let wallY = 2*vertCell-1;
-    wallState[wallY][wallX] ^= constWallClickEdge;
-    refreshPuzzle();
-    return;
-  }
-  if (horzDistFromEdgeR < 2*lineWidthFat) {
-    if (vertDistFromEdgeU < 2*lineWidthFat) {
-      return;
-    }
-    if (vertDistFromEdgeD < 2*lineWidthFat) {
-      return;
-    }
-    let wallX = 2*horzCell;
-    let wallY = 2*vertCell-1;
-    wallState[wallY][wallX] ^= constWallClickEdge;
-    refreshPuzzle();
-    return;
-  }
-  if (vertDistFromEdgeU < 2*lineWidthFat) {
+  if (!dragging) {
     if (horzDistFromEdgeL < 2*lineWidthFat) {
+      if (vertDistFromEdgeU < 2*lineWidthFat) {
+        return;
+      }
+      if (vertDistFromEdgeD < 2*lineWidthFat) {
+        return;
+      }
+      let wallX = 2*horzCell-2;
+      let wallY = 2*vertCell-1;
+      wallState[wallY][wallX] ^= constWallClickEdge;
+      refreshPuzzle();
       return;
     }
     if (horzDistFromEdgeR < 2*lineWidthFat) {
+      if (vertDistFromEdgeU < 2*lineWidthFat) {
+        return;
+      }
+      if (vertDistFromEdgeD < 2*lineWidthFat) {
+        return;
+      }
+      let wallX = 2*horzCell;
+      let wallY = 2*vertCell-1;
+      wallState[wallY][wallX] ^= constWallClickEdge;
+      refreshPuzzle();
       return;
     }
-    let wallX = 2*horzCell-1;
-    let wallY = 2*vertCell-2;
-    wallState[wallY][wallX] ^= constWallClickEdge;
-    refreshPuzzle();
-    return;
-  }
-  if (vertDistFromEdgeD < 2*lineWidthFat) {
-    if (horzDistFromEdgeL < 2*lineWidthFat) {
+    if (vertDistFromEdgeU < 2*lineWidthFat) {
+      if (horzDistFromEdgeL < 2*lineWidthFat) {
+        return;
+      }
+      if (horzDistFromEdgeR < 2*lineWidthFat) {
+        return;
+      }
+      let wallX = 2*horzCell-1;
+      let wallY = 2*vertCell-2;
+      wallState[wallY][wallX] ^= constWallClickEdge;
+      refreshPuzzle();
       return;
     }
-    if (horzDistFromEdgeR < 2*lineWidthFat) {
+    if (vertDistFromEdgeD < 2*lineWidthFat) {
+      if (horzDistFromEdgeL < 2*lineWidthFat) {
+        return;
+      }
+      if (horzDistFromEdgeR < 2*lineWidthFat) {
+        return;
+      }
+      let wallX = 2*horzCell-1;
+      let wallY = 2*vertCell;
+      wallState[wallY][wallX] ^= constWallClickEdge;
+      refreshPuzzle();
       return;
     }
-    let wallX = 2*horzCell-1;
-    let wallY = 2*vertCell;
-    wallState[wallY][wallX] ^= constWallClickEdge;
-    refreshPuzzle();
-    return;
   }
 
   if (vertCell>puzzleH) {
@@ -750,13 +765,17 @@ function handleNumberDrawing(number, lastVert, lastHorz) {
       }
       
       // draw inputted number, allow for A-Z
-      if (!number.search(/[A-Z0-9]/)) {
-        solveState[lastVert][lastHorz] = convertToNum(number);
-        if (number == "") {
+      if (isNaN(number) == false) {
+        solveState[lastVert][lastHorz] = number;
+      } else {
+        if (!number.search(/[A-Z0-9]/)) {
+          solveState[lastVert][lastHorz] = convertToNum(number);
+          if (number == "") {
+            solveState[lastVert][lastHorz] = "-";
+          }
+        } else {
           solveState[lastVert][lastHorz] = "-";
         }
-      } else {
-        solveState[lastVert][lastHorz] = "-";
       }
       modifyGroup(lastVert, lastHorz, number, oldNumber);
       calculateLines(lastVert, lastHorz, number);
@@ -778,7 +797,7 @@ function calculateLines(vertCell, horzCell, number) {
   let lineX = 2*vertCell-1;
   let lineY = 2*horzCell-1;
   let numval = "-";
-  if (number.search(/[A-Z1-9]/) != -1) {
+  if ((isNaN(number) == false) || number.search(/[A-Z1-9]/) != -1) {
     numval = convertToNum(number);
   }
   if (numval != "-" && numval != "") {
