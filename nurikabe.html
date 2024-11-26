@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./fillomino.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./npuzzles.js"></script>
+    <script type="text/javascript" src="./nurikabe.js"></script>
+    <script src="./jquery.js"></script>
+    <title>Nurikabe Solver</title>
+  </head>
+  <body>
+    <div id="banner">
+      Nurikabe Solver
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">About       </a></li>
+        <li>               <a href="#tab4">Puzzles     </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>To play, click on a cell to switch it from light to dark. Once selected,
+        arrow keys can be used to move around the canvas.  Pressing the spacebar
+        will toggle the value from on to off (white to black and reverse). Digits are
+        the initial puzzle values; digits turn red if the rules of the game are violated.
+        The canvas border will turn green if the grid is completed without error. You
+        can also click on an existing cell to toggle its color, and "drag" it to other
+        cells to overwrite their value with its value. Digit cells can't be overwritten.
+        Dark cells will turn red if they violate the rules. Digits will turn green if
+        their "islands" are complete. Digits will turn red if their islands are too
+        small. You can click the "undo" buttom on the bottom of the page to undo previous
+        moves.</p>
+        <center>
+        Enter puzzle code (1-<span id='puzzlecount1'>0</span>) or descriptor
+        (see "Puzzles" tab):<br/>
+        <input type="text"                          id="userPuzzle"    size="40" />
+        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+        </center>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        The full set of rules for Nurikabe can be found online. The simple description
+        includes a few basic rules. 1) Digits on the canvas indicate the size of an
+        "island" of white cells surrounded by a "sea" of dark cells. 2) Each island
+        can only contain one digit. 3) All black cells must be linked to be a continuous
+        "sea". 4) No "pools" of a 2x2 cluster of black cells are allowed.
+        On the "Game Play" tab, select puzzle 0 to see a completed sample grid.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. More later.
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        Puzzles can be invoked by either a numerical entry from
+        1-<span id='puzzlecount2'>0</span>, or through a character
+        description of the puzzle itself. The numbered puzzles are
+        hand-crafted of varying difficulty, roughly easy to hard.
+        To describe a puzzle, the character string must be of the
+        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+        the width of the grid, and H the height.  The descriptor is a
+        definition of the grid contents from left to right, then top
+        to bottom. A dash '-' can indicate an empty cell. For easier
+        description of sparse puzzles, letter values from 'a' to 'z'
+        can indicate 1 to 26 empty cells, respectively. A dot '.'
+        can be used as a separator, for example between rows. Cell
+        contents for values greater than '9' should use capital 'A'
+        to 'Z' for 10 through 35. An example descriptor is as follows
+        for entry 1: "7x7:2a3d.f4.d1b.e4a.g.b2a2b.a5e".
+      </div>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Clear" id="clearButton" />
+      </div>
+    </div>
+    <br />
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
