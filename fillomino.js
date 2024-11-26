@@ -31,6 +31,7 @@ let constWallClickEdge = 0b001000;
 let constWallGangEdge  = 0b010000;
 
 let KEY_BS    = 0x08;
+let KEY_CR    = 0x0d;
 let KEY_SHIFT = 0x10;
 let KEY_ESC   = 0x1b;
 let KEY_SP    = 0x20;
@@ -172,6 +173,19 @@ function puzzleInit() {
 
 function handleKey(evnt) {
   let keynum = evnt.which;
+  const focusedElement = document.activeElement;
+  if (focusedElement && focusedElement.id == "userPuzzle" && keynum == KEY_CR) {
+    let pval = $("#userPuzzle").val();
+    if (pval.search(/:/) == -1) {
+      puzzle = removeDot(cannedPuzzles[pval]);
+    } else {
+      puzzle = removeDot(pval);
+    }
+    initStructures(puzzle);
+    calculateGroups();
+    refreshPuzzle();
+    return;
+  }
   // refresh with "ESC"
   if (keynum == KEY_ESC) {
     refreshPuzzle();
@@ -1027,7 +1041,6 @@ function undo() {
     redrawCell(undoVertCell, undoHorCell-1);
     redrawCell(undoVertCell, undoHorCell);
     
-        //validateSolution();
     undoProgress.pop();
     validateSolution();
   }
