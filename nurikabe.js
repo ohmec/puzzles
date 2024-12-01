@@ -21,21 +21,15 @@ let clicking = false;
 let dragging = false;
 let activeNumber = "-";
 
-let KEY_BS    = 0x08;
-let KEY_SHIFT = 0x10;
-let KEY_ESC   = 0x1b;
-let KEY_SP    = 0x20;
-let KEY_LEFT  = 0x25;
-let KEY_UP    = 0x26;
-let KEY_RIGHT = 0x27;
-let KEY_DOWN  = 0x28;
-let KEY_0     = 0x30;
-let KEY_1     = 0x31;
-let KEY_9     = 0x39;
-let KEY_A     = 0x41;
-let KEY_Z     = 0x5a;
-let KEY_a     = 0x61;
-let KEY_z     = 0x7a;
+let KEY_BS     = 0x08;
+let KEY_CR     = 0x0d;
+let KEY_ESC    = 0x1b;
+let KEY_SP     = 0x20;
+let KEY_LEFT   = 0x25;
+let KEY_UP     = 0x26;
+let KEY_RIGHT  = 0x27;
+let KEY_DOWN   = 0x28;
+let KEY_PERIOD = 0xbe;
 
 let puzzle, solveState, context, puzzleW, puzzleH, lastVert, lastHorz;
 let puzzleState, undoProgress, numberGroups, invalidNumbers, solvedNumbers, unsolvedNumbers;
@@ -162,9 +156,26 @@ function puzzleInit() {
 
 function handleKey(evnt) {
   let keynum = evnt.which;
+
+  // look for CR within puzzle display field
+  const focusedElement = document.activeElement;
+  if (focusedElement && focusedElement.id == "userPuzzle" && keynum == KEY_CR) {
+    let pval = $("#userPuzzle").val();
+    if (pval.search(/:/) == -1) {
+      puzzle = removeDot(cannedPuzzles[pval]);
+    } else {
+      puzzle = removeDot(pval);
+    }
+    initStructures(puzzle);
+    calculateGroups();
+    refreshPuzzle();
+    return;
+  }
+
   // refresh with "ESC"
   if (keynum == KEY_ESC) {
     refreshPuzzle();
+    console.log(numberGroups);
     return;
   }
   if (keynum >= KEY_LEFT && keynum <= KEY_DOWN) {
@@ -175,6 +186,8 @@ function handleKey(evnt) {
     number = "-";
   } else if (keynum == KEY_SP) {
     number = " ";
+  } else if (keynum == KEY_PERIOD) {
+    number = ".";
   } else {
     return;
   }
@@ -269,19 +282,6 @@ function drawGiven(number, x, y) {
   context.fillText(numExp, drawX+(gridSize*0.5), drawY+(gridSize*0.75));
 }
 
-function savePuzzle() {
-  let solution = "";
-  for (x=1;x<=puzzleH;x++) {
-    for (y=1;y<=puzzleW;y++) {
-      solution += solveState[x][y];
-    }
-  }
-  localStorage.removeItem("KOSavedFillomino");
-  localStorage.removeItem("KOSavedFillominoSolution");
-  localStorage.setItem("KOSavedFillomino", puzzle);
-  localStorage.setItem("KOSavedFillominoSolution", solution);
-}
-
 function drawCursor(x,y) {
   if (x && y) {
     let drawY = Math.floor((x-1)*gridSize);
@@ -314,6 +314,9 @@ function refreshPuzzle() {
       number = "-";
       if (solveState[x][y] == "-") {
         blankTile(x,y);
+      } else if (solveState[x][y] == ".") {
+        blankTile(x,y);
+        drawNumber(".", x, y);
       } else if (solveState[x][y] == "0") {
         blackTile(x,y);
       } else if (puzzleState[x][y] != "-") {
@@ -349,6 +352,7 @@ function calculateGroups() {
       let groupNumber = solveState[x2][y2];
       if (groupNumber != "-" &&
           groupNumber != "0" &&
+          groupNumber != "." &&
           allVisitedCells.indexOf(x2+"-"+y2) == -1) {
         let visitedCells = travelCells(x2, y2, groupNumber);
         allVisitedCells.push.apply(allVisitedCells, visitedCells);
@@ -440,32 +444,16 @@ function convertToNum(numstr) {
   return "-";
 }
 
-function calculateFinishedGroups() {
-  solvedNumbers = new Array();
-  unsolvedNumbers = new Array();
-  for (let i=0;i<numberGroups.length;i++) {
-    let group = numberGroups[i];
-    let number = convertToNum(group[0]);
-    if (group.length-1 >= number) {
-      for (let j=1;j<group.length;j++) {
-        solvedNumbers.push(group[j]);
-      }
-    } else {
-      for (let j=1;j<group.length;j++) {
-        unsolvedNumbers.push(group[j]);
-      }
-    }
-  }
-}
-
 function travelCells(xCoord, yCoord, number) {
   let visitedCells = new Array();
   let x = xCoord;
   let y = yCoord;
   let continueTraveling = true;
   let target = "-";
+  let alttarget = ".";
   if (number == "0") {
     target = "0";
+    alttarget = "0";
   }
   while(continueTraveling == true) {
     if (visitedCells.indexOf(x+"-"+y) == -1) {
@@ -473,13 +461,21 @@ function travelCells(xCoord, yCoord, number) {
     }
     x = x*1;
     y = y*1;
-    if (x!=puzzleH        && solveState[parseInt(x)+1][y] == target && visitedCells.indexOf((x+1)+"-"+y) == -1) {
+    if (x!=puzzleH        && visitedCells.indexOf((x+1)+"-"+y) == -1 &&
+        ((solveState[parseInt(x)+1][y] == target) ||
+         (solveState[parseInt(x)+1][y] == alttarget))) {
       x++;
-    } else if (x!=1       && solveState[parseInt(x)-1][y] == target && visitedCells.indexOf((x-1)+"-"+y) == -1) {
+    } else if (x!=1       && visitedCells.indexOf((x-1)+"-"+y) == -1 &&
+               ((solveState[parseInt(x)-1][y] == target) ||
+                (solveState[parseInt(x)-1][y] == alttarget))) {
       x--;
-    } else if (y!=puzzleW && solveState[x][parseInt(y)+1] == target && visitedCells.indexOf(x+"-"+(y+1)) == -1) {
+    } else if (y!=puzzleW && visitedCells.indexOf(x+"-"+(y+1)) == -1 &&
+               ((solveState[x][parseInt(y)+1] == target) ||
+                (solveState[x][parseInt(y)+1] == alttarget))) {
       y++;
-    } else if (y!=1       && solveState[x][parseInt(y)-1] == target && visitedCells.indexOf(x+"-"+(y-1)) == -1 ) {
+    } else if (y!=1       && visitedCells.indexOf(x+"-"+(y-1)) == -1 &&
+               ((solveState[x][parseInt(y)-1] == target) ||
+                (solveState[x][parseInt(y)-1] == alttarget))) {
       y--;
     } else {
       let index = visitedCells.indexOf(x+"-"+y);
@@ -490,6 +486,11 @@ function travelCells(xCoord, yCoord, number) {
       } else {
         continueTraveling = false;
       }
+    }
+    // in the interest of performance, stop traveling if we're searching
+    // for a "real" number and we've already grown above its size
+    if (number != "-" && parseInt(number)>0 && visitedCells.length>(parseInt(number)+1)) {
+      continueTraveling = false;
     }
   }
   return visitedCells;
@@ -618,25 +619,7 @@ function handleNumberDrawing(number, lastVert, lastHorz) {
         }
       }
       
-      // draw inputted number, allow for A-Z
-      if (isNaN(number) == false) {
-        solveState[lastVert][lastHorz] = number;
-      } else {
-        if (!number.search(/[A-Z0-9]/)) {
-          solveState[lastVert][lastHorz] = convertToNum(number);
-          if (number == "") {
-            solveState[lastVert][lastHorz] = "-";
-          }
-        } else {
-          solveState[lastVert][lastHorz] = "-";
-        }
-      }
-      calculateLines(lastVert, lastHorz, number);
-      redrawCell(lastVert,   lastHorz);
-      redrawCell(lastVert+1, lastHorz);
-      redrawCell(lastVert-1, lastHorz);
-      redrawCell(lastVert,   lastHorz+1);
-      redrawCell(lastVert,   lastHorz-1);
+      solveState[lastVert][lastHorz] = number;
     }
   }
 }
@@ -757,6 +740,9 @@ function drawNumber(number, x, y) {
   
   if (number == "-") {
     number = "";
+  }
+  if (number == ".") {
+    number = "·";
   }
   context.textAlign = "center";
   context.fillText(number, drawX+(gridSize*0.5), drawY+(gridSize*0.75));
