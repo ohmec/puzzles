@@ -173,6 +173,8 @@ function puzzleInit() {
 
 function handleKey(evnt) {
   let keynum = evnt.which;
+
+  // look for CR within puzzle display field
   const focusedElement = document.activeElement;
   if (focusedElement && focusedElement.id == "userPuzzle" && keynum == KEY_CR) {
     let pval = $("#userPuzzle").val();
@@ -186,6 +188,7 @@ function handleKey(evnt) {
     refreshPuzzle();
     return;
   }
+
   // refresh with "ESC"
   if (keynum == KEY_ESC) {
     refreshPuzzle();
