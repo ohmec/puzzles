@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- saved from https://www.kakuro-online.com/fillomino/ -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./fillomino.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./spuzzles.js"></script>
+    <script type="text/javascript" src="./slitherlink.js"></script>
+    <script src="./jquery.js"></script>
+    <title>Slitherlink Solver</title>
+  </head>
+  <body>
+    <div id="banner">
+      Slitherlink Solver
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">About       </a></li>
+        <li>               <a href="#tab4">Puzzles     </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>To play, click on the line between vertices to toggle between on and off.
+        The lines must be connected together into one loop as per the rules
+        explained on the Rules tab. You can also click on the tile space to toggle
+        between white and gray. This has no influence on the solving of the puzzle,
+        but can help visualize the land in between the lines of the full loop.</p>
+        <center>
+        Enter puzzle code (1-<span id='puzzlecount1'>0</span>) or descriptor
+        (see "Puzzles" tab):<br/>
+        <input type="text"                          id="userPuzzle"    size="40" />
+        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+        </center>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        The full set of rules for Slitherlink can be found online. The simple description
+        includes two basic rules. 1) You must connect adjacent dots with horizontal
+        and vertical lines to make a complete loop that never crosses or touches
+        itself. 2) A numbered cell indicates how many lines surround it; empty cells 
+        may be surrounded by any number of lines. Numbers that have been violated
+        with too many lines will be rendered in red. The whole puzzle's border will
+        turn green upon successful completion. Intersections with more than two lines
+        will turn red indicating illegal connections.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. More later.
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        Puzzles can be invoked by either a numerical entry from
+        1-<span id='puzzlecount2'>0</span>, or through a character
+        description of the puzzle itself. The numbered puzzles are
+        hand-crafted of varying difficulty, roughly easy to hard.
+        To describe a puzzle, the character string must be of the
+        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+        the width of the grid, and H the height.  The descriptor is a
+        definition of the grid contents from left to right, then top
+        to bottom. A dash '-' can indicate an empty cell. For easier
+        description of sparse puzzles, letter values from 'a' to 'z'
+        can indicate 1 to 26 empty cells, respectively. A dot '.'
+        can be used as a separator, for example between rows.
+        An example descriptor is as follows: "7x7:1b2a13.0a2d.b3a30a.3b2b1.a31a2b.d2a3.02a3b3".
+      </div>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Clear" id="clearButton" />
+      </div>
+    </div>
+    <br />
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
