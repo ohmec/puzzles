@@ -6,8 +6,17 @@
 let cannedPuzzles = [
   // dummy
   "1x1:4",
-  // from original js
+  // from vol3 examples
+  "6x6:a32a3203b0ad2321da3b2110a02a",
+  "7x7:10a0b2a3b203g10a0a30g230b2a2b3a20",
+  // easy example
   "7x7:1b2a13.0a2d.b3a30a.3b2b1.a31a2b.d2a3.02a3b3",
+  // from vol3 1-
+  "10x10:1b2a23333.0b2a2d.2b3a3d.2b0a12132.2011f.f0132.30321a2b1.d1a2b3.d0a3b2.01023a0b0",
+  "10x10:a23d02a.2b2a23b1.0b32a2b2.a12d33a.a2b22a0b.b3a21b1a.a02d33a.1b2a20b2.1b22a3b1.a20d23a",
+  "10x10:a33a33b3a.3b0b3a1a.3b3b2a3a.a12a01b0a.c3b3a33.13a3b3c.a3b23a23a.a1a2b1b3.a3a3b0b1.a2b23a13a",
+  "10x10:33a201d.a2e213.b3b03b3.0b23e.2e32a3.2a30e2.e03b1.3b02b2b.302e2a.d233a20",
+  "10x10:2233b1b1.c0b2b1.2323b1020.c2231c.2212b3c.c2b2111.c1312c.3220b2113.2b2b3c.0b2b2010",
   // from big book pages 80-
   "31x45:333a1c22c02a32c33c1a010.d1a0a33a2c2c0a02a3a0d.2a31b3d2a3c0a3d1b13a3" +
         "0d2b123c133c221b0d3.a33a0b3d3e3d0b2a12a.d2a1b3a0a12a20a1a2b1a3d" +
