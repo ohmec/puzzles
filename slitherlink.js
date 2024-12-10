@@ -20,6 +20,7 @@ let dragging = false;
 let activeNumber = "-";
 
 let constWallNone      = 0b00;
+let constWallSolveEdge = 0b01;
 let constWallClickEdge = 0b10;
 
 let constNumCorrect = 0;
@@ -48,6 +49,7 @@ function puzzleInit() {
     $("#saveButton").blur();
     $("#loadButton").blur();
     $("#clearButton").blur();
+    $("#solveButton").blur();
     $("#undoButton").blur();
     if (evnt.which === KEY_BS && !$(evnt.target).is("input")) {
       evnt.preventDefault();
@@ -137,6 +139,12 @@ function puzzleInit() {
     if (clearDialog == true) {
       clear();
     }
+  });
+
+  // click on solve, works through a few obvious moves for now
+  $("#solveButton").click(function() {
+    $("#canvasDiv").css("border-color", "black");
+    solveAll();
   });
 
   // unknown at this point, but contextmenu is within jquery.js
@@ -274,16 +282,13 @@ function initStructures(puzzle) {
   wallState = new Array(wallH);
   for (let i=0;i<wallH;i++) {
     wallState[i] = new Array(wallW);
-  }
-
-  // initialize wall state as either border, or none for now.
-  // later these will be supplemented with corrections based
-  // upon cell content
-  for (let x=0;x<wallH;x++) {
-    for (let y=0;y<wallW;y++) {
-      wallState[x][y] = constWallNone;
+    for (let j=0;j<wallW;j++) {
+      // initialize wall state as none
+      wallState[i][j] = constWallNone;
     }
   }
+
+  wallPaths = new Array;
 }
 
 function removeDot(strval) {
@@ -897,5 +902,235 @@ function unshadeInterior() {
 function clear() {
   $("#clearButton").blur();
   initStructures(puzzle);
-  validSolution();
+  validateSolution();
+}
+
+function solveAll() {
+  // do a few simple solve moves, starting with just as a relationship of
+  // bordering numbers
+
+  solve30();
+  solve33();
+  solve20b();
+  calculatePaths();
+  refreshPuzzle();
+}
+
+function solve30() {
+  for (let x=1;x<=puzzleH;x++) {
+    for (let y=1;y<=puzzleW;y++) {
+      let cellState = solveState[x][y];
+      if (cellState == "3") {
+        // first look for neighboring 3:0 pairs
+        // check N, S, E, W
+        let nState  = getCellState(x,y,"N");
+        let sState  = getCellState(x,y,"S");
+        let wState  = getCellState(x,y,"W");
+        let eState  = getCellState(x,y,"E");
+
+        // if true the set wallState accordingly
+        if (nState == "0") {
+          setWallState(x,y,"S");
+          setWallState(x,y,"W");
+          setWallState(x,y,"E");
+          setWallState(x,y-1,"N");
+          setWallState(x,y+1,"N");
+        }
+        if (sState == "0") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"W");
+          setWallState(x,y,"E");
+          setWallState(x,y-1,"S");
+          setWallState(x,y+1,"S");
+        }
+        if (wState == "0") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"E");
+          setWallState(x,y,"S");
+          setWallState(x-1,y,"W");
+          setWallState(x+1,y,"W");
+        }
+        if (eState == "0") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"W");
+          setWallState(x,y,"S");
+          setWallState(x-1,y,"E");
+          setWallState(x+1,y,"E");
+        }
+
+        // next look for diagonal 3:0 pairs
+        let nwState = getCellState(x,y,"NW");
+        let swState = getCellState(x,y,"SW");
+        let neState = getCellState(x,y,"NE");
+        let seState = getCellState(x,y,"SE");
+        // if true the set wallState accordingly
+        if (nwState == "0") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"W");
+        }
+        if (swState == "0") {
+          setWallState(x,y,"S");
+          setWallState(x,y,"W");
+        }
+        if (neState == "0") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"E");
+        }
+        if (seState == "0") {
+          setWallState(x,y,"S");
+          setWallState(x,y,"E");
+        }
+      }
+    }
+  }
+}
+
+function solve33() {
+  for (let x=1;x<=puzzleH;x++) {
+    for (let y=1;y<=puzzleW;y++) {
+      // first look for neighboring 3:3 pairs
+      // only need to look S and E to not duplicate
+      let cellState = solveState[x][y];
+      if (cellState == "3") {
+        let sState  = getCellState(x,y,"S");
+        let eState  = getCellState(x,y,"E");
+        // if true the set wallState accordingly
+        if (sState == "3") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"S");
+          setWallState(x+1,y,"S");
+        }
+        if (eState == "3") {
+          setWallState(x,y,"W");
+          setWallState(x,y,"E");
+          setWallState(x,y+1,"E");
+        }
+
+        // next look for diagonal 3:3 pairs
+        // only need to look SE and SW
+        let swState = getCellState(x,y,"SW");
+        let seState = getCellState(x,y,"SE");
+        // if true the set wallState accordingly, outer edges of the two
+        if (swState == "3") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"E");
+          setWallState(x+1,y-1,"S");
+          setWallState(x+1,y-1,"W");
+        }
+        if (seState == "3") {
+          setWallState(x,y,"N");
+          setWallState(x,y,"W");
+          setWallState(x+1,y+1,"S");
+          setWallState(x+1,y+1,"E");
+        }
+      }
+    }
+  }
+}
+
+// 2:0 on the border is solveable like a 3:0
+function solve20b() {
+  // west and east side
+  for (let x=1;x<=puzzleH;x++) {
+    for (let iy=0;iy<=1;iy++) {
+      let y=iy*(puzzleW-1)+1;
+      let cellState = solveState[x][y];
+      if (cellState == "2") {
+        // look for neighboring 2:0 pairs on N or S
+        let nState  = getCellState(x,y,"N");
+        let sState  = getCellState(x,y,"S");
+        if (nState == "0") {
+          if (y==1) { // west wall
+            setWallState(x,y,"S");
+            setWallState(x,y,"E");
+            setWallState(x+1,y,"W");
+            setWallState(x,y+1,"N");
+          } else {    // east wall
+            setWallState(x,y,"S");
+            setWallState(x,y,"W");
+            setWallState(x+1,y,"E");
+            setWallState(x,y-1,"N");
+          }
+        }
+        if (sState == "0") {
+          if (y==1) { // west wall
+            setWallState(x,y,"N");
+            setWallState(x,y,"E");
+            setWallState(x-1,y,"W");
+            setWallState(x,y+1,"S");
+          } else {    // east wall
+            setWallState(x,y,"N");
+            setWallState(x,y,"W");
+            setWallState(x-1,y,"E");
+            setWallState(x,y-1,"S");
+          }
+        }
+      }
+    }
+  }
+  // north and south side
+  for (let y=1;y<=puzzleW;y++) {
+    for (let ix=0;ix<=1;ix++) {
+      let x=ix*(puzzleH-1)+1;
+      let cellState = solveState[x][y];
+      if (cellState == "2") {
+        // look for neighboring 2:0 pairs on W or E
+        let wState  = getCellState(x,y,"W");
+        let eState  = getCellState(x,y,"E");
+        if (wState == "0") {
+          if (x==1) { // north wall
+            setWallState(x,y,"S");
+            setWallState(x,y,"E");
+            setWallState(x+1,y,"W");
+            setWallState(x,y+1,"N");
+          } else {    // south wall
+            setWallState(x,y,"N");
+            setWallState(x,y,"E");
+            setWallState(x-1,y,"W");
+            setWallState(x,y+1,"S");
+          }
+        }
+        if (eState == "0") {
+          if (x==1) { // north wall
+            setWallState(x,y,"S");
+            setWallState(x,y,"W");
+            setWallState(x+1,y,"E");
+            setWallState(x,y-1,"N");
+          } else {    // south wall
+            setWallState(x,y,"N");
+            setWallState(x,y,"W");
+            setWallState(x-1,y,"E");
+            setWallState(x,y-1,"S");
+          }
+        }
+      }
+    }
+  }
+}
+
+function getCellState(x,y,dir) {
+  let cx = x;
+  let cy = y;
+  if (dir == "N" || dir == "NW" || dir == "NE") { cx--; }
+  if (dir == "S" || dir == "SW" || dir == "SE") { cx++; }
+  if (dir == "W" || dir == "NW" || dir == "SW") { cy--; }
+  if (dir == "E" || dir == "NE" || dir == "SE") { cy++; }
+  if (cx < 1) { return "-" }
+  if (cy < 1) { return "-" }
+  if (cx > puzzleH) { return "-" }
+  if (cy > puzzleW) { return "-" }
+  return solveState[cx][cy];
+}
+
+function setWallState(x,y,dir) {
+  let wx = 2*x-1;
+  let wy = 2*y-1;
+  if (x < 1)       { return; }
+  if (x > puzzleH) { return; }
+  if (y < 1)       { return; }
+  if (y > puzzleW) { return; }
+  if (dir == "N")  { wallState[wx-1][wy] = constWallSolveEdge; }
+  if (dir == "S")  { wallState[wx+1][wy] = constWallSolveEdge; }
+  if (dir == "W")  { wallState[wx][wy-1] = constWallSolveEdge; }
+  if (dir == "E")  { wallState[wx][wy+1] = constWallSolveEdge; }
 }
