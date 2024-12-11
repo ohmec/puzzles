@@ -41,7 +41,8 @@ let KEY_RIGHT = 0x27;
 let KEY_DOWN  = 0x28;
 
 let puzzle, solveState, context, puzzleW, puzzleH, lastVert, lastHorz;
-let puzzleState, wallState, grayState, greenState, undoProgress, numberGroups, wallPaths;
+let puzzleState, wallState, grayState, greenState, offState;
+let undoProgress, numberGroups, wallPaths;
 
 function puzzleInit() {
   // any key anywhere as long as canvas is in focus
@@ -145,6 +146,7 @@ function puzzleInit() {
   $("#startButton").click(function() {
     $("#canvasDiv").css("border-color", "black");
     getStarted();
+    continueSolve();
   });
 
   // unknown at this point, but contextmenu is within jquery.js
@@ -287,6 +289,13 @@ function initStructures(puzzle) {
       wallState[i][j] = constWallNone;
     }
   }
+  offState = new Array(wallH);
+  for (let i=0;i<wallH;i++) {
+    offState[i] = new Array(wallW);
+    for (let j=0;j<wallW;j++) {
+      offState[i][j] = false;
+    }
+  }
 
   wallPaths = new Array;
 }
@@ -320,10 +329,15 @@ function savePuzzle() {
   localStorage.setItem("KOSavedFillominoSolution", solution);
 }
 
-function refreshPuzzle() {
+function refreshPuzzle(ignoreOff = true) {
   let drawX = 0;
   let drawY = 0;
   let number, tileColor;
+
+  // clear the whole canvas
+  context.fillStyle = cellColor;
+  context.fillRect(0,0,puzzleW*gridSize+2*lineWidthFat,puzzleH*gridSize+2*lineWidthFat);
+
   // draw blank tiles first, light green if solved, grayed if " "
   for (x=1;x<=puzzleH;x++) {
     for (y=1;y<=puzzleW;y++) {
@@ -386,6 +400,38 @@ function refreshPuzzle() {
       context.stroke();
     }
   }
+  if (!ignoreOff) {
+    // draw little Xs for offState
+    let wallH = puzzleH*2+1;
+    let wallW = puzzleW*2+1;
+    context.strokeStyle = "purple";
+    for (let wx=0;wx<wallH;wx++) {
+      for (let wy=0;wy<wallW;wy++) {
+        if (wx%2 && !(wy%2)) {
+          if ((wallState[wx][wy] == constWallNone) && offState[wx][wy]) {
+            drawOffX(wx,wy);
+          }
+        } else if (wy%2 && !(wx%2)) {
+          if ((wallState[wx][wy] == constWallNone) && offState[wx][wy]) {
+            drawOffX(wx,wy);
+          }
+        }
+      }
+    }
+  }
+}
+
+function drawOffX(x,y) {
+  let drawY = Math.floor((x/2)*gridSize) + lineWidthFat;
+  let drawX = Math.floor((y/2)*gridSize) + lineWidthFat;
+  context.strokeStyle = incorrectColor;
+  context.lineWidth = lineWidthThin;
+  context.beginPath();
+  context.moveTo(drawX-lineWidthFat,drawY-lineWidthFat);
+  context.lineTo(drawX+lineWidthFat,drawY+lineWidthFat);
+  context.moveTo(drawX-lineWidthFat,drawY+lineWidthFat);
+  context.lineTo(drawX+lineWidthFat,drawY-lineWidthFat);
+  context.stroke();
 }
 
 function convertToNum(numstr) {
@@ -561,7 +607,7 @@ function handleClick(evnt) {
         return;
       }
       foundOne = true;
-      wallState[2*vertCell-1][2*horzCell-2] ^= constWallClickEdge;
+      rotateWall(2*vertCell-1,2*horzCell-2);
     }
     if (horzDistFromEdgeR < 2*lineWidthFat) {
       if (vertDistFromEdgeU < 2*lineWidthFat) {
@@ -571,7 +617,7 @@ function handleClick(evnt) {
         return;
       }
       foundOne = true;
-      wallState[2*vertCell-1][2*horzCell] ^= constWallClickEdge;
+      rotateWall(2*vertCell-1,2*horzCell);
     }
     if (vertDistFromEdgeU < 2*lineWidthFat) {
       if (horzDistFromEdgeL < 2*lineWidthFat) {
@@ -581,7 +627,7 @@ function handleClick(evnt) {
         return;
       }
       foundOne = true;
-      wallState[2*vertCell-2][2*horzCell-1] ^= constWallClickEdge;
+      rotateWall(2*vertCell-2,2*horzCell-1);
     }
     if (vertDistFromEdgeD < 2*lineWidthFat) {
       if (horzDistFromEdgeL < 2*lineWidthFat) {
@@ -591,7 +637,7 @@ function handleClick(evnt) {
         return;
       }
       foundOne = true;
-      wallState[2*vertCell][2*horzCell-1] ^= constWallClickEdge;
+      rotateWall(2*vertCell,2*horzCell-1);
     }
     if (foundOne) {
       calculatePaths();
@@ -618,6 +664,19 @@ function handleClick(evnt) {
   validateSolution();
 }
 
+function rotateWall(wx,wy) {
+  if (wallState[wx][wy] == constWallSolveEdge) {
+    return;
+  }
+  if (wallState[wx][wy] == constWallClickEdge) {
+    wallState[wx][wy] = constWallNone;
+    offState[wx][wy] = true;
+  } else if (offState[wx][wy]) {
+    offState[wx][wy] = false;
+  } else {
+    wallState[wx][wy] = constWallClickEdge;
+  }
+}
 
 function handleNumberDrawing(number, lastVert, lastHorz) {
   if (lastVert && number == " ") {  // toggle
@@ -869,7 +928,7 @@ function validateSolution() {
   } else {
     unshadeInterior();
   }
-  refreshPuzzle();
+  refreshPuzzle(isSolved);
 }
 
 // assumed to be solved here, so just walk left
@@ -908,12 +967,14 @@ function clear() {
 function getStarted() {
   // do a few simple solve moves, starting with just as a relationship of
   // bordering numbers
-
   solve30();
   solve33();
   solve20b();
   calculatePaths();
   refreshPuzzle();
+}
+
+function continueSolve() {
 }
 
 function solve30() {
