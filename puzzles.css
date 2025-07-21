@@ -2,7 +2,7 @@ html,body {
   background: #EEEEEE;
 }
 #banner {
-  font-family: 'Maven Pro', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   width: 100%;
   text-align: center;
   font-size: 24pt;
@@ -29,14 +29,34 @@ html,body {
   vertical-align: bottom;
 }
 #buttonsDiv {
-  margin-bottom: 100px;
+  font-family: 'Open Sans', sans-serif;
+}
+#puzzledescr {
+  font-size: 8pt;
+}
+#demotab {
+  display: hide;
+  text-align: center;
+  width: 60%;
+  border: 2px solid black;
+  margin-left: auto;
+  margin-right: auto;
+}
+#demop {
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+#prevDemoButton, #nextDemoButton {
+  display: hide;
 }
 #tabContainer {
   margin-left: auto;
   margin-right: auto;
 }
 #tabs {
-  font-family: 'Maven Pro', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 14pt;
   padding-top: 5px;
   padding-bottom: 3px;
@@ -81,6 +101,7 @@ html,body {
 }
 
 #tabsContent {
+  font-family: 'Open Sans', sans-serif;
   background-color: #CEDCE0;
   border: 1px solid black;
   padding: 8px;
@@ -91,10 +112,12 @@ html,body {
   box-shadow: 1px 1px 5px 2px #888888;
 }
 .tab_content {
+  font-size: 11pt;
   display: none;
   margin: 2px;
 }
 .button {
+  font-family: 'Open Sans', sans-serif;
   background: black;
   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #454545), color-stop(1, #000000) );
   background:-moz-linear-gradient( center top, #454545 5%, #000000 100% );
