@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./hitori.js"></script>
+    <script type="text/javascript" src="./hpuzzles.js"></script>
+    <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+    <title>Hitori Player</title>
+  </head>
+  <body>
+    <div id="banner">
+      <span id="gamename">Hitori</span> Player
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">About       </a></li>
+        <li>               <a href="#tab4">Puzzles     </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>To play, click on a cell to switch it from light to dark. Once selected,
+        arrow keys can be used to move around the canvas.  Pressing the spacebar
+        will toggle the value from on to off (white to black and reverse).
+        In Error Display Mode (0), the default, only the existance of errors
+        is indicated. In Mode (1), the number of errors are indicated, be they
+        duplicate digits per row or column, adjacent blackened cells, or
+        stranded "rivers" of white cells. In Mode (2), these errors are
+        highlighted in colors.
+        The canvas border will turn green if the grid is completed without error.
+        You can click the "undo" buttom on the bottom of the page to undo previous
+        moves.</p>
+        <p>
+        Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>), or
+        a puzzle descriptor (see "Puzzles" tab). The following puzzle codes have demos,
+        which will walk you through a solve to help you on the path to mastery: 
+        <span id='demolist1'>[]</span>).<br/>
+        </p>
+        <center>
+        <input type="text"                          id="userPuzzle"    size="40" />
+        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+        </center>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        The full set of rules for Hitori can be found online. The simple description
+        includes a few basic rules.
+        <ol>
+        <li>
+          No single digit can exist "un-blackened" in a single
+          row or column.
+        </li>
+        <li>
+          There can be no blackened cells adjacent to another (diagonally
+          adjacent is OK).
+        </li>
+        <li>
+          The non-blackened cells must all form one contiguous "river"
+          of cells, connected to each other in the vertical or horizontal
+          direction.
+        </li>
+        </ol>
+        On the "Game Play" tab, select puzzle 0 to see a completed sample grid.
+        See the Game Play or Puzzles tab for how to invoke a demo.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        <p>
+        Puzzles can be invoked by either a numerical entry from
+        0-<span id='puzzlecount2'>0</span>, or through a character
+        description of the puzzle itself, entered into the Display
+        form on the 'Game Play' tab. The numbered puzzles are
+        hand-crafted of varying difficulty, roughly easy to hard.
+        Puzzle 0 shows a completed correct puzzle.
+        To describe a puzzle, the character string must be of the
+        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+        the width of the grid, and H the height.  The descriptor is a
+        definition of the grid contents from left to right, then top
+        to bottom.  A dot '.' can be used as a visual separator,
+        for example between rows. Cell contents for values greater than
+        '9' should use capital 'A' to 'Z' for 10 through 35. An example
+        descriptor is as follows for entry 1:
+        '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+        For Hitori there are <span id='democount'>1</span> demo
+        puzzles that can be helpful to walk through solving methods.
+        They are puzzle codes <span id='demolist2'>[]</span>.
+        Enter them in the Game Play tab with the code number and there
+        will be added a demo panel to help with the solve.
+        </p>
+      </div>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo" id="undoButton"  />
+        <input class="button small" type="button" value="Clear" id="clearButton" />
+        <input class="button small" type="button" value="Toggle Error Mode (0)" id="showErrorButton"  />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
+        </pr>
+      </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'>Testing this text</span></p>
+    </div>
+    <br />
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+

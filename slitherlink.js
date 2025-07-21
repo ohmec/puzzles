@@ -19,9 +19,10 @@ let clicking = false;
 let dragging = false;
 let activeNumber = "-";
 
-let constWallNone      = 0b00;
-let constWallSolveEdge = 0b01;
-let constWallClickEdge = 0b10;
+let constWallNone      = 0b000;
+let constWallSolveEdge = 0b001;
+let constWallClickEdge = 0b010;
+let constWallInferEdge = 0b100;
 
 let constNumCorrect = 0;
 let constNumTooMany = 1;
@@ -35,6 +36,7 @@ let KEY_BS    = 0x08;
 let KEY_CR    = 0x0d;
 let KEY_ESC   = 0x1b;
 let KEY_SP    = 0x20;
+let KEY_S     = 0x53;
 let KEY_LEFT  = 0x25;
 let KEY_UP    = 0x26;
 let KEY_RIGHT = 0x27;
@@ -146,7 +148,6 @@ function puzzleInit() {
   $("#startButton").click(function() {
     $("#canvasDiv").css("border-color", "black");
     getStarted();
-    continueSolve();
   });
 
   // unknown at this point, but contextmenu is within jquery.js
@@ -192,8 +193,13 @@ function handleKey(evnt) {
 
   // refresh with "ESC"
   if (keynum == KEY_ESC) {
+    continueSolve();
     validateSolution();
     console.log(wallState);
+    return;
+  }
+  if (keynum == KEY_S) {
+    getStarted();
     return;
   }
   if (keynum >= KEY_LEFT && keynum <= KEY_DOWN) {
@@ -975,6 +981,95 @@ function getStarted() {
 }
 
 function continueSolve() {
+  // some algorithms for ends of wallPaths
+  for (let i=0;i<wallPaths.length;i++) {
+    // if length is 1, only one segment, handle both ends
+    let n = wallPaths[i][1].length-1;
+    if (n==0) {
+      let wxy = wallPaths[i][1][0].split("-");
+      let x = wxy[0];
+      let y = wxy[1];
+      if (x%2) { // N:S
+        solveVertexPoint(x,y,parseInt(x)-1,y,"NW");
+        solveVertexPoint(x,y,parseInt(x)-1,y,"NE");
+        solveVertexPoint(x,y,parseInt(x)-1,y,"SW");
+        solveVertexPoint(x,y,parseInt(x)-1,y,"SE");
+        solveVertexPoint(x,y,parseInt(x)+1,y,"NW");
+        solveVertexPoint(x,y,parseInt(x)+1,y,"NE");
+        solveVertexPoint(x,y,parseInt(x)+1,y,"SW");
+        solveVertexPoint(x,y,parseInt(x)+1,y,"SE");
+      } else {   // E:W
+        solveVertexPoint(x,y,x,parseInt(y)-1,"NW");
+        solveVertexPoint(x,y,x,parseInt(y)-1,"NE");
+        solveVertexPoint(x,y,x,parseInt(y)-1,"SW");
+        solveVertexPoint(x,y,x,parseInt(y)-1,"SE");
+        solveVertexPoint(x,y,x,parseInt(y)+1,"NW");
+        solveVertexPoint(x,y,x,parseInt(y)+1,"NE");
+        solveVertexPoint(x,y,x,parseInt(y)+1,"SW");
+        solveVertexPoint(x,y,x,parseInt(y)+1,"SE");
+      }
+    } else {
+      // two ends determined from 0,1 and l-1,l-2
+      let m = n-1;
+      let w0 = wallPaths[i][1][0];
+      let w1 = wallPaths[i][1][1];
+      let wn = wallPaths[i][1][n];
+      let wm = wallPaths[i][1][m];
+      let e01 = findPathEnd(w0,w1);
+      let enm = findPathEnd(wn,wm);
+      solveVertex(wallPaths[i][1][0],wallPaths[i][1][1],"NW");
+      solveVertex(wallPaths[i][1][0],wallPaths[i][1][1],"NE");
+      solveVertex(wallPaths[i][1][0],wallPaths[i][1][1],"SW");
+      solveVertex(wallPaths[i][1][0],wallPaths[i][1][1],"SE");
+      solveVertex(wallPaths[i][1][n],wallPaths[i][1][m],"NW");
+      solveVertex(wallPaths[i][1][n],wallPaths[i][1][m],"NE");
+      solveVertex(wallPaths[i][1][n],wallPaths[i][1][m],"SW");
+      solveVertex(wallPaths[i][1][n],wallPaths[i][1][m],"SE");
+    }
+  }
+  calculatePaths();
+  refreshPuzzle();
+}
+
+function solveVertex (wa,wb,dir) {
+  let axy = wa.split("-");
+  let ax = axy[0];
+  let ay = axy[1];
+  let exy = findPathEnd(wa,wb).split("-");
+  let ex = exy[0];
+  let ey = exy[1];
+  solveVertexPoint(ax,ay,ex,ey,dir);
+}
+
+function solveVertexPoint(ax,ay,ex,ey,dir) {
+  let cellState = getVertexState(ex,ey,dir);
+  if (cellState == "-") {
+    return;
+  }
+  // if we have a "0", we can set the wallState in the opposing direction
+  // if it is to our NW, we set either S or E, depending upon where ax,ay lays
+  // if it is to our NE, we set either S or W, depending upon where ax,ay lays
+  // if it is to our SW, we set either N or E, depending upon where ax,ay lays
+  // if it is to our SE, we set either N or W, depending upon where ax,ay lays
+  if (cellState == "0") {
+    if        (dir == "NW" && (ax%2)) { // NW from a N:S wall, set east
+      wallState[ex][parseInt(ey)+1] |= constWallInferEdge;
+    } else if (dir == "NW")   {        // NW from a E:W wall, set south
+      wallState[parseInt(ex)+1][ey] |= constWallInferEdge;
+    } else if (dir == "NE" && (ax%2)) { // NE from a N:S wall, set west
+      wallState[ex][parseInt(ey)-1] |= constWallInferEdge;
+    } else if (dir == "NE")   {        // NE from a E:W wall, set south
+      wallState[parseInt(ex)+1][ey] |= constWallInferEdge;
+    } else if (dir == "SW" && (ax%2)) { // SW from a N:S wall, set east
+      wallState[ex][parseInt(ey)+1] |= constWallInferEdge;
+    } else if (dir == "SW")   {        // SW from a E:W wall, set north
+      wallState[parseInt(ex)-1][ey] |= constWallInferEdge;
+    } else if (dir == "SE" && (ax%2)) { // SE from a N:S wall, set west
+      wallState[ex][parseInt(ey)-1] |= constWallInferEdge;
+    } else if (dir == "SE")   {        // SE from a E:W wall, set north
+      wallState[parseInt(ex)-1][ey] |= constWallInferEdge;
+    }
+  }
 }
 
 function solve30() {
@@ -1194,4 +1289,54 @@ function setWallState(x,y,dir) {
   if (dir == "S")  { wallState[wx+1][wy] = constWallSolveEdge; }
   if (dir == "W")  { wallState[wx][wy-1] = constWallSolveEdge; }
   if (dir == "E")  { wallState[wx][wy+1] = constWallSolveEdge; }
+}
+
+// return the vertex at the end of the wall given two last wall segments
+function findPathEnd(pa,pb) {
+  let pxya = pa.split("-");
+  let pxyb = pb.split("-");
+  let xa = pxya[0];
+  let ya = pxya[1];
+  let xb = pxyb[0];
+  let yb = pxyb[1];
+  let ax0, ax1, ay0, ay1, bx0, bx1, by0, by1;
+  if (xa%2) { // N:S segment
+    ax0 = parseInt(xa)-1; ay0 = ya; ax1 = parseInt(xa)+1; ay1 = ya;
+  } else {    // W:E segment
+    ax0 = xa; ay0 = parseInt(ya)-1; ax1 = xa; ay1 = parseInt(ya)+1;
+  }
+  if (xb%2) { // N:S segment
+    bx0 = parseInt(xb)-1; by0 = yb; bx1 = parseInt(xb)+1; by1 = yb;
+  } else {    // W:E segment
+    bx0 = xb; by0 = parseInt(yb)-1; bx1 = xb; by1 = parseInt(yb)+1;
+  }
+  // there are four endpoints, two of which are common
+  // return the vertex from pa that is not the common one
+  if (ax0 == bx0 && ay0 == by0) {
+    return ax1 + "-" + ay1;
+  } else if (ax0 == bx1 && ay0 == by1) {
+    return ax1 + "-" + ay1;
+  } else if (ax1 == bx0 && ay1 == by0) {
+    return ax0 + "-" + ay0;
+  } else if (ax1 == bx1 && ay1 == by1) {
+    return ax0 + "-" + ay0;
+  } else {
+    console.log("doesn't make sense");
+  }
+}
+
+function getVertexState(wx,wy,dir) {
+  let cwx = wx;
+  let cwy = wy;
+  if (dir == "NW" || dir == "NE") { cwx--; }
+  if (dir == "SW" || dir == "SE") { cwx++; }
+  if (dir == "NW" || dir == "SW") { cwy--; }
+  if (dir == "NE" || dir == "SE") { cwy++; }
+  let cx = Math.floor((cwx+1)/2);
+  let cy = Math.floor((cwy+1)/2);
+  if (cx < 1) { return "-" }
+  if (cy < 1) { return "-" }
+  if (cx > puzzleH) { return "-" }
+  if (cy > puzzleW) { return "-" }
+  return solveState[cx][cy];
 }
