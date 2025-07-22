@@ -6,9 +6,19 @@ html,body {
   width: 100%;
   text-align: center;
   font-size: 24pt;
-  background: #EEEEEE;
   letter-spacing: 0px;
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+}
+#content {
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+  font-size: 12pt;
+  margin: 10px 10% 10px 10%;
+  padding: 10px;
+}
+#content li {
+  list-style-type: none;
+  font-weight: bold;
 }
 #puzzleInterface {
   text-align: center;
