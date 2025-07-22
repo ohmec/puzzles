@@ -1,5 +1,5 @@
 let numberColor = [
-  // 0 unused     1          2          3          4          5          6           7          8        9        
+  // 0 unused     1          2          3          4          5          6           7          8        9
   "black",   "salmon", "dodgerblue", "fuchsia", "wheat", "lightgreen", "aqua",    "plum", "goldenrod", "deeppink",
   //  A-10       B-11       C-12       D-13       E-14       F-15       G-16        H-17       I-18     J-19
   "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0", "#b0b0ff", "#ffb0b0", "#ffff80", "lime",

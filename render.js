@@ -1,3 +1,14 @@
+const numberColor = [
+  // 0 unused     1          2          3          4          5          6           7          8        9
+  "black",   "salmon", "dodgerblue", "fuchsia", "wheat", "lightgreen", "aqua",    "plum", "goldenrod", "deeppink",
+  //  A-10       B-11       C-12       D-13       E-14       F-15       G-16        H-17       I-18     J-19
+  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0", "#b0b0ff", "#ffb0b0", "#ffff80", "lime",
+  //  K-20       L-21       M-22       N-23       O-24       P-25       Q-26        R-27       S-28     T-29
+  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0", "#b0b0ff", "#ffb0b0", "#ffff80", "lime",
+  //  U-30       V-31       W-32       X-33       Y-34       Z-35
+  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0",
+];
+
 let PUZZLE_DOUBLECHOCO = 1;
 let PUZZLE_NURIKABE = 2;
 let PUZZLE_MASYU = 3;
@@ -17,33 +28,36 @@ let puzzleName = [ "undefined", "Double Choco", "Nurikabe",
   "Masyu", "Fillomino", "Heyawake", "Yajilin", "Slitherlink", "Choco Banana",
   "Akari", "Hashiwokakero", "Hitori", "Ripple Effect", "Shikaku", "LITS"];
 
-let constWallNone      = 0b000000000;
-let constWallLight     = 0b000000001;
-let constWallStandard  = 0b000000010;
-let constWallDash      = 0b000000100;
-let constWallBorder    = 0b000001000;
-let constWallStartEdge = 0b000010000;
-let constWallEnterEdge = 0b000100000;
-let constWallClickEdge = 0b001000000;
-let constWallGangEdge  = 0b010000000;
+const constWallNone      = 0b000000000;
+const constWallLight     = 0b000000001;
+const constWallStandard  = 0b000000010;
+const constWallDash      = 0b000000100;
+const constWallBorder    = 0b000001000;
+const constWallStartEdge = 0b000010000;
+const constWallEnterEdge = 0b000100000;
+const constWallClickEdge = 0b001000000;
+const constWallGangEdge  = 0b010000000;
 
-let constHoriz = true;
-let constVert  = false;
+const constHoriz = true;
+const constVert  = false;
 
-let constColorLightGray = "#c0c0c0";
-let constColorMedGray   = "#a0a0a0";
-let constColorSuccess   = "#1be032";
+const constColorLightGray = "#c0c0c0";
+const constColorMedGray   = "#a0a0a0";
+const constColorSuccess   = "#1be032";
+const constColorCursor    = "#ff80ff";
 
 let globalFontSize = 0.5;
 let globalGridSize = 45;
 let globalPuzzleH = 10;
 let globalPuzzleW = 10;
 let globalCircleRadius = 0.4;
-let globalContext;
+let globalCursorOn = false;
+let globalCursorY = 0;
+let globalCursorX = 0;
 
-let globalInitBoardValues, globalInitWallStates;
-let globalBoardValues, globalBoardColors, globalWallStates;
-let globalLineStates, globalCircleStates;
+let globalContext, globalInitBoardValues, globalInitWallStates;
+let globalBoardValues, globalBoardColors, globalBoardTextColors;
+let globalWallStates, globalLineStates, globalCircleStates;
 
 function expandNumParams(numStr) {
   let expStr = numStr.replace(/_/gi, "");
@@ -302,7 +316,7 @@ function initWallStatesFromHexes(hexParamsH,hexParamsV,defState) {
 function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      drawTile(x,y,globalBoardColors[y][x],globalBoardValues[y][x],globalCircleStates[y][x],globalLineStates[y][x],lineFirst,textColor);
+      drawTile(x,y,globalBoardColors[y][x],globalBoardValues[y][x],globalCircleStates[y][x],globalLineStates[y][x],lineFirst,globalBoardTextColors[y][x]);
     }
   }
   // draw horizontal walls
@@ -315,6 +329,9 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
     for (let x=2;x<=2*globalPuzzleW;x+=2) {
       drawWall(constVert,x,y,globalWallStates[y][x]);
     }
+  }
+  if (globalCursorOn) {
+    drawCursor();
   }
   if (drawDots) {
     for (let y=0;y<=globalPuzzleH;y++) {
@@ -381,11 +398,20 @@ function drawTile(x,y,color,value,circle,line,lineFirst,textColor) {
   }
 }
 
+function drawCursor() {
+  let drawX = Math.floor(globalCursorX*globalGridSize)+1;
+  let drawY = Math.floor(globalCursorY*globalGridSize)+1;
+  globalContext.lineWidth = 4;
+  globalContext.strokeStyle = constColorCursor;
+  globalContext.strokeRect(drawX,drawY,globalGridSize-2,globalGridSize-2);
+}
+
 function drawWall(horv,x,y,wallState) {
   let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : x*globalGridSize*0.5;
   let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : x*globalGridSize*0.5;
   let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : y*globalGridSize*0.5;
   let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : y*globalGridSize*0.5;
+  globalContext.strokeStyle = "black";
   if (wallState != constWallNone) {
     if (wallState == constWallDash) {
       globalContext.setLineDash([2,2]);

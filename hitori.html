@@ -14,7 +14,8 @@
   </head>
   <body>
     <div id="banner">
-      <span id="gamename">Hitori</span> Player
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Hitori Player
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -26,22 +27,30 @@
     </div>
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
-        <p>To play, click on a cell to switch it from light to dark. Once selected,
-        arrow keys can be used to move around the canvas.  Pressing the spacebar
-        will toggle the value from on to off (white to black and reverse).
-        In Error Display Mode (0), the default, only the existance of errors
-        is indicated. In Mode (1), the number of errors are indicated, be they
-        duplicate digits per row or column, adjacent blackened cells, or
-        stranded "rivers" of white cells. In Mode (2), these errors are
-        highlighted in colors.
-        The canvas border will turn green if the grid is completed without error.
-        You can click the "undo" buttom on the bottom of the page to undo previous
-        moves.</p>
         <p>
-        Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>), or
-        a puzzle descriptor (see "Puzzles" tab). The following puzzle codes have demos,
-        which will walk you through a solve to help you on the path to mastery: 
-        <span id='demolist1'>[]</span>).<br/>
+          To play, click on a cell to toggle from light to dark. Alternately,
+          you can use the arrow keys to move around the board, and press
+          the space bar to toggle, or the '1' key to turn black, or the '0'
+          key to turn white.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          is indicated.  In Assist Mode (1), the number of errors is
+          indicated, be they duplicate digits per row or column, adjacent
+          blackened cells, or stranded "rivers" of white cells. In Assist
+          Mode (2), these errors are highlighted in colors. In some cases
+          the solve difficulty will greatly decrease in Assist Mode (2),
+          so select depending upon the level of challenge desired. The canvas
+          border will turn green if the grid is completed without error.
+          You can click the "undo" button on the bottom of the page
+          to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-canned puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
         </p>
         <center>
         <input type="text"                          id="userPuzzle"    size="40" />
@@ -49,22 +58,22 @@
         </center>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        The full set of rules for Hitori can be found online. The simple description
-        includes a few basic rules.
+        The rules for Hitori are listed here.
         <ol>
-        <li>
-          No single digit can exist "un-blackened" in a single
-          row or column.
-        </li>
-        <li>
-          There can be no blackened cells adjacent to another (diagonally
-          adjacent is OK).
-        </li>
-        <li>
-          The non-blackened cells must all form one contiguous "river"
-          of cells, connected to each other in the vertical or horizontal
-          direction.
-        </li>
+          <li>
+            No single digit can exist "enabled" in a single row or column.
+            In this player, disabled cells are turned black.
+          </li>
+          <li>
+            There can be no two disabled cells adjacent to another horizontally
+            or vertically (diagonally adjacent is OK).
+          </li>
+          <li>
+            The enabled (white) cells must all form one contiguous "river"
+            of cells, connected to each other in the vertical or horizontal
+            direction. A river is not considered connected if it only flows
+            through diagonally adjacent white cells.
+          </li>
         </ol>
         On the "Game Play" tab, select puzzle 0 to see a completed sample grid.
         See the Game Play or Puzzles tab for how to invoke a demo.
@@ -115,8 +124,8 @@
       <br />
       <div id="buttonsDiv">
         <input class="button small" type="button" value="Undo" id="undoButton"  />
-        <input class="button small" type="button" value="Clear" id="clearButton" />
-        <input class="button small" type="button" value="Toggle Error Mode (0)" id="showErrorButton"  />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
         <p><span id='puzzledescr'></span></p>
         <p><span id='errortext'></span></p>
         </pr>
