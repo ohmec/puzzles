@@ -15,14 +15,14 @@
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Hitori Player
+      Player for Hitori &#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
         <li class="active"><a href="#tab1">Game Play   </a></li>
         <li>               <a href="#tab2">Rules       </a></li>
-        <li>               <a href="#tab3">About       </a></li>
-        <li>               <a href="#tab4">Puzzles     </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
       </ul>
     </div>
     <div id="tabsContent">
@@ -38,7 +38,7 @@
           is indicated.  In Assist Mode (1), the number of errors is
           indicated, be they duplicate digits per row or column, adjacent
           blackened cells, or stranded "rivers" of white cells. In Assist
-          Mode (2), these errors are highlighted in colors. In some cases
+          Mode (2), these errors are highlighted with colors. In some cases
           the solve difficulty will greatly decrease in Assist Mode (2),
           so select depending upon the level of challenge desired. The canvas
           border will turn green if the grid is completed without error.
@@ -47,17 +47,18 @@
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
-          for one of a list of pre-canned puzzles, or a puzzle descriptor
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
           (see "Puzzles" tab). The following puzzle codes have demos,
           which will walk you through a solve to help you on the path to
           mastery: <span id='demolist1'>[]</span>).
         </p>
-        <center>
-        <input type="text"                          id="userPuzzle"    size="40" />
-        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
-        </center>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
+        <a href="https://en.wikipedia.org/wiki/Hitori" target="_blank">Hitori</a>
+        (&#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
+        <i>Hitori ni shite kure</i>; literally "leave me alone")
+        is a Japanese logic puzzle published by
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
         The rules for Hitori are listed here.
         <ol>
           <li>
@@ -75,16 +76,10 @@
             through diagonally adjacent white cells.
           </li>
         </ol>
-        On the "Game Play" tab, select puzzle 0 to see a completed sample grid.
+        Below select puzzle 0 to see a completed sample grid.
         See the Game Play or Puzzles tab for how to invoke a demo.
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
-        This playground was written using javascript and is available open
-        source. All code is checked into the github repo at
-        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
-        Feel free to file bugs there!
-      </div>
-      <div id="tab4" class="tab_content" style="display: none;">
         <p>
         Puzzles can be invoked by either a numerical entry from
         0-<span id='puzzlecount2'>0</span>, or through a character
@@ -110,6 +105,18 @@
         will be added a demo panel to help with the solve.
         </p>
       </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
     </div>
     <br />
     <div id="puzzleInterface">

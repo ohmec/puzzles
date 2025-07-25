@@ -129,6 +129,11 @@ function initBoardValuesFromParams(numParamText, hasDir=false) {
     numParamText = numParamText.replace(/([0-9])v/g, "$1*");
   }
   let numParams = expandNumParams(numParamText);
+  if (numParams.length != (globalPuzzleH*globalPuzzleW)) {
+    console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
+                " expected " + (globalPuzzleH*globalPuzzleW));
+    return;
+  }
   let boardValues = new Array(globalPuzzleH);
   let scoot = 0;  // only used for hasDir
   for (let y=0;y<globalPuzzleH;y++) {
@@ -249,10 +254,22 @@ function initWallStatesFromBoxes(boxParams,defState) {
   return wallStates;
 }
 
-function initWallStatesFromHexes(hexParamsH,hexParamsV,defState) {
-  let hexParamArrayH = hexParamsH.replace(/\./gi, "").split("");
-  let hexParamArrayV = hexParamsV.replace(/\./gi, "").split("");
+function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
+  let hexParamArrayRows = hexParamsRows.replace(/\./gi, "").split("");
+  let hexParamArrayCols = hexParamsCols.replace(/\./gi, "").split("");
   let wallStates  = new Array(globalPuzzleH*2+1);
+  let expLenH = Math.floor((globalPuzzleW+2)/4)*globalPuzzleH;
+  let expLenW = Math.floor((globalPuzzleH+2)/4)*globalPuzzleW;
+  if (expLenH != hexParamArrayRows.length) {
+    console.log("ERROR in puzzle descriptor row walls, got length " + hexParamArrayRows.length +
+                " expected " + expLenH);
+    return;
+  }
+  if (expLenW != hexParamArrayCols.length) {
+    console.log("ERROR in puzzle descriptor col walls, got length " + hexParamArrayCols.length +
+                " expected " + expLenW);
+    return;
+  }
   // "true" wall states are all dashes at first
   for (let y=0;y<=2*globalPuzzleH;y++) {
     wallStates[y] = new Array(2*globalPuzzleW+1);
@@ -275,7 +292,7 @@ function initWallStatesFromHexes(hexParamsH,hexParamsV,defState) {
       bit=0;
     }
     for (let x=2;x<2*globalPuzzleW;x+=2) {
-      let hexval = parseInt(hexParamArrayH[ptr],16);
+      let hexval = parseInt(hexParamArrayRows[ptr],16);
       let bitval = (hexval >> (3-bit)) & 1;
       if (bitval) {
         wallStates[y][x] = constWallBorder;
@@ -296,8 +313,8 @@ function initWallStatesFromHexes(hexParamsH,hexParamsV,defState) {
       ptr++;
       bit=0;
     }
-    for (let y=2;y<=2*globalPuzzleH;y+=2) {
-      let hexval = parseInt(hexParamArrayV[ptr],16);
+    for (let y=2;y<2*globalPuzzleH;y+=2) {
+      let hexval = parseInt(hexParamArrayCols[ptr],16);
       let bitval = (hexval >> (3-bit)) & 1;
       if (bitval) {
         wallStates[y][x] = constWallBorder;
@@ -610,7 +627,6 @@ function getClickCellInfo(coords) {
 
 function travelRiver(arrayYX,y,x,trueFalse) {
   let riverCells = new Array();
-  let continueTravel = true;
   let tryindex = 0;
   riverCells.push(y+","+x);
   while (riverCells.length > tryindex) {
@@ -640,4 +656,54 @@ function travelRiver(arrayYX,y,x,trueFalse) {
     tryindex++;
   }
   return riverCells;
+}
+
+function findPolyominos() {
+  let polyoList = new Array();
+  let coveredCells = new Array();
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (coveredCells.indexOf(y+","+x) == -1) {
+        let polyo = travelPolyo(y,x);
+        polyoList.push(polyo);
+        coveredCells.push.apply(coveredCells,polyo);
+      }
+    }
+  }
+  return polyoList;
+}
+
+function travelPolyo(y,x) {
+  let polyo = new Array;
+  let tryindex = 0;
+  polyo.push(y+","+x);
+  while (polyo.length > tryindex) {
+    let curCell = polyo[tryindex].split(",");
+    let iy = parseInt(curCell[0]);
+    let ix = parseInt(curCell[1]);
+    let wy = iy*2+1;
+    let wx = ix*2+1;
+    if ((iy != (globalPuzzleH-1)) &&
+        (polyo.indexOf((iy+1)+","+ix) == -1) &&
+        (globalWallStates[wy+1][wx] != constWallBorder)) {
+      polyo.push((iy+1)+","+ix);
+    }
+    if ((iy != 0) &&
+        (polyo.indexOf((iy-1)+","+ix) == -1) &&
+        (globalWallStates[wy-1][wx] != constWallBorder)) {
+      polyo.push((iy-1)+","+ix);
+    }
+    if ((ix != (globalPuzzleW-1)) &&
+        (polyo.indexOf(iy+","+(ix+1)) == -1) &&
+        (globalWallStates[wy][wx+1] != constWallBorder)) {
+      polyo.push(iy+","+(ix+1));
+    }
+    if ((ix != 0) &&
+        (polyo.indexOf(iy+","+(ix-1)) == -1) &&
+        (globalWallStates[wy][wx-1] != constWallBorder)) {
+      polyo.push(iy+","+(ix-1));
+    }
+    tryindex++;
+  }
+  return polyo;
 }
