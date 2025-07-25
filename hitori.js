@@ -4,9 +4,6 @@ let fillCellColor = "black";          // default
 let incorrectFillColor = "#802020";   // dark reddish
 let duplicateStateColor = "#FFC0C0";  // light reddish
 let incorrectRiverColor = "#C0C040";  // light brown
-let lineColor = "black";
-let stdFont, boldFont;
-let numberFont = "Courier, sans-serif";
 let clicking = false;
 let dragging = false;
 let errorCount = 0;
@@ -308,13 +305,9 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  let auxParams1 = puzzleSplit[2];
-  let auxParams2 = puzzleSplit[3];
   globalPuzzleW = parseInt(wxh[0]);
   globalPuzzleH = parseInt(wxh[1]);
   setGridSize(globalPuzzleW);
-  stdFont  = (globalGridSize*0.5)+"pt "+numberFont;
-  boldFont = "bold "+stdFont;
   canvas.height = globalPuzzleH*globalGridSize;
   canvas.width  = globalPuzzleW*globalGridSize;
 
