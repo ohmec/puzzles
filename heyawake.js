@@ -1,8 +1,15 @@
+const emptyCellColor = "white";         // not-filled
+const indetCellColor = "#e0e0e0";       // indeterminant color (default)
+const fillCellColor = "black";          // filled
+const incorrectCellColor = "#802020";   // dark reddish
+const tooLongSpanColor = "#FFC0C0";     // light reddish
+const incorrectRiverColor = "#FFE0A0";  // light brown
 
-let emptyCellColor = "white";         // default
-let fillCellColor = "black";          // default
-let completeFillColor = "#e0ffe0";    // light green
-let errorFontColor = "red";
+const stdFontColor = "black";
+const offFontColor = "white";
+const errorFontColor = "red";
+const correctFontColor = "green";
+
 let clicking = false;
 let dragging = false;
 let errorCount = 0;
@@ -18,34 +25,18 @@ const KEY_RIGHT = 0x27;
 const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
-const KEY_9     = 0x39;
-const KEY_A     = 0x41;
-const KEY_Z     = 0x5a;
-const KEY_a     = 0x61;
-const KEY_z     = 0x7a;
 
-const MOVE_CLEAR  = 1;
-const MOVE_SET    = 2;
+const STATE_WHITE = 1;
+const STATE_BLACK = 2;
+const STATE_INDET = 3;
 
-// the digits and letters are added below
-let handledKeys = [ KEY_BS, KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
+// which keys are handled
+let handledKeys = [ KEY_BS, KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1 ];
 
-let initPuzzle, puzzle, moveHistory;
-let boardStates, demoStepNum, puzzleRoomList, largestPolyo;
+let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = true;
-
-  // add digits and letters to handled key list
-  for (let key=KEY_1;key<=KEY_9;key++) {
-    handledKeys.push(key);
-  }
-  for (let key=KEY_a;key<=KEY_z;key++) {
-    handledKeys.push(key);
-  }
-  for (let key=KEY_A;key<=KEY_Z;key++) {
-    handledKeys.push(key);
-  }
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
@@ -141,7 +132,6 @@ function puzzleInit() {
     if (clicking == false) return;
     evnt.preventDefault();
     dragging = true;
-    handleClick(evnt);
   });
 
   // releasing mouse within puzzle or not within puzzle
@@ -232,9 +222,15 @@ function addHistory(y,x,prevvalue,newvalue) {
   moveHistory.push([y,x,prevvalue,newvalue]);
 }
 
-function addMove(y,x,value) {
-  addHistory(y,x,globalBoardValues[y][x],value);
-  globalBoardValues[y][x] = value;
+function addMove(moveType,y,x) {
+  addHistory(y,x,puzzleBoardStates[y][x],moveType);
+  puzzleBoardStates[y][x] = moveType;
+  // colors will be overridden based upon error status
+  globalBoardColors[y][x] =
+    (moveType == STATE_WHITE) ? emptyCellColor :
+    (moveType == STATE_BLACK) ? fillCellColor :
+                                indetCellColor;
+  globalBoardTextColors[y][x] = (moveType == STATE_BLACK) ? offFontColor : stdFontColor;
 }
 
 function handleKey(keynum) {
@@ -288,28 +284,23 @@ function handleKey(keynum) {
           globalCursorX++;
         }
         break;
-      case KEY_BS:
-      case KEY_SP: // clear the board contents unless default
-        // don't delete those that are pre-set
-        if (globalInitBoardValues[globalCursorY][globalCursorX] == '') {
-          addMove(globalCursorY,globalCursorX,'');
+      case KEY_SP: // toggle through states like the click
+        if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_INDET) {
+          addMove(STATE_BLACK,globalCursorY,globalCursorX,STATE_INDET);
+        } else if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_BLACK) {
+          addMove(STATE_WHITE,globalCursorY,globalCursorX,STATE_BLACK);
+        } else {
+          addMove(STATE_INDET,globalCursorY,globalCursorX,STATE_WHITE);
         }
         break;
-      default:    // here we handle all digit keys including A-Z
-        // don't overwrite those that are pre-set
-        let setValue = 0;
-        if (globalInitBoardValues[globalCursorY][globalCursorX] == '') {
-          if (keynum >= KEY_1 && keynum <= KEY_9) {
-            setValue = keynum-KEY_0;
-          } else if(keynum >= KEY_a && keynum <= KEY_z) {
-            setValue = keynum-KEY_a+10;
-          } else {
-            setValue = keynum-KEY_A+10;
-          }
-        }
-        if (setValue && setValue <= largestPolyo) {
-          addMove(globalCursorY,globalCursorX,setValue);
-        }
+      case KEY_BS:
+        addMove(STATE_INDET,globalCursorY,globalCursorX);
+        break;
+      case KEY_0:
+        addMove(STATE_WHITE,globalCursorY,globalCursorX);
+        break;
+      case KEY_1:
+        addMove(STATE_BLACK,globalCursorY,globalCursorX);
         break;
       }
     updateBoardStatus();
@@ -325,33 +316,46 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  let rwallParams = puzzleSplit[2];
-  let cwallParams = puzzleSplit[3];
+  let roomParams = puzzleSplit[2];
   globalPuzzleW = parseInt(wxh[0]);
   globalPuzzleH = parseInt(wxh[1]);
   setGridSize(globalPuzzleW);
   canvas.height = globalPuzzleH*globalGridSize;
   canvas.width  = globalPuzzleW*globalGridSize;
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
+  globalInitBoardValues = initBoardValuesFromParams(numParams,false,true);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
   globalCircleStates =    initYXFromValue(0);     // no circles, lines needed in this puzzle
   globalLineStates   =    initYXFromValue(0);
-  globalBoardColors =     initYXFromValue(emptyCellColor);
-  globalBoardTextColors = initYXFromValue(fillCellColor); // all text is black
+  globalBoardColors =     initYXFromValue(indetCellColor);
+  puzzleBoardStates =     initYXFromValue(STATE_INDET);
+  globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
 
-  // initialize the wall states based upon the given parameters
-  globalInitWallStates  = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
-  globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-
-  // find all the rooms
-  puzzleRoomList = findRooms();
-  largestPolyo = 0;
-  for (let i=0;i<puzzleRoomList.length;i++) {
-    if (puzzleRoomList[i].length > largestPolyo) {
-      largestPolyo = puzzleRoomList[i].length;
+  // override board values and colors with _ for white and * for black
+  // and for special case of 0th puzzle, A-J for black and K-T for white
+  let numParamsExp = expandNumParams(numParams);
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (numParamsExp[y*globalPuzzleH+x] == '_') {
+        puzzleBoardStates[y][x] = STATE_WHITE;
+        globalBoardColors[y][x] = emptyCellColor;
+      } else if (numParamsExp[y*globalPuzzleH+x] == '*') {
+        puzzleBoardStates[y][x] = STATE_BLACK;
+        globalBoardColors[y][x] = fillCellColor;
+      } else if (numParamsExp[y*globalPuzzleH+x].search(/[K-T]/) != -1) {
+        puzzleBoardStates[y][x] = STATE_WHITE;
+        globalBoardColors[y][x] = emptyCellColor;
+      } else if (numParamsExp[y*globalPuzzleH+x].search(/[A-J]/) != -1) {
+        puzzleBoardStates[y][x] = STATE_BLACK;
+        globalBoardColors[y][x] = fillCellColor;
+      }
     }
   }
+
+  // initialize the wall states based upon the room parameters
+  globalInitWallStates  = initWallStatesFromBoxes(roomParams, constWallLight);
+  globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  puzzleRoomList  = initRoomsFromBoxes(roomParams,numParams);
   updateBoardStatus();
   drawBoard();
 }
@@ -378,116 +382,220 @@ function handleClick(evnt) {
   
   globalCursorY = yCell;
   globalCursorX = xCell;
+  // switch through the board states, indet --> black --> white --> indet
+  if (puzzleBoardStates[yCell][xCell] == STATE_INDET) {
+    addMove(STATE_BLACK,yCell,xCell,STATE_INDET);
+  } else if (puzzleBoardStates[yCell][xCell] == STATE_BLACK) {
+    addMove(STATE_WHITE,yCell,xCell,STATE_BLACK);
+  } else {
+    addMove(STATE_INDET,yCell,xCell,STATE_WHITE);
+  }
+  updateBoardStatus();
   drawBoard();
 }
 
 // look for errors and incompletions
 function updateBoardStatus() {
   // accounting the errors:
-  //  1) duplicates of a digit in a room
-  //  2) too large of a value in a room
-  //  3) two digits too close to each other
-  // also count the incompletes, which are rooms
-  // that don't have all of the digits filled correctly
-  let errorCells = new Array();
+  //  1) too many set squares in a room with a number
+  //  2) two black cells next to each other
+  //  3) a white span that goes across 3 rooms
+  //  4) white spans that are "blocked" from making a long river
+  //
+  // also count the incomplete rooms, which are rooms
+  // that don't have the correct number of black squares
+  errorCount = 0;
   let incompleteRooms = new Array();
   incompleteCount = 0;
 
-  for (let p=0;p<puzzleRoomList.length;p++) {
-    let room = puzzleRoomList[p];
-    let vcounts = new Array();
-    for (let i=1;i<=room.length;i++) {
-      vcounts[i] = 0;
-    }
-    for (let i=0;i<room.length;i++) {
-      let pcell = room[i].split(",");
-      let py = pcell[0];
-      let px = pcell[1];
-      let pv = globalBoardValues[py][px];
-      if (pv > room.length && (errorCells.indexOf(pcell) == -1)) {
-        errorCells.push(room[i]);
-      }
-      vcounts[pv]++;
-    }
-    for (let c=1;c<=room.length;c++) {
-      // if more than one, mark all in the room with that number in error
-      if (vcounts[c] > 1) {
-        for (let i=0;i<room.length;i++) {
-          let pcell = room[i].split(",");
-          let py = pcell[0];
-          let px = pcell[1];
-          let pv = globalBoardValues[py][px];
-          if ((pv == c) && (errorCells.indexOf(pcell) == -1)) {
-            errorCells.push(room[i]);
-          }
-        }
-      // if zero, then this is an incomplete room
-      } else if (vcounts[c] == 0) {
-        if (incompleteRooms.indexOf(p) == -1) {
-          incompleteRooms.push(p);
-        }
-      }
-    }
-  }
-
-  // now check the ripple effect. only need to go in the positive
-  // direction so as to not double count
+  // start by reseting all cell and font colors to "standard"
+  // before evaluating errors
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (globalBoardValues[y][x]) {
-        // count forward in both directions and look for duplicates
-        for (let i=1;i<=globalBoardValues[y][x];i++) {
-          let xi = x+i;
-          let yi = y+i;
-          let cellyx  = y +","+x;
-          let cellyxi = y +","+xi;
-          let cellyix = yi+","+x;
-          if ((xi < globalPuzzleW) &&
-              (globalBoardValues[y][xi] == globalBoardValues[y][x])) {
-            if (errorCells.indexOf(cellyx) == -1) {
-              errorCells.push(cellyx);
-            }
-            if (errorCells.indexOf(cellyxi) == -1) {
-              errorCells.push(cellyxi);
-            }
-          }
-          if ((yi < globalPuzzleH) &&
-              (globalBoardValues[yi][x] == globalBoardValues[y][x])) {
-            if (errorCells.indexOf(cellyx) == -1) {
-              errorCells.push(cellyx);
-            }
-            if (errorCells.indexOf(cellyix) == -1) {
-              errorCells.push(cellyix);
-            }
+      if (puzzleBoardStates[y][x] == STATE_BLACK) {
+        globalBoardColors[y][x] = fillCellColor;
+        globalBoardTextColors[y][x] = offFontColor;
+      } else if (puzzleBoardStates[y][x] == STATE_WHITE) {
+        globalBoardColors[y][x] = emptyCellColor;
+        globalBoardTextColors[y][x] = stdFontColor;
+      } else {
+        globalBoardColors[y][x] = indetCellColor;
+        globalBoardTextColors[y][x] = stdFontColor;
+      }
+    }
+  }
+
+  for (let p=0;p<puzzleRoomList.length;p++) {
+    let roomInfo = puzzleRoomList[p];
+    let roomCount = roomInfo[4];
+    let bcount = 0;
+    let isIncomplete = 0;
+    for (let y=roomInfo[0];y<(roomInfo[0]+roomInfo[2]);y++) {
+      for (let x=roomInfo[1];x<(roomInfo[1]+roomInfo[3]);x++) {
+        if (puzzleBoardStates[y][x] == STATE_BLACK) {
+          bcount++;
+        } else if (puzzleBoardStates[y][x] == STATE_INDET) {
+          isIncomplete = 1;
+        }
+      }
+    }
+    if ((roomCount != EMPTYCELL) && (bcount > roomCount)) {
+      errorCount++;
+    }
+    if (isIncomplete) {
+      incompleteCount++;
+    }
+    // if isn't incomplete, also count errors if < expected count
+    if (!isIncomplete && (roomCount != EMPTYCELL) && (bcount < roomCount)) {
+      errorCount++;
+    }
+    // if is complete and room count is off and in assist mode 2,
+    // turn any digit inside red. if complete and correct, turn
+    // green. since this needs to be undoable, we need to set it
+    // to black in all other cases
+    for (let y=roomInfo[0];y<(roomInfo[0]+roomInfo[2]);y++) {
+      for (let x=roomInfo[1];x<(roomInfo[1]+roomInfo[3]);x++) {
+        if ((globalBoardValues[y][x] == "0") || (globalBoardValues[y][x] != "")) {
+          if (!isIncomplete && (roomCount != EMPTYCELL) && (assistState == 2)) {
+            globalBoardTextColors[y][x] =
+              (bcount == roomCount) ? correctFontColor : errorFontColor;
+          } else {
+            globalBoardTextColors[y][x] =
+              (puzzleBoardStates[y][x] == STATE_BLACK) ?
+                offFontColor : stdFontColor;
           }
         }
       }
     }
   }
 
-  // in assistState 2, color completed rooms light green,
-  // and error cells with red font
-  for (let p=0;p<puzzleRoomList.length;p++) {
-    let room = puzzleRoomList[p];
-    for (let i=0;i<room.length;i++) {
-      let pcell = room[i].split(",");
-      let py = pcell[0];
-      let px = pcell[1];
-      if ((assistState == 2) && (incompleteRooms.indexOf(p) == -1)) {
-        globalBoardColors[py][px] = completeFillColor;
-      } else {
-        globalBoardColors[py][px] = emptyCellColor;
+  // rule 2: now count adjacent black cells, only counting
+  // one error per "clump". in assist mode 2 these error
+  // cells should be colored to indicate the error.
+  let filledCells = new Array();
+  for (let y=0;y<(globalPuzzleH-1);y++) {
+    for (let x=0;x<(globalPuzzleW-1);x++) {
+      if ((puzzleBoardStates[y  ][x] == STATE_BLACK) &&
+          (puzzleBoardStates[y+1][x] == STATE_BLACK)) {
+        errorCount++;
+        if (assistState == 2) {
+          globalBoardColors[y  ][x] = incorrectCellColor;
+          globalBoardColors[y+1][x] = incorrectCellColor;
+        }
       }
-      if ((assistState == 2) && (errorCells.indexOf(room[i]) != -1)) {
-        globalBoardTextColors[py][px] = errorFontColor;
-      } else {
-        globalBoardTextColors[py][px] = fillCellColor;
+      if ((puzzleBoardStates[y][x  ] == STATE_BLACK) &&
+          (puzzleBoardStates[y][x+1] == STATE_BLACK)) {
+        errorCount++;
+        if (assistState == 2) {
+          globalBoardColors[y][x  ] = incorrectCellColor;
+          globalBoardColors[y][x+1] = incorrectCellColor;
+        }
       }
     }
   }
 
-  errorCount = errorCells.length;
-  incompleteCount = incompleteRooms.length;
+  // rule 3: look for too many crossings of room walls
+  // for contiguous white cells. if in assist mode 2,
+  // color the walls differently to indicate the error
+
+  // start horizontally
+  for (let y=0;y<globalPuzzleH;y++) {
+    let inwhite = false;
+    let crossings = 0;
+    let x0;
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (puzzleBoardStates[y][x] == STATE_WHITE) {
+        if (inwhite) {
+          if (globalWallStates[2*y+1][2*x] == constWallBorder) {
+            crossings++;
+            if (crossings==2) {
+              errorCount++;
+              if (assistState==2) {
+                for (let xi=x0;xi<=x;xi++) {
+                  globalBoardColors[y][xi] = tooLongSpanColor;
+                }
+              }
+            } else if ((assistState==2) && (crossings>=2)) {
+              globalBoardColors[y][x] = tooLongSpanColor;
+            }
+          } else if ((assistState==2) && (crossings>=2)) {
+            globalBoardColors[y][x] = tooLongSpanColor;
+          }
+        } else {
+          inwhite = true;
+          crossings = 0;
+          x0 = x;
+        }
+      } else {
+        inwhite = false;
+        crossings = 0;
+      }
+    }
+  }
+
+  // now vertically
+  for (let x=0;x<globalPuzzleW;x++) {
+    let inwhite = false;
+    let crossings = 0;
+    let y0;
+    for (let y=0;y<globalPuzzleH;y++) {
+      if (puzzleBoardStates[y][x] == STATE_WHITE) {
+        if (inwhite) {
+          if (globalWallStates[2*y][2*x+1] == constWallBorder) {
+            crossings++;
+            if (crossings==2) {
+              errorCount++;
+              if (assistState==2) {
+                for (let yi=y0;yi<=y;yi++) {
+                  globalBoardColors[yi][x] = tooLongSpanColor;
+                }
+              }
+            } else if ((assistState==2) && (crossings>=2)) {
+              globalBoardColors[y][x] = tooLongSpanColor;
+            }
+          } else if ((assistState==2) && (crossings>=2)) {
+            globalBoardColors[y][x] = tooLongSpanColor;
+          }
+        } else {
+          inwhite = true;
+          crossings = 0;
+          y0 = y;
+        }
+      } else {
+        inwhite = false;
+        crossings = 0;
+      }
+    }
+  }
+
+  // now rule 4: check for stranded rivers. make sure to not
+  // consider indeterminant cells as blocking
+  let unfilledCells = new Array();
+  let riverCount = 0;
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if ((puzzleBoardStates[y][x] != STATE_BLACK) &&
+          (unfilledCells.indexOf(y+","+x) == -1)) {
+        let visitedCells = travelRiver(puzzleBoardStates,y,x,false,STATE_BLACK);
+        if (riverCount) {
+          errorCount++;
+          // if in assistState==2 then color these second river
+          // cells differently
+          if (assistState==2) {
+            for (let i=0;i<visitedCells.length;i++) {
+              let curCell = visitedCells[i].split(",");
+              let iy = curCell[0];
+              let ix = curCell[1];
+              globalBoardColors[iy][ix] = incorrectRiverColor;
+            }
+          }
+        }
+        unfilledCells.push.apply(unfilledCells, visitedCells);
+        riverCount++;
+      }
+    }
+  }
+
   updateTextFields();
   if ((errorCount == 0) && (incompleteCount == 0)) {
     $("#canvasDiv").css("border-color", constColorSuccess);
@@ -499,7 +607,7 @@ function updateBoardStatus() {
 function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
-    globalBoardValues[lastMove[0]][lastMove[1]] = lastMove[2];
+    puzzleBoardStates[lastMove[0]][lastMove[1]] = lastMove[2];
     updateBoardStatus();
     drawBoard();
   }
@@ -520,7 +628,7 @@ function updateDemoRegion(demoNum) {
         "Press the 'next' button to walk through the solving steps, or the " +
         "'back' button to return to the previous step.</p>" +
         "<p>At the beginning of a solve, there are no errors, but there are " +
-        "many incomplete rooms (polyominos). For our first time through we can " +
+        "many incomplete rooms (rooms). For our first time through we can " +
         "turn on Assist Mode 2 to see any errors that we might generate in the " +
         "process of the solve.</p>",
       "Easy ones to knock out single-tile rooms, where the only solution " +

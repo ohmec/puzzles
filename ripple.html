@@ -38,14 +38,15 @@
         </p>
         <p>
           In Assist Mode (0), the default, only the existance of errors
-          is indicated.  In Assist Mode (1), the number of errors is
-          indicated, see game rules.  In Assist Mode (2), these errors
-          are highlighted with colors. In some cases the solve difficulty
-          will greatly decrease in Assist Mode (2), so select depending
-          upon the level of challenge desired. The canvas border will
-          turn green if the grid is completed without error.  You can
-          click the "undo" button on the bottom of the page to undo
-          previous moves.
+          or incomplete rooms is indicated.  In Assist Mode (1), the
+          number of errors and incomplete rooms is indicated, see game rules.
+          In Assist Mode (2), errors are highlighted with digit colors, and
+          completed rules are highlighted with tile colors. In some cases
+          the solve difficulty will greatly decrease in Assist Mode (2),
+          so select depending upon the level of challenge desired. The
+          canvas border will turn green if the grid is completed without
+          error.  You can click the "undo" button on the bottom of the
+          page to undo previous moves.
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
@@ -168,7 +169,7 @@
     <div id="demotab">
       <input class="button small" type="button" value="prev" id="prevDemoButton"  />
       <input class="button small" type="button" value="next" id="nextDemoButton" />
-      <p id='demop'><span id='demotext'>Testing this text</span></p>
+      <p id='demop'><span id='demotext'></span></p>
     </div>
     <br />
     <script type="text/javascript">

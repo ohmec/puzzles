@@ -9,20 +9,20 @@ const numberColor = [
   "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0",
 ];
 
-let PUZZLE_DOUBLECHOCO = 1;
-let PUZZLE_NURIKABE = 2;
-let PUZZLE_MASYU = 3;
-let PUZZLE_FILLOMINO = 4;
-let PUZZLE_HEYAWAKE = 5;
-let PUZZLE_YAJILIN = 6;
-let PUZZLE_SLITHERLINK = 7;
-let PUZZLE_CHOCOBANANA = 8;
-let PUZZLE_AKARI = 9;
-let PUZZLE_HASHIWOKAKERO = 10;
-let PUZZLE_HITORI = 11;
-let PUZZLE_RIPPLEEFFECT = 12;
-let PUZZLE_SHIKAKU = 13;
-let PUZZLE_LITS = 14;
+const PUZZLE_DOUBLECHOCO = 1;
+const PUZZLE_NURIKABE = 2;
+const PUZZLE_MASYU = 3;
+const PUZZLE_FILLOMINO = 4;
+const PUZZLE_HEYAWAKE = 5;
+const PUZZLE_YAJILIN = 6;
+const PUZZLE_SLITHERLINK = 7;
+const PUZZLE_CHOCOBANANA = 8;
+const PUZZLE_AKARI = 9;
+const PUZZLE_HASHIWOKAKERO = 10;
+const PUZZLE_HITORI = 11;
+const PUZZLE_RIPPLEEFFECT = 12;
+const PUZZLE_SHIKAKU = 13;
+const PUZZLE_LITS = 14;
 
 let puzzleName = [ "undefined", "Double Choco", "Nurikabe",
   "Masyu", "Fillomino", "Heyawake", "Yajilin", "Slitherlink", "Choco Banana",
@@ -46,6 +46,8 @@ const constColorMedGray   = "#a0a0a0";
 const constColorSuccess   = "#1be032";
 const constColorCursor    = "#ff80ff";
 
+const EMPTYCELL = -1;
+
 let globalFontSize = 0.5;
 let globalGridSize = 45;
 let globalPuzzleH = 10;
@@ -60,16 +62,15 @@ let globalBoardValues, globalBoardColors, globalBoardTextColors;
 let globalWallStates, globalLineStates, globalCircleStates;
 
 function expandNumParams(numStr) {
-  let expStr = numStr.replace(/_/gi, "");
   for (let cv=10;cv<36;cv++) {
     // replace lowercase values to that many dashes (-)
     // eventually replace uppercase values with the hex equivalent
     let c = cv.toString(36);
     let cre = new RegExp(c, 'g');
     let dash = '-'.repeat(cv-9);
-    expStr = expStr.replace(cre, dash);
+    numStr = numStr.replace(cre, dash);
   }
-  return expStr;
+  return numStr;
 }
 
 function setGridSize(puzzleW) {
@@ -121,14 +122,25 @@ function initYXWithValues(defvalue,avalue,array) {
   return yxArray;
 }
 
-function initBoardValuesFromParams(numParamText, hasDir=false) {
+function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
   // special case for hasDir; 1v (2v 3v etc) indicates a south
   // arrow so we need to convert those to another character
   // before expandNumParams
   if (hasDir) {
     numParamText = numParamText.replace(/([0-9])v/g, "$1*");
   }
-  let numParams = expandNumParams(numParamText);
+  let numParams = expandNumParams(numParamText).split("");
+  if (charForNum) {
+    for (let i=0;i<numParams.length;i++) {
+      let val = numParams[i];
+      if (val.search(/[A-J]/) != -1) {
+        numParams[i] = parseInt(numParams[i],36) - 10;
+      }
+      if (val.search(/[K-T]/) != -1) {
+        numParams[i] = parseInt(numParams[i],36) - 20;
+      }
+    }
+  }
   if (numParams.length != (globalPuzzleH*globalPuzzleW)) {
     console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
                 " expected " + (globalPuzzleH*globalPuzzleW));
@@ -147,7 +159,10 @@ function initBoardValuesFromParams(numParamText, hasDir=false) {
         // look for a number always followed by direction
         boardValues[y][x] = param + paramDir;
       } else {
-        boardValues[y][x] = (param == '-') ? "" : (param == '*') ? "" : parseInt(param,36);
+        boardValues[y][x] =
+          (param == '-') ? "" :
+          (param == '*') ? "" :
+          (param == '_') ? "" : parseInt(param,36);
       }
     }
   }
@@ -230,10 +245,10 @@ function initWallStatesFromBoxes(boxParams,defState) {
     }
   }
   for (let b=0;b<boxParamArray.length;b+=4) {
-    let by = parseInt(boxParamArray[b+0], 36);
-    let bx = parseInt(boxParamArray[b+1], 36);
-    let bh = parseInt(boxParamArray[b+2], 36);
-    let bw = parseInt(boxParamArray[b+3], 36);
+    let bx = parseInt(boxParamArray[b+0], 36);
+    let by = parseInt(boxParamArray[b+1], 36);
+    let bw = parseInt(boxParamArray[b+2], 36);
+    let bh = parseInt(boxParamArray[b+3], 36);
     // top wall
     for (let i=0;i<bw;i++) {
       wallStates[by*2][(bx+i)*2+1] = constWallBorder;
@@ -252,6 +267,39 @@ function initWallStatesFromBoxes(boxParams,defState) {
     }
   }
   return wallStates;
+}
+
+function initRoomsFromBoxes(boxParams,numParams) {
+  let boxParamArray = boxParams.replace(/\./gi, "").split("");
+  let numParamsExp = expandNumParams(numParams);
+  let numParamArray = numParamsExp.replace(/\./gi, "").split("");
+  let roomStates  = new Array();
+  for (let b=0;b<boxParamArray.length;b+=4) {
+    let bx = parseInt(boxParamArray[b+0], 36);
+    let by = parseInt(boxParamArray[b+1], 36);
+    let bw = parseInt(boxParamArray[b+2], 36);
+    let bh = parseInt(boxParamArray[b+3], 36);
+    // look for a digit within the room, else ascribe EMPTYCELL as the count
+    let count = EMPTYCELL;
+    for (let y=by;y<(by+bh);y++) {
+      for (let x=bx;x<(bx+bw);x++) {
+        if (numParamArray[y*globalPuzzleW+x] != "-") {
+          let v = numParamArray[y*globalPuzzleW+x];
+          // special case for solved Heyawake content using A-T characters
+          if (v.search(/[0-9]/) != -1) {
+            count = v;
+          } else if (v.search(/[A-J]/) != -1) {
+            count = parseInt(v,36) - 10;
+          } else if (v.search(/[K-T]/) != -1) {
+            count = parseInt(v,36) - 20;
+          } else {
+          }
+        }
+      }
+    }
+    roomStates.push([by,bx,bh,bw,count]);
+  }
+  return roomStates;
 }
 
 function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
@@ -380,36 +428,35 @@ function drawTile(x,y,color,value,circle,line,lineFirst,textColor) {
     globalContext.fill();
   }
   // now text of value
-  if (value) {
-    let vstr = "";
-    globalContext.textAlign = "center";
-    globalContext.fillStyle = textColor;
-    globalContext.font = "bold " + (globalGridSize*globalFontSize) + "pt " + "Courier, sans-serif";
-    if (isNaN(value) == false) {
-      vstr = value;
-    } else if (value.search(/^[A-Z1-9]$/) != -1) {
-      vstr = parseInt(value, 36);
-    } else if (isNaN(value)) { // arrows for Yajilin
-      let valueArray = value.split("");
-      if (valueArray.length == 2) {
-        switch (valueArray[1]) {
-          case "^":
-            vstr = valueArray[0] + '\u2191';
-            break;
-          case ">":
-            vstr = valueArray[0] + '\u2192';
-            break;
-          case "<":
-            vstr = valueArray[0] + '\u2190';
-            break;
-          case "v":
-            vstr = valueArray[0] + '\u2193';
-            break;
-        }
+  let vstr = "";
+  globalContext.textAlign = "center";
+  globalContext.fillStyle = textColor;
+  globalContext.font = "bold " + (globalGridSize*globalFontSize) + "pt " + "Courier, sans-serif";
+  if (isNaN(value) == false) {
+    vstr = value;
+  } else if (value.search(/^[A-Z0-9]$/) != -1) {
+    vstr = parseInt(value, 36);
+  } else if (isNaN(value)) { // arrows for Yajilin
+    let valueArray = value.split("");
+    if (valueArray.length == 2) {
+      switch (valueArray[1]) {
+        case "^":
+          vstr = valueArray[0] + '\u2191';
+          break;
+        case ">":
+          vstr = valueArray[0] + '\u2192';
+          break;
+        case "<":
+          vstr = valueArray[0] + '\u2190';
+          break;
+        case "v":
+          vstr = valueArray[0] + '\u2193';
+          break;
       }
     }
-    globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.5+globalFontSize*0.5)));
   }
+  globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.5+globalFontSize*0.5)));
+
   if (!lineFirst) {
     drawLine(x,y,line);
   }
@@ -625,7 +672,17 @@ function getClickCellInfo(coords) {
   }
 }
 
-function travelRiver(arrayYX,y,x,trueFalse) {
+function eqCompare(testValue,isEqual,compValue) {
+  if (isEqual && (testValue == compValue)) {
+    return true;
+  } else if (!isEqual && (testValue != compValue)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function travelRiver(arrayYX,y,x,isEqual,testValue) {
   let riverCells = new Array();
   let tryindex = 0;
   riverCells.push(y+","+x);
@@ -634,76 +691,76 @@ function travelRiver(arrayYX,y,x,trueFalse) {
     let iy = parseInt(curCell[0]);
     let ix = parseInt(curCell[1]);
     if ((iy != (globalPuzzleH-1)) &&
-        (riverCells.indexOf((parseInt(iy)+1)+","+ix) == -1) &&
-        (arrayYX[parseInt(iy)+1][ix] == trueFalse)) {
-      riverCells.push((parseInt(iy)+1)+","+ix);
+        (riverCells.indexOf((iy+1)+","+ix) == -1) &&
+        eqCompare(arrayYX[iy+1][ix],isEqual,testValue)) {
+      riverCells.push((iy+1)+","+ix);
     }
     if ((iy != 0) &&
-        (riverCells.indexOf((parseInt(iy)-1)+","+ix) == -1) &&
-        (arrayYX[parseInt(iy)-1][ix] == trueFalse)) {
-      riverCells.push((parseInt(iy)-1)+","+ix);
+        (riverCells.indexOf((iy-1)+","+ix) == -1) &&
+        eqCompare(arrayYX[iy-1][ix],isEqual,testValue)) {
+      riverCells.push((iy-1)+","+ix);
     }
     if ((ix != (globalPuzzleW-1)) &&
-        (riverCells.indexOf(iy+","+(parseInt(ix)+1)) == -1) &&
-        (arrayYX[iy][parseInt(ix)+1] == trueFalse)) {
-      riverCells.push(iy+","+(parseInt(ix)+1));
+        (riverCells.indexOf(iy+","+(ix+1)) == -1) &&
+        eqCompare(arrayYX[iy][ix+1],isEqual,testValue)) {
+      riverCells.push(iy+","+(ix+1));
     }
     if ((ix != 0) &&
-        (riverCells.indexOf(iy+","+(parseInt(ix)-1)) == -1) &&
-        (arrayYX[iy][parseInt(ix)-1] == trueFalse)) {
-      riverCells.push(iy+","+(parseInt(ix)-1));
+        (riverCells.indexOf(iy+","+(ix-1)) == -1) &&
+        eqCompare(arrayYX[iy][ix-1],isEqual,testValue)) {
+      riverCells.push(iy+","+(ix-1));
     }
     tryindex++;
   }
   return riverCells;
 }
 
-function findPolyominos() {
-  let polyoList = new Array();
+function findRooms() {
+  let roomList = new Array();
   let coveredCells = new Array();
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (coveredCells.indexOf(y+","+x) == -1) {
-        let polyo = travelPolyo(y,x);
-        polyoList.push(polyo);
-        coveredCells.push.apply(coveredCells,polyo);
+        let room = travelRoom(y,x);
+        roomList.push(room);
+        coveredCells.push.apply(coveredCells,room);
       }
     }
   }
-  return polyoList;
+  return roomList;
 }
 
-function travelPolyo(y,x) {
-  let polyo = new Array;
+function travelRoom(y,x) {
+  let room = new Array;
   let tryindex = 0;
-  polyo.push(y+","+x);
-  while (polyo.length > tryindex) {
-    let curCell = polyo[tryindex].split(",");
+  room.push(y+","+x);
+  while (room.length > tryindex) {
+    let curCell = room[tryindex].split(",");
     let iy = parseInt(curCell[0]);
     let ix = parseInt(curCell[1]);
     let wy = iy*2+1;
     let wx = ix*2+1;
     if ((iy != (globalPuzzleH-1)) &&
-        (polyo.indexOf((iy+1)+","+ix) == -1) &&
+        (room.indexOf((iy+1)+","+ix) == -1) &&
         (globalWallStates[wy+1][wx] != constWallBorder)) {
-      polyo.push((iy+1)+","+ix);
+      room.push((iy+1)+","+ix);
     }
     if ((iy != 0) &&
-        (polyo.indexOf((iy-1)+","+ix) == -1) &&
+        (room.indexOf((iy-1)+","+ix) == -1) &&
         (globalWallStates[wy-1][wx] != constWallBorder)) {
-      polyo.push((iy-1)+","+ix);
+      room.push((iy-1)+","+ix);
     }
     if ((ix != (globalPuzzleW-1)) &&
-        (polyo.indexOf(iy+","+(ix+1)) == -1) &&
+        (room.indexOf(iy+","+(ix+1)) == -1) &&
         (globalWallStates[wy][wx+1] != constWallBorder)) {
-      polyo.push(iy+","+(ix+1));
+      room.push(iy+","+(ix+1));
     }
     if ((ix != 0) &&
-        (polyo.indexOf(iy+","+(ix-1)) == -1) &&
+        (room.indexOf(iy+","+(ix-1)) == -1) &&
         (globalWallStates[wy][wx-1] != constWallBorder)) {
-      polyo.push(iy+","+(ix-1));
+      room.push(iy+","+(ix-1));
     }
     tryindex++;
   }
-  return polyo;
+  return room;
 }
