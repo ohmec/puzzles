@@ -1,9 +1,12 @@
+const emptyCellColor = "white";         // default
+const fillCellColor = "black";          // default
+const incorrectCellColor = "#802020";   // dark reddish
+const duplicateStateColor = "#FFC0C0";  // light reddish
+const incorrectRiverColor = "#C0C040";  // light brown
 
-let emptyCellColor = "white";         // default
-let fillCellColor = "black";          // default
-let incorrectFillColor = "#802020";   // dark reddish
-let duplicateStateColor = "#FFC0C0";  // light reddish
-let incorrectRiverColor = "#C0C040";  // light brown
+const stdFontColor = "black";
+const offFontColor = "white";
+
 let clicking = false;
 let dragging = false;
 let errorCount = 0;
@@ -24,7 +27,7 @@ const MOVE_RESET  = 3;
 
 const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1 ];
 
-let puzzle, lastVert, lastHorz, moveHistory, boardStates, demoStepNum;
+let puzzle, moveHistory, boardStates, demoStepNum;
 
 // update HTML data
 function updateHTML(spanName, value, isbutton=false) {
@@ -64,8 +67,6 @@ function puzzleInit() {
     $(".tab_content").hide();
     $($(this).find("a").attr("href")).show();
     clicking = false;
-    lastVert = "";
-    lastHorz = "";
     return false;
   });
   
@@ -117,8 +118,6 @@ function puzzleInit() {
   // effect on canvas
   $("#userPuzzle").mousedown(function(evnt) {
     clicking = false;
-    lastVert = "";
-    lastHorz = "";
   });
 
   // click (down) within puzzle frame, find out if contains number already
@@ -133,7 +132,6 @@ function puzzleInit() {
     if (clicking == false) return;
     evnt.preventDefault();
     dragging = true;
-    handleClick(evnt);
   });
 
   // releasing mouse within puzzle or not within puzzle
@@ -298,8 +296,6 @@ function handleKey(keynum) {
 function initStructures(puzzle) {
   $("#canvasDiv").css("border-color", "black");
   moveHistory = new Array();
-  lastVert = "";
-  lastHorz = "";
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
@@ -327,7 +323,7 @@ function initStructures(puzzle) {
     }
   }
   globalBoardColors = initYXFromValue(emptyCellColor);
-  globalBoardTextColors = initYXFromValue(fillCellColor);
+  globalBoardTextColors = initYXFromValue(stdFontColor);
   globalInitWallStates  = initWallStates(constWallLight);
   globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   updateBoardStatus();
@@ -356,8 +352,6 @@ function handleClick(evnt) {
   [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
 //console.log(yCell + "," + xCell + "," + isEdge + "," + yEdge + "," + xEdge);
   
-  lastVert = yCell;
-  lastHorz = xCell;
   globalCursorY = yCell;
   globalCursorX = xCell;
 
@@ -375,8 +369,8 @@ function updateBoardStatus() {
   // set all cells to black or white before figuring out error conditions
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      globalBoardColors[y][x]     = boardStates[y][x] ?  fillCellColor : emptyCellColor;
-      globalBoardTextColors[y][x] = boardStates[y][x] ? emptyCellColor :  fillCellColor;
+      globalBoardColors[y][x]     = boardStates[y][x] ? fillCellColor : emptyCellColor;
+      globalBoardTextColors[y][x] = boardStates[y][x] ?  offFontColor :   stdFontColor;
     }
   }
 
@@ -439,7 +433,7 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (boardStates[y][x] && (filledCells.indexOf(y+","+x) == -1)) {
-        let visitedCells = travelRiver(boardStates,y,x,true);
+        let visitedCells = travelRiver(boardStates,y,x,true,true);
         if (visitedCells.length != 1) {
           errorCount++;
           // color them if in assistState==2
@@ -448,7 +442,7 @@ function updateBoardStatus() {
               let curCell = visitedCells[i].split(",");
               let iy = curCell[0];
               let ix = curCell[1];
-              globalBoardColors[iy][ix] = incorrectFillColor;
+              globalBoardColors[iy][ix] = incorrectCellColor;
             }
           }
         }
@@ -463,7 +457,7 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (!boardStates[y][x] && (whiteCells.indexOf(y+","+x) == -1)) {
-        let visitedCells = travelRiver(boardStates,y,x,false);
+        let visitedCells = travelRiver(boardStates,y,x,true,false);
         if (riverCount) {
           errorCount++;
           // if in assistState==2 then color these second river

@@ -7,7 +7,7 @@
 // gathered into hex values. the ends of rows and columns are dropped
 // off the hex, not wrapped into the next hex. for instance a grid
 // of 6x6 would have 5 walls in each direction, and thus hex values
-// could be (00000) 00 to (11111) F8A.
+// could be (00000) 00 to (11111) F8.
 const cannedPuzzles = [
   // example completed one
   "7x7:2153214.3214321.1325132.2132413.1543121.4121312.3214231:" +

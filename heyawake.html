@@ -6,16 +6,16 @@
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
-    <script type="text/javascript" src="./hitori.js"></script>
-    <script type="text/javascript" src="./hipuzzles.js"></script>
+    <script type="text/javascript" src="./heyawake.js"></script>
+    <script type="text/javascript" src="./hapuzzles.js"></script>
     <script src="./jquery.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
-    <title>Hitori Player</title>
+    <title>Heyawake Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Hitori &#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
+      Player for Heyawake &#x3078;&#x3084;&#x308f;&#x3051;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -28,22 +28,24 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell to toggle from light to dark. Alternately,
+          To play, click on a cell to switch from indeterminant (gray,
+          the default state) to dark or to light. Alternately,
           you can use the arrow keys to move around the board, and press
-          the space bar to toggle, or the '1' key to turn black, or the '0'
-          key to turn white.
+          back space to return to indeterminant, or the '1' key to
+          turn black, the '0' key to turn white, or the space bar to toggle
+          through the states.
         </p>
         <p>
           In Assist Mode (0), the default, only the existance of errors
-          is indicated.  In Assist Mode (1), the number of errors is
-          indicated, be they duplicate digits per row or column, adjacent
-          blackened cells, or stranded "rivers" of white cells. In Assist
-          Mode (2), these errors are highlighted with colors. In some cases
+          or incomplete rooms is indicated.  In Assist Mode (1), the
+          number of errors and incomplete rooms is indicated, see game rules.
+          In Assist Mode (2), errors are highlighted with digit colors, and
+          completed rules are highlighted with tile colors. In some cases
           the solve difficulty will greatly decrease in Assist Mode (2),
-          so select depending upon the level of challenge desired. The canvas
-          border will turn green if the grid is completed without error.
-          You can click the "undo" button on the bottom of the page
-          to undo previous moves.
+          so select depending upon the level of challenge desired. The
+          canvas border will turn green if the grid is completed without
+          error.  You can click the "undo" button on the bottom of the
+          page to undo previous moves.
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
@@ -54,26 +56,32 @@
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://en.wikipedia.org/wiki/Hitori" target="_blank">Hitori</a>
-        (&#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
-        <i>Hitori ni shite kure</i>; literally "leave me alone")
-        is a Japanese logic puzzle published by
+        <a href="https://en.wikipedia.org/wiki/Heyawake" target="_blank">Heyawake</a>
+        (&#x3078;&#x3084;&#x308f;&#x3051;, or "divided rooms")
+        is a classic Japanese logic puzzle published by
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
-        The rules for Hitori are listed here.
+        In Heyawake, the puzzle board is divided into rectangular rooms,
+        some with digits within them, and some without.  The rules relate
+        to these digits and the size and shape of the rooms with respect
+        to their neighbors.
         <ol>
           <li>
-            No single digit can exist "enabled" in a single row or column.
-            In this player, disabled cells are turned black.
+            A room with a number within its borders indicates how many
+            black cells must be within the room. Rooms without borders
+            can have any otherwise legal number of black cells.
           </li>
           <li>
-            There can be no two disabled cells adjacent to another horizontally
-            or vertically (diagonally adjacent is OK).
+            Two black squares can not touch adjacently, diagonally is ok.
           </li>
           <li>
             The enabled (white) cells must all form one contiguous "river"
             of cells, connected to each other in the vertical or horizontal
             direction. A river is not considered connected if it only flows
             through diagonally adjacent white cells.
+          </li>
+          <li>
+            A contiguous sequence of white cells can not extend into
+            three consecutive rooms, either horizontally or vertically.
           </li>
         </ol>
         Below select puzzle 0 to see a completed sample grid.
@@ -88,17 +96,26 @@
           hand-crafted of varying difficulty, roughly easy to hard.
           Puzzle 0 shows a completed correct puzzle.
           To describe a puzzle, the character string must be of the
-          form: "WxH:&lt;descriptor&gt;", where W is a number indicating
-          the width of the grid, and H the height.  The descriptor is a
-          definition of the grid contents from left to right, then top
-          to bottom.  A dot '.' can be used as a visual separator,
-          for example between rows. Cell contents for values greater than
-          '9' should use capital 'A' to 'Z' for 10 through 35. An example
-          descriptor is as follows for entry 1:
+          form: "WxH:&lt;digit-descriptor&gt;:&lt;room-descriptors&gt;",
+          where W is a number indicating the width of the grid, and H
+          the height.  The digit descriptor is a list of the pre-defined
+          digit contents, from left to right, then top to bottom.
+          Blank cells are represented with a '-' character. To assist
+          in the definition of sparse digits, a combination of <i>b</i>
+          consecutive blanks can be represented with a lowercase letter
+          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
+          A dot '.' can be used as a visual separator, for example between
+          rows.  The room descriptors are a description of the individual
+          rooms with a 4-character code for each room including, in order,
+          <i>xywh</i> where <i>x,y</i> describes the starting location
+          and <i>w,h</i> describes the room's width and height. Values
+          greater than 9 should use a-z to represent 10-35. For instance
+          a 3-wide 2-high room at coordinate location 12,3 should be
+          designated as 'c332'. An example descriptor is as follows for entry 1:
           '<span id="descr1">descr</span>'.
         </p>
         <p>
-          For Hitori there are <span id='democount'>1</span> demo
+          For Heyawake there are <span id='democount'>1</span> demo
           puzzles that can be helpful to walk through solving methods.
           They are puzzle codes <span id='demolist2'>[]</span>.
           Enter them in the Game Play tab with the code number and there
