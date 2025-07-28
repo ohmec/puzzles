@@ -74,14 +74,14 @@
             Two black squares can not touch adjacently, diagonally is ok.
           </li>
           <li>
+            A contiguous sequence of white cells can not extend into
+            three consecutive rooms, either horizontally or vertically.
+          </li>
+          <li>
             The enabled (white) cells must all form one contiguous "river"
             of cells, connected to each other in the vertical or horizontal
             direction. A river is not considered connected if it only flows
             through diagonally adjacent white cells.
-          </li>
-          <li>
-            A contiguous sequence of white cells can not extend into
-            three consecutive rooms, either horizontally or vertically.
           </li>
         </ol>
         Below select puzzle 0 to see a completed sample grid.
@@ -95,24 +95,26 @@
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
           Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
           To describe a puzzle, the character string must be of the
-          form: "WxH:&lt;digit-descriptor&gt;:&lt;room-descriptors&gt;",
-          where W is a number indicating the width of the grid, and H
-          the height.  The digit descriptor is a list of the pre-defined
-          digit contents, from left to right, then top to bottom.
-          Blank cells are represented with a '-' character. To assist
-          in the definition of sparse digits, a combination of <i>b</i>
-          consecutive blanks can be represented with a lowercase letter
-          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
-          A dot '.' can be used as a visual separator, for example between
-          rows.  The room descriptors are a description of the individual
-          rooms with a 4-character code for each room including, in order,
-          <i>xywh</i> where <i>x,y</i> describes the starting location
-          and <i>w,h</i> describes the room's width and height. Values
-          greater than 9 should use a-z to represent 10-35. For instance
-          a 3-wide 2-high room at coordinate location 12,3 should be
-          designated as 'c332'. An example descriptor is as follows for entry 1:
-          '<span id="descr1">descr</span>'.
+          form: "WxH:&lt;room-descriptors&gt;", where W is a number
+          indicating the width of the grid, and H the height.  The
+          room descriptors are a description of the individual
+          rooms with a 5-character code for each room including,
+          in order, <i>yxhwd</i> where <i>y,x</i> describes the
+          starting location and <i>h,w</i> describes the room's width
+          and height. The puzzle matrix should be thought of as starting
+          at 0,0 in the top left corner, with <i>y</i> increasing down,
+          and <i>x</i> increasing across. The value <i>d</i> is the count
+          of black cells expected for the room. If there is no value,
+          then the character '-' should be used instead. Values greater
+          than 9 should use a-z to represent 10-35. For instance a 2-digit
+          2-high 3-wide room at y,x coordinate location 12,3 should be
+          designated as 'c3232'. An example descriptor is as follows for
+          entry 1: '<span id="descr1">descr</span>'. If the board is
+          blank, there are likely descriptor errors that can be debugged
+          by pressing F12 to see the javascript error output.
         </p>
         <p>
           For Heyawake there are <span id='democount'>1</span> demo
