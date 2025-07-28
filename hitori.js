@@ -20,24 +20,16 @@ const KEY_RIGHT = 0x27;
 const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
+const ALT_0     = 0x60; // these are the number pad versions
+const ALT_1     = 0x61;
 
 const MOVE_TOGGLE = 1;
 const MOVE_SET    = 2;
 const MOVE_RESET  = 3;
 
-const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1 ];
+const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1, ALT_0, ALT_1 ];
 
-let puzzle, moveHistory, boardStates, demoStepNum;
-
-// update HTML data
-function updateHTML(spanName, value, isbutton=false) {
-  let spanHandle = document.querySelector('#' + spanName);
-  if (isbutton) {
-    spanHandle.value = value;
-  } else {
-    spanHandle.innerHTML = value;
-  }
-}
+let initPuzzle, puzzle, moveHistory, boardStates, demoStepNum;
 
 function puzzleInit() {
   // any key anywhere as long as canvas is in focus
@@ -82,8 +74,9 @@ function puzzleInit() {
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
-        updateHTML('puzzledescr', cannedPuzzles[pval]);
-        puzzle = removeDot(cannedPuzzles[pval]);
+        initPuzzle = cannedPuzzles[pval];
+        updateHtmlDescr(initPuzzle);
+        puzzle = removeDot(initPuzzle);
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
@@ -96,8 +89,9 @@ function puzzleInit() {
       }
     } else {
       $("#demotab").hide();
+      initPuzzle = pval;
       puzzle = removeDot(pval);
-      updateHTML('puzzledescr', puzzle);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
@@ -171,34 +165,33 @@ function puzzleInit() {
   globalContext = canvas.getContext('2d');
 
   if(cannedPuzzles[puzzleChoice]) {
-    puzzle = removeDot(cannedPuzzles[puzzleChoice]);
+    initPuzzle = cannedPuzzles[puzzleChoice];
   } else {
-    puzzle = removeDot(cannedPuzzles[0]);
+    initPuzzle = cannedPuzzles[0];
   }
 
+  puzzle = removeDot(initPuzzle);
   initStructures(puzzle);
-
-  updateHTML('puzzlecount1', puzzleCount-1);
-  updateHTML('puzzlecount2', puzzleCount-1);
-  updateHTML('descr1',       cannedPuzzles[1]);
-  updateHTML('demolist1', '[' + demoPuzzles.join(", ") + ']');
-  updateHTML('demolist2', '[' + demoPuzzles.join(", ") + ']');
-  updateHTML('democount', demoPuzzles.length);
+  updateStaticHtmlEntries(
+    initPuzzle,
+    cannedPuzzles[1],
+    puzzleCount,
+    '[' + demoPuzzles.join(", ") + ']',
+    demoPuzzles.length);
 }
 
-function updateTextFields() {
-  let errorTextHandle = document.querySelector('#errortext');
+function updateDynTextFields() {
+  let etext = '';
   if (assistState == 0) { 
     if (errorCount) {
-      updateHTML('errortext', "there are errors");
+      etext = "there are errors";
     } else {
-      updateHTML('errortext', "there are no errors");
+      etext = "there are no errors";
     }
   } else {
-    updateHTML('errortext', "there are " + errorCount + " errors");
+    etext = "there are " + errorCount + " errors";
   }
-  updateHTML('puzzledescr', "puzzle descriptor:<br/>" + puzzle);
-  updateHTML('assistButton', 'Current Assist Mode (' + assistState + ')', true);
+  updateDynamicHtmlEntries(etext,assistState);
 }
 
 function addHistory(setOrReset,y,x) {
@@ -230,8 +223,9 @@ function handleKey(keynum) {
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
-        puzzle = removeDot(cannedPuzzles[pval]);
-        updateHTML('puzzledescr', puzzle);
+        initPuzzle = cannedPuzzles[pval];
+        puzzle = removeDot(initPuzzle);
+        updateHtmlDescr(initPuzzle);
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
@@ -244,8 +238,9 @@ function handleKey(keynum) {
       }
     } else {
       $("#demotab").hide();
-      puzzle = removeDot(pval);
-      updateHTML('puzzledescr', puzzle);
+      initPuzzle = pval;
+      puzzle = removeDot(initPuzzle);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   // else look for keys not in puzzle display field
@@ -279,13 +274,15 @@ function handleKey(keynum) {
         globalCursorOn = true;
         addMove(MOVE_TOGGLE,globalCursorY,globalCursorX);
         break;
-      case KEY_1: // set on
-        globalCursorOn = true;
-        addMove(MOVE_SET,globalCursorY,globalCursorX);
-        break;
       case KEY_0: // set off
+      case ALT_0:
         globalCursorOn = true;
         addMove(MOVE_RESET,globalCursorY,globalCursorX);
+        break;
+      case KEY_1: // set on
+      case ALT_1:
+        globalCursorOn = true;
+        addMove(MOVE_SET,globalCursorY,globalCursorX);
         break;
       }
     updateBoardStatus();
@@ -328,8 +325,7 @@ function initStructures(puzzle) {
   globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   updateBoardStatus();
   drawBoard();
-
-  updateTextFields();
+  updateDynTextFields();
 }
 
 function removeDot(strval) {
@@ -477,7 +473,7 @@ function updateBoardStatus() {
     }
   }
 
-  updateTextFields();
+  updateDynTextFields();
   if (errorCount == 0) {
     $("#canvasDiv").css("border-color", constColorSuccess);
   } else {
@@ -585,7 +581,7 @@ function updateDemoRegion(demoNum) {
     } else {
       assistState = 0;
     }
-    updateHTML('demotext', demotext[demoStepNum]);
+    updateHtmlText('demotext', demotext[demoStepNum]);
     boardStates = initYXFromValue(false);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {

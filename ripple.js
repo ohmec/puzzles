@@ -19,6 +19,9 @@ const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
 const KEY_9     = 0x39;
+const ALT_0     = 0x60; // number pad versions
+const ALT_1     = 0x61;
+const ALT_9     = 0x69;
 const KEY_A     = 0x41;
 const KEY_Z     = 0x5a;
 const KEY_a     = 0x61;
@@ -38,6 +41,9 @@ function puzzleInit() {
 
   // add digits and letters to handled key list
   for (let key=KEY_1;key<=KEY_9;key++) {
+    handledKeys.push(key);
+  }
+  for (let key=ALT_1;key<=ALT_9;key++) {
     handledKeys.push(key);
   }
   for (let key=KEY_a;key<=KEY_z;key++) {
@@ -89,8 +95,8 @@ function puzzleInit() {
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
-        updateHTML('puzzledescr', cannedPuzzles[pval]);
         initPuzzle = cannedPuzzles[pval];
+        updateHtmlDescr(initPuzzle);
         puzzle = removeDot(initPuzzle);
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
@@ -106,7 +112,7 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
-      updateHTML('puzzledescr', puzzle);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
@@ -189,43 +195,31 @@ function puzzleInit() {
   }
 
   initStructures(puzzle);
-
-  updateHTML('puzzlecount1', puzzleCount-1);
-  updateHTML('puzzlecount2', puzzleCount-1);
-  updateHTML('descr1',       cannedPuzzles[1]);
-  updateHTML('demolist1', '[' + demoPuzzles.join(", ") + ']');
-  updateHTML('demolist2', '[' + demoPuzzles.join(", ") + ']');
-  updateHTML('democount', demoPuzzles.length);
+  updateStaticHtmlEntries(
+    initPuzzle,
+    cannedPuzzles[1],
+    puzzleCount,
+    '[' + demoPuzzles.join(", ") + ']',
+    demoPuzzles.length);
 }
 
-// update HTML data
-function updateHTML(spanName, value, isbutton=false) {
-  let spanHandle = document.querySelector('#' + spanName);
-  if (isbutton) {
-    spanHandle.value = value;
-  } else {
-    spanHandle.innerHTML = value;
-  }
-}
-
-function updateTextFields() {
-  let errorTextHandle = document.querySelector('#errortext');
+function updateDynTextFields() {
+  let etext = '';
   if (assistState == 0) { 
     if (errorCount && incompleteCount) {
-      updateHTML('errortext', "there are errors and incomplete rooms");
+      etext = "there are errors and incomplete rooms";
     } else if (errorCount) {
-      updateHTML('errortext', "there are errors");
+      etext = "there are errors";
     } else if (incompleteCount) {
-      updateHTML('errortext', "there are incomplete rooms");
+      etext = "there are incomplete rooms";
     } else {
-      updateHTML('errortext', "there are no errors nor incomplete rooms");
+      etext = "there are no errors nor incomplete rooms";
     }
   } else {
-    updateHTML('errortext', "there are " + errorCount + " errors and " +
-                            incompleteCount + " incomplete rooms");
+    etext = "there are " + errorCount + " errors and " +
+                      incompleteCount + " incomplete rooms";
   }
-  updateHTML('puzzledescr', "puzzle descriptor:<br/>" + initPuzzle);
-  updateHTML('assistButton', 'Current Assist Mode (' + assistState + ')', true);
+  updateDynamicHtmlEntries(etext,assistState);
 }
 
 function addHistory(y,x,prevvalue,newvalue) {
@@ -247,7 +241,7 @@ function handleKey(keynum) {
         puzzleChoice = pval;
         initPuzzle = cannedPuzzles[pval];
         puzzle = removeDot(initPuzzle);
-        updateHTML('puzzledescr', puzzle);
+        updateHtmlDescr(initPuzzle);
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
@@ -262,7 +256,7 @@ function handleKey(keynum) {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
-      updateHTML('puzzledescr', puzzle);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   // else look for keys not in puzzle display field
@@ -301,6 +295,8 @@ function handleKey(keynum) {
         if (globalInitBoardValues[globalCursorY][globalCursorX] == '') {
           if (keynum >= KEY_1 && keynum <= KEY_9) {
             setValue = keynum-KEY_0;
+          } else if (keynum >= ALT_1 && keynum <= ALT_9) {
+            setValue = keynum-ALT_0;
           } else if(keynum >= KEY_a && keynum <= KEY_z) {
             setValue = keynum-KEY_a+10;
           } else {
@@ -488,7 +484,7 @@ function updateBoardStatus() {
 
   errorCount = errorCells.length;
   incompleteCount = incompleteRooms.length;
-  updateTextFields();
+  updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0)) {
     $("#canvasDiv").css("border-color", constColorSuccess);
   } else {
@@ -600,7 +596,7 @@ function updateDemoRegion(demoNum) {
     } else {
       assistState = 0;
     }
-    updateHTML('demotext', demotext[demoStepNum]);
+    updateHtmlText('demotext', demotext[demoStepNum]);
     globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {

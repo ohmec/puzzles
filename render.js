@@ -94,6 +94,17 @@ function initYXFromArray(ymax,xmax,array) {
   return yxArray;
 }
 
+function initBobFromValue(value) {
+  let yxArray = new Array(globalPuzzleH);
+  for (let y=0;y<globalPuzzleH;y++) {
+    yxArray[y] = new Array(globalPuzzleW);
+    for (let x=0;x<globalPuzzleW;x++) {
+      yxArray[y][x] = 63;
+    }
+  }
+  return yxArray;
+}
+
 function initYXFromValue(value) {
   let yxArray = new Array(globalPuzzleH);
   for (let y=0;y<globalPuzzleH;y++) {
@@ -165,6 +176,62 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
           (param == '_') ? "" : parseInt(param,36);
       }
     }
+  }
+  return boardValues;
+}
+
+function initBoardValuesFromBoxes(boxParams) {
+  let boxParamArray = boxParams.replace(/\./gi, "").split("");
+
+  // for error checking, make sure the descriptor hasn't double
+  // counted or missed any squares with the boxes
+  let cellCounts = new Array(globalPuzzleH);
+  let boardValues = new Array(globalPuzzleH);
+  for (let y=0;y<globalPuzzleH;y++) {
+    cellCounts[y] = new Array(globalPuzzleW);
+    boardValues[y] = new Array(globalPuzzleW);
+    for (let x=0;x<globalPuzzleW;x++) {
+      cellCounts[y][x] = 0;
+      boardValues[y][x] = "";
+    }
+  }
+
+  let totalCount = 0;
+  let inError = 0;
+  for (let b=0;b<boxParamArray.length;b+=5) {
+    let by = parseInt(boxParamArray[b+0], 36);
+    let bx = parseInt(boxParamArray[b+1], 36);
+    let bh = parseInt(boxParamArray[b+2], 36);
+    let bw = parseInt(boxParamArray[b+3], 36);
+    let bd = boxParamArray[b+4];
+    if (bd != "-") {
+      boardValues[by][bx] = bd;
+    }
+    for (let y=by;y<(by+bh);y++) {
+      for (let x=bx;x<(bx+bw);x++) {
+        if (y>=globalPuzzleH) {
+          console.log("ERROR: cell " + y + "," + x + " extends beyond puzzle board");
+          inError = 1;
+        }
+        if (x>=globalPuzzleW) {
+          console.log("ERROR: cell " + y + "," + x + " extends beyond puzzle board");
+          inError = 1;
+        }
+        totalCount++;
+        if (cellCounts[y][x] != 0) {
+          console.log("ERROR: cell " + y + "," + x + " is used by two box descriptors");
+          inError = 1;
+        }
+        cellCounts[y][x]++;
+      }
+    }
+  }
+  if (totalCount != (globalPuzzleH*globalPuzzleW)) {
+    console.log("ERROR: box descriptors only cover " + totalCount + " of the required " + (globalPuzzleH*globalPuzzleW) + " cells");
+    inError = 1;
+  }
+  if (inError) {
+    return;
   }
   return boardValues;
 }
@@ -244,11 +311,11 @@ function initWallStatesFromBoxes(boxParams,defState) {
       }
     }
   }
-  for (let b=0;b<boxParamArray.length;b+=4) {
-    let bx = parseInt(boxParamArray[b+0], 36);
-    let by = parseInt(boxParamArray[b+1], 36);
-    let bw = parseInt(boxParamArray[b+2], 36);
-    let bh = parseInt(boxParamArray[b+3], 36);
+  for (let b=0;b<boxParamArray.length;b+=5) {
+    let by = parseInt(boxParamArray[b+0], 36);
+    let bx = parseInt(boxParamArray[b+1], 36);
+    let bh = parseInt(boxParamArray[b+2], 36);
+    let bw = parseInt(boxParamArray[b+3], 36);
     // top wall
     for (let i=0;i<bw;i++) {
       wallStates[by*2][(bx+i)*2+1] = constWallBorder;
@@ -269,34 +336,16 @@ function initWallStatesFromBoxes(boxParams,defState) {
   return wallStates;
 }
 
-function initRoomsFromBoxes(boxParams,numParams) {
+function initRoomsFromBoxes(boxParams) {
   let boxParamArray = boxParams.replace(/\./gi, "").split("");
-  let numParamsExp = expandNumParams(numParams);
-  let numParamArray = numParamsExp.replace(/\./gi, "").split("");
   let roomStates  = new Array();
-  for (let b=0;b<boxParamArray.length;b+=4) {
-    let bx = parseInt(boxParamArray[b+0], 36);
-    let by = parseInt(boxParamArray[b+1], 36);
-    let bw = parseInt(boxParamArray[b+2], 36);
-    let bh = parseInt(boxParamArray[b+3], 36);
-    // look for a digit within the room, else ascribe EMPTYCELL as the count
-    let count = EMPTYCELL;
-    for (let y=by;y<(by+bh);y++) {
-      for (let x=bx;x<(bx+bw);x++) {
-        if (numParamArray[y*globalPuzzleW+x] != "-") {
-          let v = numParamArray[y*globalPuzzleW+x];
-          // special case for solved Heyawake content using A-T characters
-          if (v.search(/[0-9]/) != -1) {
-            count = v;
-          } else if (v.search(/[A-J]/) != -1) {
-            count = parseInt(v,36) - 10;
-          } else if (v.search(/[K-T]/) != -1) {
-            count = parseInt(v,36) - 20;
-          } else {
-          }
-        }
-      }
-    }
+  for (let b=0;b<boxParamArray.length;b+=5) {
+    let by = parseInt(boxParamArray[b+0], 36);
+    let bx = parseInt(boxParamArray[b+1], 36);
+    let bh = parseInt(boxParamArray[b+2], 36);
+    let bw = parseInt(boxParamArray[b+3], 36);
+    let bd = parseInt(boxParamArray[b+4], 36);
+    let count = (bd == '-') ? EMPTYCELL : bd;
     roomStates.push([by,bx,bh,bw,count]);
   }
   return roomStates;
@@ -763,4 +812,42 @@ function travelRoom(y,x) {
     tryindex++;
   }
   return room;
+}
+
+// update data in .html doc
+function updateHtmlText(spanName, value, isbutton=false) {
+  let spanHandle = document.querySelector('#' + spanName);
+  if (isbutton) {
+    spanHandle.value = value;
+  } else {
+    spanHandle.innerHTML = value;
+  }
+}
+
+function updateHtmlDescr(pdescr) {
+  // these can get long, break into pieces
+  if (pdescr) {
+    let ptext = "puzzle descriptor:<br/>";
+    while (pdescr.length > 120) {
+      ptext = ptext + pdescr.substr(0,120) + "<br/>";
+      pdescr = pdescr.substr(120);
+    }
+    ptext = ptext + pdescr;
+    updateHtmlText('puzzledescr',  ptext);
+  }
+}
+
+function updateStaticHtmlEntries(pdescr,edescr,pcnt,dpuzz,dpuzzlen) {
+  updateHtmlDescr(pdescr);
+  updateHtmlText('descr1',       edescr);
+  updateHtmlText('puzzlecount1', pcnt-1);
+  updateHtmlText('puzzlecount2', pcnt-1);
+  updateHtmlText('demolist1',    dpuzz);
+  updateHtmlText('demolist2',    dpuzz);
+  updateHtmlText('democount',    dpuzzlen);
+}
+
+function updateDynamicHtmlEntries(etext,astate) {
+  updateHtmlText('errortext', etext);
+  updateHtmlText('assistButton', 'Current Assist Mode (' + astate + ')', true);
 }
