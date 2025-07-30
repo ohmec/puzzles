@@ -764,6 +764,22 @@ function travelRiver(arrayYX,y,x,isEqual,testValue) {
   return riverCells;
 }
 
+function roomIsRectangle(roomSquares) {
+  let xmin = 999;
+  let ymin = 999;
+  let xmax = 0;
+  let ymax = 0;
+  for (let i=0;i<roomSquares.length;i++) {
+    let square = roomSquares[i].split(",");
+    ymin = (square[0] < ymin) ? square[0] : ymin;
+    xmin = (square[1] < xmin) ? square[1] : xmin;
+    ymax = (square[0] > ymax) ? square[0] : ymax;
+    xmax = (square[1] > xmax) ? square[1] : xmax;
+  }
+  let area = (ymax-ymin+1)*(xmax-xmin+1);
+  return (area == roomSquares.length) ? 1 : 0;
+}
+
 function findRooms() {
   let roomList = new Array();
   let coveredCells = new Array();

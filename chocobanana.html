@@ -6,16 +6,16 @@
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
-    <script type="text/javascript" src="./ripple.js"></script>
-    <script type="text/javascript" src="./repuzzles.js"></script>
+    <script type="text/javascript" src="./chocobanana.js"></script>
+    <script type="text/javascript" src="./cbpuzzles.js"></script>
     <script src="./jquery.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
-    <title>Ripple Effect Player</title>
+    <title>Heyawake Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Ripple Effect &#x6ce2;&#x53ca;&#x52b9;&#x679c;
+      Player for Choco Banana &#x30C1;&#x30E8;&#x30B3;&#x30D0;&#x30CA;&#x30CA;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -28,25 +28,22 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell, then enter a digit value. If needed,
-          digit values greater than '9' can be entered by pressing the
-          corresponding letter from 'A' (10) to 'Z' (35). Digit values
-          greater than the largest polyomino ("room") on the board will be
-          ignored. Once on a cell, you can use the arrow keys to move
-          around the board. Press the space bar to remove an entry
-          (except those defined by the puzzle itself).
+          To play, click on a cell to toggle between light, dark, and the
+          default indeterminate state.  Alternately, you can use the arrow
+          keys to move around the board, and press the space bar to toggle,
+          or the '1' key to turn black, the '0' key to turn white, or the
+          backspace key to set back to indeterminate.
         </p>
         <p>
           In Assist Mode (0), the default, only the existance of errors
           or incomplete rooms is indicated.  In Assist Mode (1), the
           number of errors and incomplete rooms is indicated, see game rules.
-          In Assist Mode (2), errors are highlighted with digit colors, and
-          completed rules are highlighted with tile colors. In some cases
-          the solve difficulty will greatly decrease in Assist Mode (2),
-          so select depending upon the level of challenge desired. The
-          canvas border will turn green if the grid is completed without
-          error.  You can click the "undo" button on the bottom of the
-          page to undo previous moves.
+          In Assist Mode (2), errors and completed rules are highlighted
+          with digit colors.  In some cases the solve difficulty will
+          greatly decrease in Assist Mode (2), so select depending upon
+          the level of challenge desired. The canvas border will turn
+          green if the grid is completed without error.  You can click
+          the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
@@ -57,30 +54,38 @@
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)" target="_blank">Ripple Effect</a>
-        (&#x6ce2;&#x53ca;&#x52b9;&#x679c; <i>Hakyuu Kouka</i>) is a
-        Japanese logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en/puzzles/choco-banana" target="_blank">Choco Banana</a>
+        (&#x30C1;&#x30E8;&#x30B3;&#x30D0;&#x30CA;&#x30CA;) is one of the
+        newer Japanese logic puzzle published by
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
-        In Ripple Effect, the puzzle board is divided a collection of
-        polyominos (or "rooms", i.e. joined sqares) of different sizes
-        and shapes.  Each shape contains a number of square tiles, call the
-        number <i>n</i>, where <i>n</i> is at least 1.  The rules
-        around these shapes are listed below.
+        In Choco Banana, the puzzle board is initiated with some numbers
+        that must be separated into collections of squares, or rooms, that
+        contain the number of squares of that number. Sometimes rooms
+        must be created without knowing in advance how many squares are
+        contained. The following rules relate to these numbers and the
+        size and shape of the rooms that must be created.
         <ol>
           <li>
-            For an <i>n</i>-tile polyomino, each of the digits from 1
-            to <i>n</i> must be represented.
+            A number indicates the number of cells of the area containing
+            this cell.
           </li>
           <li>
-            In any of the 4 directions (up, down, left, right), there can
-            not be any two numbered digits <i>d</i> within <i>d+1</i> tiles.
-            For example, there can not be two <i>3</i> digits within
-            a 4-tile span. In this way the effects of a number "ripple"
-            out a distance equivalent to the digit's value.
+            Black cells must form a rectangle when linked with their neighbors.
+            I.e. a collection of contiguous black cells could be of
+            combined size 2x3, or 1x4, or 1x1, etc. If it contains a
+            number it must be that combined size. For example a black
+            room with the number three could be a 1x3 or 3x1 collection
+            of black squares.
           </li>
           <li>
-            All blank cells must be filled in with their appropriate 1-<i>n</i>
-            values so that the above rules are not violated.
+            White cells must <b>not</b> form a rectangle when linked with
+            their neighbors. For example a white room with the number
+            three could only be an L-shape collection of three white
+            cells, though they could be in any orientation.
+          </li>
+          <li>
+            Rooms, or collections of cells, do not need to contain a
+            number.
           </li>
         </ol>
         Below select puzzle 0 to see a completed sample grid.
@@ -97,10 +102,9 @@
         </p>
         <p>
           To describe a puzzle, the character string must be of the
-          form: "WxH:&lt;digit-descriptor&gt;:&lt;wall-descriptor-rows:
-          &lt;wall-descriptor-columns&gt;",
-          where W is a number indicating the width of the grid, and
-          H the height.  The digit descriptor is a list of the pre-defined
+          form: "WxH:&lt;digit-descriptor&gt;", where W is a number
+          indicating the width of the grid, and H the height.
+          The digit descriptor is a list of the pre-defined
           digit contents, from left to right, then top to bottom.
           Blank cells are represented with a '-' character. To assist
           in the definition of a sparse board, a combination of <i>b</i>
@@ -109,28 +113,15 @@
           Digit values greater than '9' should be represented with
           capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
           can be used as a visual separator, for example between rows.
-          The wall descriptors are a description of the true/false nature
-          of the walls for each row, and then each column. These are
-          denoted in hexadecimal value, which is a value from 0 to 15
-          denoted as 0-9,a-f for each collection of 4 walls, ignoring
-          the sides. As an example, if a grid is 8 columns wide, then
-          7 wall values are needed to define the walls between column
-          0 and 1, then 1 and 2, etc. These 7 values are described in
-          two-character hex values from 00 to fe. Extra unused bits
-          for the end of a row or column are ignored, and each new
-          row or column begins with a new hex pair or triplet. So if
-          the top row has a wall between columns 0 and 1, and between
-          columns 5 and 6, that would be binary value of 1000010, which
-          is represented as the hex pair of 84.  An example
-          descriptor is as follows for entry 1:
+          An example descriptor is as follows for entry 1:
           '<span id="descr1">descr</span>'.
         </p>
         <p>
-        For Ripple Effect there are <span id='democount'>1</span> demo
-        puzzles that can be helpful to walk through solving methods.
-        They are puzzle codes <span id='demolist2'>[]</span>.
-        Enter them in the Game Play tab with the code number and there
-        will be added a demo panel to help with the solve.
+          For Choco Banana there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
         </p>
       </div>
       <div id="tab4" class="tab_content" style="display: none;">
