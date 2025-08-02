@@ -14,21 +14,48 @@ const cannedPuzzles = [
       "40.e8.cc.e8.68.dc.c8:60.98.e4.ac.a8.bc.d8",
   // Godzilla sample puzzle
   "7x7:g.g.d1b.c2c.b4d.g.g:40.e8.cc.e8.68.dc.c8:60.98.e4.ac.a8.bc.d8",
+  // D1 of 4
   "8x8:4f3.a3d2a.h.2b12b2.1b43b1.h.a3d1a.2f1:" +
       "76.4a.96.fa.bc.b6.aa.46:" +
-      "46.7a.da.72.d6.fe.e8.18",                        // Godzilla 233 Easy
+      "46.7a.da.72.d6.fe.e8.18",                        // Godzilla 233
   "8x8:2g.g2.h.a5f.f4a.h.3g.g5:" +
       "4e.fa.4e.78.a8.ac.98.b4:" +
-      "c8.54.f4.5e.fa.fe.54.74",                        // Godzilla 238 Easy
+      "c8.54.f4.5e.fa.fe.54.74",                        // Godzilla 238
   "8x8:d1b6.c2a43a.b2c2a.a2e3.2e6a.a3c3b.a21a1c.3b1d:" +
       "68.f2.fe.64.c4.72.6c.46:" +
-      "b4.cc.9a.7e.da.7c.4e.a4",                        // Godzilla 239 Easy
+      "b4.cc.9a.7e.da.7c.4e.a4",                        // Godzilla 239
   "8x8:h.h.h.h.h.h.h.h:" +
       "f6.fe.36.36.68.6e.68.ee:" +
-      "b6.74.70.14.54.9e.98.3e",                        // Godzilla 244 Easy
+      "b6.74.70.14.54.9e.98.3e",                        // Godzilla 244
   "10x10:b12345b1.j.j.2h3.e1d.d5e.4h5.j.j.2b12345b:" +
       "550.548.4f0.f98.a80.f38.4b0.6d0.ce8.ca0:" +
-      "250.290.7f0.690.7d0.7a0.5b8.7d0.f90.6d8",        // 2014 Box #4 Easy
+      "250.290.7f0.690.7d0.7a0.5b8.7d0.f90.6d8",        // 2014 Box #4
+  "10x10:b5c3c.c2c4b.a5c4c1.b1c4c.2c1c2a.a6c3c1.c1c4b." +
+        "5c2c2a.b5c4c.c6c3b:8c8.798.740.ee8.de8.2a8.ef8." +
+        "ed0.538.4f0:290.ac0.8a0.790.e98.490.d78.f40.f50.638",  // 2019 #1
+  "10x10:jjjjjjjjjj:ec0.db0.fd8.ca8.bb8.fe8.b78.f70." +
+        "de8.3f8:918.2a8.558.f30.3b0.de0.b40.f68.ed0.a28",      // 2019 #2
+  "10x10:d4e.b2g.h3a.a1h.1h1.2h2.h1a.a5h.g5b.e5d:d28." +
+        "7b0.770.768.7f0.a50.f70.958.fe0.6f8:d20.5b8.a70." +
+        "320.4d8.dc0.8e8.6d0.d98.ea0",                          // 2019 #3
+  // D2
+  "10x10:jjjjjjjjjj:2d0.768.5a8.4e8.fa8.4a0.5f0.e68.bd8.c60:" +
+        "d30.da0.ef8.bf8.b48.d78.738.ab0.ac8.370",               // 2019 #4
+  "10x10:jjjjjjjjjj:970.230.278.d70.7d0.b60.938.f98.ae8.ef8:" +
+        "fc8.de8.f78.e60.ef0.ff0.668.1f0.2a8.4e0",               // 2019 #5
+  "10x10:j.f12b.d1e.b1g.4a2f5.1f2a6.g5b.e4d.b14f.j:958.4b0." +
+        "760.958.3c8.f60.d48.d58.520.9c0:7b0.f48.bd0.d50.ca0." +
+        "528.d58.7d8.7f8.e28",                                   // 2019 #6
+  // D3
+  "10x10:jjjjjjjjjj:160.cf0.378.b30.b68.560.598.5b8.950.968:" +
+        "4d0.ed8.ed8.958.f50.370.b70.3d8.ac8.d30",                    // 2019 #11
+  "10x10:j.1i.j.j.j.j.j.d4e.b23c4b.j:918.b50.d68.ee8.a50.338." +
+        "538.b10.148.680:2d8.b68.e68.9d8.7b0.6b8.ab8.d98.da8.258",    // 2019 #12
+  "17x17:e4k.d2l.q.c2g4e.c1d56a2a4c.e4g1c.f3a1h.c31b3i.h3h.i1b21c." +
+        "h2a4f.c1g4e.c2a6a53d3c.e1g4c.q.l5d.k4e:f967.fad3.e862." +
+        "fed6.9997.273e.7f7b.dfe9.2759.d2ec.467f.31ea.7ff7.28aa." +
+        "689b.d8aa.e8a5:0eed.1fae.3afe.6bd3.a4fa.7def.647f.fc6f." +
+        "71e7.fb2f.ad37.e2a6.e7fe.efa9.ebb9.5dca.537d",               // 2019 #13
   "17x17:k2e.e1h2b.a1o.d1l.f1f2c.1n2a.g1d2d.j2f.q." +
         "f4j.d4d3g.a4n3.c4f3f.l3d.o3a.b4h3e.e4k:" +
         "ba61.323a.cb72.27ba.abaa.49cb.f6fb.4d2f.cdad." +
@@ -48,6 +75,7 @@ const cannedPuzzles = [
   "10x18:c4f.d2e.j.j.d5e.j.h4a.e1d.b6g.g4b.d4e.a3h.j.e4d.j.j.e1d.f6c:" +
         "958.558.5d8.d50.558.350.5c8.aa0.d50.d50.4a0.5a8.4f0.d90.540.6a8.ea8.558:" +
         "7e948.dd5d0.5eb98.55ba0.37668.73768.a66e8.a7560.6bda8.37fa0",  // Godzilla 252 Hard
+  // D4
   "14x24:2d4b2d4.n.b21f14b.b13f52b.n.4d3b2d5.n.b13b53b64b.n.2d2b1d4.n.b12f31b." +
         "b34f12b.n.4d6b2d4.n.b21b24b21b.n.1d4b1d1.n.b12f12b.b35f21b.n.2d1b5d1:" +
         "6550.bd50.d5f8.bd90.b5c8.1d10.2d50.55d8.d550.0d00.dd08.d5d8." +
@@ -68,4 +96,3 @@ const cannedPuzzles = [
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,2];
-

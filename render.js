@@ -1,3 +1,26 @@
+const CLICK_LEFT    = 0;
+const CLICK_MIDDLE  = 1;
+const CLICK_RIGHT   = 2;
+const CLICK_UNKNOWN = 9;
+
+const KEY_BS    = 0x08;
+const KEY_CR    = 0x0d;
+const KEY_SP    = 0x20;
+const KEY_LEFT  = 0x25;
+const KEY_UP    = 0x26;
+const KEY_RIGHT = 0x27;
+const KEY_DOWN  = 0x28;
+const KEY_0     = 0x30;
+const KEY_1     = 0x31;
+const KEY_9     = 0x39;
+const ALT_0     = 0x60; // these are the number pad versions
+const ALT_1     = 0x61;
+const ALT_9     = 0x69;
+const KEY_A     = 0x41;
+const KEY_Z     = 0x5a;
+const KEY_a     = 0x61;
+const KEY_z     = 0x7a;
+
 const numberColor = [
   // 0 unused     1          2          3          4          5          6           7          8        9
   "black",   "salmon", "dodgerblue", "fuchsia", "wheat", "lightgreen", "aqua",    "plum", "goldenrod", "deeppink",
@@ -180,6 +203,18 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
   return boardValues;
 }
 
+// for heyawake and other box-based puzzles, need 0-9A-Za-z encoding for coordinate locations
+function parseBase62(val) {
+  let conv;
+  if (val.search(/^[a-z]$/) != -1) {
+    conv = parseInt(val,36) + 26;
+    console.log("converting " + val + " to " + conv);
+  } else {
+    conv = parseInt(val,36);
+  }
+  return conv;
+}
+
 function initBoardValuesFromBoxes(boxParams) {
   let boxParamArray = boxParams.replace(/\./gi, "").split("");
 
@@ -199,10 +234,10 @@ function initBoardValuesFromBoxes(boxParams) {
   let totalCount = 0;
   let inError = 0;
   for (let b=0;b<boxParamArray.length;b+=5) {
-    let by = parseInt(boxParamArray[b+0], 36);
-    let bx = parseInt(boxParamArray[b+1], 36);
-    let bh = parseInt(boxParamArray[b+2], 36);
-    let bw = parseInt(boxParamArray[b+3], 36);
+    let by = parseBase62(boxParamArray[b+0]);
+    let bx = parseBase62(boxParamArray[b+1]);
+    let bh = parseBase62(boxParamArray[b+2]);
+    let bw = parseBase62(boxParamArray[b+3]);
     let bd = boxParamArray[b+4];
     if (bd != "-") {
       boardValues[by][bx] = bd;
@@ -312,10 +347,10 @@ function initWallStatesFromBoxes(boxParams,defState) {
     }
   }
   for (let b=0;b<boxParamArray.length;b+=5) {
-    let by = parseInt(boxParamArray[b+0], 36);
-    let bx = parseInt(boxParamArray[b+1], 36);
-    let bh = parseInt(boxParamArray[b+2], 36);
-    let bw = parseInt(boxParamArray[b+3], 36);
+    let by = parseBase62(boxParamArray[b+0]);
+    let bx = parseBase62(boxParamArray[b+1]);
+    let bh = parseBase62(boxParamArray[b+2]);
+    let bw = parseBase62(boxParamArray[b+3]);
     // top wall
     for (let i=0;i<bw;i++) {
       wallStates[by*2][(bx+i)*2+1] = constWallBorder;
@@ -866,4 +901,17 @@ function updateStaticHtmlEntries(pdescr,edescr,pcnt,dpuzz,dpuzzlen) {
 function updateDynamicHtmlEntries(etext,astate) {
   updateHtmlText('errortext', etext);
   updateHtmlText('assistButton', 'Current Assist Mode (' + astate + ')', true);
+}
+
+function clickType(evnt) {
+  if((evnt.button==CLICK_LEFT) && !evnt.altKey) {
+    return CLICK_LEFT;
+  }
+  if(evnt.button==CLICK_MIDDLE) {
+    return CLICK_MIDDLE;
+  }
+  if((evnt.button==CLICK_RIGHT) || ((evnt.button==CLICK_LEFT) && evnt.altKey)) {
+    return CLICK_RIGHT;
+  }
+  return CLICK_UNKNOWN;
 }
