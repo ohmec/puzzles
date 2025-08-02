@@ -14,18 +14,7 @@ let dragging = false;
 let errorCount = 0;
 let incompleteCount = 0;
 let assistState = 0;
-
-const KEY_BS    = 0x08;
-const KEY_CR    = 0x0d;
-const KEY_SP    = 0x20;
-const KEY_LEFT  = 0x25;
-const KEY_UP    = 0x26;
-const KEY_RIGHT = 0x27;
-const KEY_DOWN  = 0x28;
-const KEY_0     = 0x30;
-const KEY_1     = 0x31;
-const ALT_0     = 0x60; // these are the number pad versions
-const ALT_1     = 0x61;
+let curClickType = CLICK_UNKNOWN;
 
 const STATE_WHITE = 1;
 const STATE_BLACK = 2;
@@ -72,9 +61,6 @@ function puzzleInit() {
   $("#tab1").show();
   $("#demotab").hide();
 
-  // a click on display button; currently fails on Invalid Array
-  // if the field in front of it doesn't work
-  // Length in displayPuzzle (height?)
   $("#displayButton").click(function() {
     $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
@@ -124,6 +110,7 @@ function puzzleInit() {
   // click (down) within puzzle frame, find out if contains number already
   $("#puzzleCanvas").mousedown(function(evnt) {
     clicking = true;
+    curClickType = clickType(evnt);
     $("#puzzleCanvas").css("border-color", "black");
     handleClick(evnt);
   });
@@ -133,6 +120,7 @@ function puzzleInit() {
     if (clicking == false) return;
     evnt.preventDefault();
     dragging = true;
+    handleClick(evnt);
   });
 
   // releasing mouse within puzzle or not within puzzle
@@ -163,9 +151,6 @@ function puzzleInit() {
     drawBoard();
   });
 
-  // unknown at this point, but contextmenu is within jquery.js
-  // I added the ; which seems to not have changed anything so
-  // I don't think it is related to what follows
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
 
   canvas = document.getElementById('puzzleCanvas');  
@@ -274,7 +259,7 @@ function handleKey(keynum) {
           globalCursorX++;
         }
         break;
-      case KEY_SP: // toggle through states like the click
+      case KEY_SP: // toggle through states
         if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_INDET) {
           addMove(STATE_BLACK,globalCursorY,globalCursorX,STATE_INDET);
         } else if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_BLACK) {
@@ -355,24 +340,36 @@ function findPosition(evnt, canvas) {
 }
 
 function handleClick(evnt) {
-  let tileColor;
+  if (!dragging) {
+    curClickType = clickType(evnt);
+  }
   $("#userPuzzleField").blur();
   let coords = findPosition(evnt, "puzzleCanvas");
   coords = coords.split(",");
   let yCell, xCell, isEdge, yEdge, xEdge;
   [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
 //console.log(yCell + "," + xCell + "," + isEdge + "," + yEdge + "," + xEdge);
-  
+
+  // dragging, but no move yet 
+  if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {
+    return;
+  }
+
   globalCursorY = yCell;
   globalCursorX = xCell;
-  // switch through the board states, indet --> black --> white --> indet
-  if (puzzleBoardStates[yCell][xCell] == STATE_INDET) {
-    addMove(STATE_BLACK,yCell,xCell,STATE_INDET);
-  } else if (puzzleBoardStates[yCell][xCell] == STATE_BLACK) {
-    addMove(STATE_WHITE,yCell,xCell,STATE_BLACK);
-  } else {
-    addMove(STATE_INDET,yCell,xCell,STATE_WHITE);
+
+  // left sets to black, right sets to white, middle sets to indet
+  // ignore if already the same state
+  if ((curClickType == CLICK_LEFT)   && puzzleBoardStates[yCell][xCell] != STATE_BLACK) {
+    addMove(STATE_BLACK,yCell,xCell,puzzleBoardStates[yCell][xCell]);
   }
+  if ((curClickType == CLICK_MIDDLE) && puzzleBoardStates[yCell][xCell] != STATE_INDET) {
+    addMove(STATE_INDET,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+  }
+  if ((curClickType == CLICK_RIGHT)  && puzzleBoardStates[yCell][xCell] != STATE_WHITE) {
+    addMove(STATE_WHITE,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+  }
+
   updateBoardStatus();
   drawBoard();
 }

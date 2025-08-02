@@ -12,17 +12,6 @@ let dragging = false;
 let errorCount = 0;
 let assistState = 0;
 
-const KEY_CR    = 0x0d;
-const KEY_SP    = 0x20;
-const KEY_LEFT  = 0x25;
-const KEY_UP    = 0x26;
-const KEY_RIGHT = 0x27;
-const KEY_DOWN  = 0x28;
-const KEY_0     = 0x30;
-const KEY_1     = 0x31;
-const ALT_0     = 0x60; // these are the number pad versions
-const ALT_1     = 0x61;
-
 const MOVE_TOGGLE = 1;
 const MOVE_SET    = 2;
 const MOVE_RESET  = 3;
@@ -65,9 +54,6 @@ function puzzleInit() {
   $("#tab1").show();
   $("#demotab").hide();
 
-  // a click on display button; currently fails on Invalid Array
-  // if the field in front of it doesn't work
-  // Length in displayPuzzle (height?)
   $("#displayButton").click(function() {
     $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
@@ -156,9 +142,6 @@ function puzzleInit() {
     drawBoard();
   });
 
-  // unknown at this point, but contextmenu is within jquery.js
-  // I added the ; which seems to not have changed anything so
-  // I don't think it is related to what follows
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
 
   canvas = document.getElementById('puzzleCanvas');  
