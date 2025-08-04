@@ -5,6 +5,7 @@ const CLICK_UNKNOWN = 9;
 
 const KEY_BS    = 0x08;
 const KEY_CR    = 0x0d;
+const KEY_ESC   = 0x1b;
 const KEY_SP    = 0x20;
 const KEY_LEFT  = 0x25;
 const KEY_UP    = 0x26;
@@ -208,7 +209,6 @@ function parseBase62(val) {
   let conv;
   if (val.search(/^[a-z]$/) != -1) {
     conv = parseInt(val,36) + 26;
-    console.log("converting " + val + " to " + conv);
   } else {
     conv = parseInt(val,36);
   }
@@ -375,11 +375,11 @@ function initRoomsFromBoxes(boxParams) {
   let boxParamArray = boxParams.replace(/\./gi, "").split("");
   let roomStates  = new Array();
   for (let b=0;b<boxParamArray.length;b+=5) {
-    let by = parseInt(boxParamArray[b+0], 36);
-    let bx = parseInt(boxParamArray[b+1], 36);
-    let bh = parseInt(boxParamArray[b+2], 36);
-    let bw = parseInt(boxParamArray[b+3], 36);
-    let bd = parseInt(boxParamArray[b+4], 36);
+    let by = parseBase62(boxParamArray[b+0]);
+    let bx = parseBase62(boxParamArray[b+1]);
+    let bh = parseBase62(boxParamArray[b+2]);
+    let bw = parseBase62(boxParamArray[b+3]);
+    let bd = parseBase62(boxParamArray[b+4]);
     let count = (bd == '-') ? EMPTYCELL : bd;
     roomStates.push([by,bx,bh,bw,count]);
   }

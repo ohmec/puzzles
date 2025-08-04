@@ -5,73 +5,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
-    <script type="text/javascript" src="./npuzzles.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./nkpuzzles.js"></script>
     <script type="text/javascript" src="./nurikabe.js"></script>
     <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
     <title>Nurikabe Player</title>
   </head>
   <body>
     <div id="banner">
-      Nurikabe Player
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for Nurikabe &#x306C;&#x308A;&#x30B3;&#x304B;&#x3079;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
         <li class="active"><a href="#tab1">Game Play   </a></li>
         <li>               <a href="#tab2">Rules       </a></li>
-        <li>               <a href="#tab3">About       </a></li>
-        <li>               <a href="#tab4">Puzzles     </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
       </ul>
     </div>
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
-        <p>To play, click on a cell to switch it from light to dark. Once selected,
-        arrow keys can be used to move around the canvas.  Pressing the spacebar
-        will toggle the value from on to off (white to black and reverse). Digits are
-        the initial puzzle values; digits turn red if the rules of the game are violated.
-        The canvas border will turn green if the grid is completed without error. You
-        can also click on an existing cell to toggle its color, and "drag" it to other
-        cells to overwrite their value with its value. Digit cells can't be overwritten.
-        Dark cells will turn red if they violate the rules. Digits will turn green if
-        their "islands" are complete. Digits will turn red if their islands are too
-        small. You can click the "undo" button on the bottom of the page to undo previous
-        moves. Typing in '.' to a square is equivalent to keeping it 'on' but marks it
-        as part of an island not yet complete.</p>
-        <center>
-        Enter puzzle code (1-<span id='puzzlecount1'>0</span>) or descriptor
-        (see "Puzzles" tab):<br/>
-        <input type="text"                          id="userPuzzle"    size="40" />
-        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
-        </center>
+        <p>
+          To play, click on a cell to switch between light, dark, and the
+          default indeterminate state.  A left-click turns it black, a
+          right-click turns to white, and a middle-click returns to
+          indeterminate. Once the mouse is pressed down, you can drag
+          the mouse to set multiple squares in one sequence.
+          Alternately, you can use the arrow keys to move
+          around the board, and press the space bar to toggle between
+          the states, or the '1' key to turn black, the '0' key to turn
+          white, or the backspace key to set back to indeterminate.
+          You can not alter the state of a white square with a digit.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete numbers is indicated.  In Assist Mode (1), the
+          number of errors and incomplete numbers is indicated, see game rules.
+          In Assist Mode (2), errors and completed rules are highlighted
+          with digit colors.  In some cases the solve difficulty will
+          greatly decrease in Assist Mode (2), so select depending upon
+          the level of challenge desired. The game border will turn
+          green if the grid is completed without error.  You can click
+          the "undo" button on the bottom of the page to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
+        </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        The full set of rules for Nurikabe can be found online. The simple description
-        includes a few basic rules. 1) Digits on the canvas indicate the size of an
-        "island" of white cells surrounded by a "sea" of dark cells. 2) Each island
-        can only contain one digit. 3) All black cells must be linked to be a continuous
-        "sea". 4) No "pools" of a 2x2 cluster of black cells are allowed.
-        On the "Game Play" tab, select puzzle 0 to see a completed sample grid.
+        <a href="https://www.nikoli.co.jp/en/puzzles/nurikabe" target="_blank">Nurikabe</a>
+        (&#x306C;&#x308A;&#x30B3;&#x304B;&#x3079; or Invisible Wall),
+        is a classic Japanese logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
+        In Nurikabe, the board begins with a collection of numbers within
+        white squares. These numbers indicate a "room size" that must be
+        satisfied in order to complete the puzzle. The room must consist
+        of combined white squares, connected horizontally or vertically.
+        The rules below relate to those numbers and how to complete the puzzle.
+        <ol>
+          <li>
+            A number indicates the number of white cells in the area containing
+            the value. All rooms with numbers must be white, and the
+            rooms must be bounded horizontally and vertically by black
+            squares.
+          </li>
+          <li>
+            All squares must be set to black or white, and white squares
+            must be part of a room with a value.
+          </li>
+          <li>
+            Each room with a number can only contain one number.
+          </li>
+          <li>
+            The black cells must all form one contiguous "river" of black
+            cells, connected to each other in the vertical or horizontal
+            direction. A river is not considered connected if it only flows
+            through diagonally adjacent black cells.
+          </li>
+          <li>
+            No "pools" of black cells of size 2x2 or larger are allowd.
+          </li>
+        </ol>
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
-        This playground was written using javascript and is available open
-        source. More later.
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH:&lt;digit-descriptor&gt;", where W is a number
+          indicating the width of the grid, and H the height.
+          The digit descriptor is a list of the pre-defined
+          digit contents, from left to right, then top to bottom.
+          Blank cells are represented with a '-' character. To assist
+          in the definition of a sparse board, a combination of <i>b</i>
+          consecutive blanks can be represented with a lowercase letter
+          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
+          Digit values greater than '9' should be represented with
+          capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
+          can be used as a visual separator, for example between rows.
+          An example descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Nurikabe there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
       </div>
       <div id="tab4" class="tab_content" style="display: none;">
-        Puzzles can be invoked by either a numerical entry from
-        1-<span id='puzzlecount2'>0</span>, or through a character
-        description of the puzzle itself. The numbered puzzles are
-        hand-crafted of varying difficulty, roughly easy to hard.
-        To describe a puzzle, the character string must be of the
-        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
-        the width of the grid, and H the height.  The descriptor is a
-        definition of the grid contents from left to right, then top
-        to bottom. A dash '-' can indicate an empty cell. For easier
-        description of sparse puzzles, letter values from 'a' to 'z'
-        can indicate 1 to 26 empty cells, respectively. A dot '.'
-        can be used as a separator, for example between rows. Cell
-        contents for values greater than '9' should use capital 'A'
-        to 'Z' for 10 through 35. An example descriptor is as follows
-        for entry 1: "7x7:2a3d.f4.d1b.e4a.g.b2a2b.a5e".
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
       </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
     </div>
     <br />
     <div id="puzzleInterface">
@@ -86,8 +152,16 @@
       <br />
       <div id="buttonsDiv">
         <input class="button small" type="button" value="Undo"  id="undoButton"  />
-        <input class="button small" type="button" value="Clear" id="clearButton" />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
       </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
     </div>
     <br />
     <script type="text/javascript">

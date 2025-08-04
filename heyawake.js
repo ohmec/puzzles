@@ -349,7 +349,6 @@ function handleClick(evnt) {
   coords = coords.split(",");
   let yCell, xCell, isEdge, yEdge, xEdge;
   [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
-//console.log(yCell + "," + xCell + "," + isEdge + "," + yEdge + "," + xEdge);
 
   // dragging, but no move yet 
   if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {
