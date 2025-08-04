@@ -1,56 +1,54 @@
-let numberColor = [
-  // 0 unused     1          2          3          4          5          6           7          8        9
-  "black",   "salmon", "dodgerblue", "fuchsia", "wheat", "lightgreen", "aqua",    "plum", "goldenrod", "deeppink",
-  //  A-10       B-11       C-12       D-13       E-14       F-15       G-16        H-17       I-18     J-19
-  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0", "#b0b0ff", "#ffb0b0", "#ffff80", "lime",
-  //  K-20       L-21       M-22       N-23       O-24       P-25       Q-26        R-27       S-28     T-29
-  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0", "#b0b0ff", "#ffb0b0", "#ffff80", "lime",
-  //  U-30       V-31       W-32       X-33       Y-34       Z-35
-  "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0",
-];
+const emptyCellColor = "white";         // not-filled
+const indetCellColor = "#e0e0e0";       // indeterminant color (default)
+const fillCellColor  = "#000040";       // filled, slightly dark blue to contrast with black walls
+const incorrectRiverColor = "#802020";  // dark reddish
+const incorrectPoolColor = "#202080";   // dark bluish
 
-let cellColor = "white";        // default
-let incorrectColor = "#C03C39"; // reddish
-let lineColor = "black";
-let inputColor = "black";
-let poolColor = "#700000";
-let gridSize, lineWidthThin, lineWidthFat, stdFont, boldFont;
-let buttonSize = 45;
-let numberFont = "Courier, sans-serif";
+const stdFontColor = "black";
+const offFontColor = "white";
+const errorFontColor = "red";
+const correctFontColor = "green";
+
 let clicking = false;
 let dragging = false;
-let activeNumber = "-";
+let errorCount = 0;
+let incompleteCount = 0;
+let indeterminates = 0;
+let assistState = 0;
+let curClickType = CLICK_UNKNOWN;
+let debugMode = false;
 
-let KEY_BS     = 0x08;
-let KEY_CR     = 0x0d;
-let KEY_ESC    = 0x1b;
-let KEY_SP     = 0x20;
-let KEY_LEFT   = 0x25;
-let KEY_UP     = 0x26;
-let KEY_RIGHT  = 0x27;
-let KEY_DOWN   = 0x28;
-let KEY_PERIOD = 0xbe;
+const STATE_WHITE = 1;
+const STATE_BLACK = 2;
+const STATE_INDET = 3;
 
-let puzzle, solveState, context, puzzleW, puzzleH, lastVert, lastHorz;
-let puzzleState, undoProgress, numberGroups, invalidNumbers, solvedNumbers, unsolvedNumbers;
+// which keys are handled
+let handledKeys =
+  [ KEY_BS, KEY_CR, KEY_ESC, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN,
+    KEY_0, KEY_1, ALT_0, ALT_1 ];
+
+let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList, puzzleBoardStates;
 
 function puzzleInit() {
+  globalCursorOn = true;
+
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#saveButton").blur();
     $("#loadButton").blur();
-    $("#clearButton").blur();
+    $("#resetButton").blur();
+    $("#showButton").blur();
     $("#undoButton").blur();
-    if (evnt.which === KEY_BS && !$(evnt.target).is("input")) {
-      evnt.preventDefault();
-    }
+    $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
       evnt.preventDefault();
     }
     if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
       evnt.preventDefault();
     }
-    handleKey(evnt);
+    if (handledKeys.find(element => element == evnt.which)) {
+      handleKey(evnt.which);
+    }
   });
 
   // a click (except right-click i.e. ctrl-click) on tabs.
@@ -61,43 +59,61 @@ function puzzleInit() {
     $(".tab_content").hide();
     $($(this).find("a").attr("href")).show();
     clicking = false;
-    activeNumber = "-";
-    lastVert = "";
-    lastHorz = "";
     return false;
   });
   
   $("#tab1").show();
+  $("#demotab").hide();
 
-  // a click on display button; currently fails on Invalid Array
-  // if the field in front of it doesn't work
-  // Length in displayPuzzle (height?)
   $("#displayButton").click(function() {
     $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
-      puzzle = removeDot(cannedPuzzles[pval]);
+      if (pval < cannedPuzzles.length) {
+        puzzleChoice = pval;
+        initPuzzle = cannedPuzzles[pval];
+        puzzle = removeDot(initPuzzle);
+        updateHtmlDescr(initPuzzle);
+        // check to see if this is a demo puzzle
+        let search = demoPuzzles.find(element => element == pval);
+        if (search !== undefined) {
+          $("#demotab").show();
+          demoStepNum = 0;
+          updateDemoRegion(pval);
+        } else {
+          $("#demotab").hide();
+        }
+      }
     } else {
+      $("#demotab").hide();
+      initPuzzle = pval;
       puzzle = removeDot(pval);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
-    calculateGroups();
-    refreshPuzzle();
+  });
+
+  $("#nextDemoButton").click(function() {
+    demoStepNum++;
+    updateDemoRegion(puzzleChoice);
+  });
+
+  $("#prevDemoButton").click(function() {
+    if (demoStepNum) {
+      demoStepNum--;
+    }
+    updateDemoRegion(puzzleChoice);
   });
 
   // click (down) within puzzle number entry, remove clicking
   // effect on canvas
   $("#userPuzzle").mousedown(function(evnt) {
     clicking = false;
-    activeNumber = "-";
-    lastVert = "";
-    lastHorz = "";
   });
 
   // click (down) within puzzle frame, find out if contains number already
   $("#puzzleCanvas").mousedown(function(evnt) {
     clicking = true;
-    activeNumber = getActiveNumber(evnt);
     $("#puzzleCanvas").css("border-color", "black");
     handleClick(evnt);
   });
@@ -116,704 +132,578 @@ function puzzleInit() {
     dragging = false;
   });
 
-  // undo click. does the good job of removing one move at a time.
+  // undo click, remove the last move
   $("#undoButton").click(function() {
     $("#canvasDiv").css("border-color", "black");
-    undo();
+    undoMove();
   });
 
-  // click on clear, brings up confirmation, then clears puzzle
-  $("#clearButton").click(function() {
+  // click on reset, brings up confirmation, then resets puzzle
+  $("#resetButton").click(function() {
     $("#canvasDiv").css("border-color", "black");
-    let clearDialog = confirm("Clear puzzle?");
-    if (clearDialog == true) {
-      clear();
+    let resetDialog = confirm("Reset puzzle?");
+    if (resetDialog == true) {
+      resetBoard();
     }
   });
 
-  // unknown at this point, but contextmenu is within jquery.js
-  // I added the ; which seems to not have changed anything so
-  // I don't think it is related to what follows
+  // click on show errors, converts to show how many errors remain
+  $("#assistButton").click(function() {
+    assistState = (assistState+1)%3;
+    updateBoardStatus();
+    drawBoard();
+  });
+
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
 
   canvas = document.getElementById('puzzleCanvas');  
-  context = canvas.getContext('2d');
- 
+  globalContext = canvas.getContext('2d');
+
   if(cannedPuzzles[puzzleChoice]) {
-    puzzle = removeDot(cannedPuzzles[puzzleChoice]);
+    initPuzzle = cannedPuzzles[puzzleChoice];
+    puzzle = removeDot(initPuzzle);
   } else {
-    puzzle = removeDot(cannedPuzzles[0]);
+    initPuzzle = cannedPuzzles[0];
+    puzzle = removeDot(initPuzzle);
   }
 
   initStructures(puzzle);
-  refreshPuzzle();
 
-  let spanHandle = document.querySelector('#puzzlecount1');
-  spanHandle.textContent = puzzleCount-1;
-  spanHandle = document.querySelector('#puzzlecount2');
-  spanHandle.textContent = puzzleCount-1;
+  updateStaticHtmlEntries(
+    initPuzzle,
+    cannedPuzzles[1],
+    puzzleCount,
+    '[' + demoPuzzles.join(", ") + ']',
+    demoPuzzles.length);
 }
 
-function handleKey(evnt) {
-  let keynum = evnt.which;
+function updateDynTextFields() {
+  let etext = '';
+  if (assistState == 0) { 
+    if (errorCount && incompleteCount) {
+      etext = "there are errors and incomplete numbers";
+    } else if (errorCount) {
+      etext = "there are errors";
+    } else if (incompleteCount) {
+      etext = "there are incomplete numbers";
+    } else if (indeterminates) {
+      etext = "there are indeterminate tiles";
+    } else {
+      etext = "there are no errors nor incomplete numbers";
+    }
+  } else {
+    if (errorCount || incompleteCount) {
+      etext = "there are " + errorCount + " errors and " +
+                        incompleteCount + " incomplete numbers";
+    } else if (indeterminates) {
+      etext = "there are " + indeterminates + " indeterminate tiles";
+    } else {
+      etext = "there are no errors nor incomplete numbers";
+    }
+  }
+  updateDynamicHtmlEntries(etext,assistState);
+}
 
-  // look for CR within puzzle display field
+function addHistory(y,x,prevvalue,newvalue) {
+  moveHistory.push([y,x,prevvalue,newvalue]);
+}
+
+function addMove(moveType,y,x) {
+  addHistory(y,x,puzzleBoardStates[y][x],moveType);
+  puzzleBoardStates[y][x] = moveType;
+  // colors will be overridden based upon error status
+  globalBoardColors[y][x] =
+    (moveType == STATE_WHITE) ? emptyCellColor :
+    (moveType == STATE_BLACK) ? fillCellColor :
+                                indetCellColor;
+  globalBoardTextColors[y][x] = (moveType == STATE_BLACK) ? offFontColor : stdFontColor;
+}
+
+function handleKey(keynum) {
   const focusedElement = document.activeElement;
-  if (focusedElement && focusedElement.id == "userPuzzle" && keynum == KEY_CR) {
+  // look for CR within puzzle display field
+  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
-      puzzle = removeDot(cannedPuzzles[pval]);
+      if (pval < cannedPuzzles.length) {
+        puzzleChoice = pval;
+        initPuzzle = cannedPuzzles[pval];
+        puzzle = removeDot(initPuzzle);
+        updateHtmlDescr(initPuzzle);
+        // check to see if this is a demo puzzle
+        let search = demoPuzzles.find(element => element == pval);
+        if (search !== undefined) {
+          $("#demotab").show();
+          demoStepNum = 0;
+          updateDemoRegion(pval);
+        } else {
+          $("#demotab").hide();
+        }
+      }
     } else {
-      puzzle = removeDot(pval);
+      $("#demotab").hide();
+      initPuzzle = pval;
+      puzzle = removeDot(initPuzzle);
+      updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
-    calculateGroups();
-    refreshPuzzle();
-    return;
+  // else look for keys not in puzzle display field
+  } else if (focusedElement && focusedElement.id != "userPuzzle") {
+    switch (keynum) {
+      case KEY_ESC:
+        console.log(puzzleBoardStates);
+        debugMode = true;
+        break;
+      case KEY_UP:
+        if (globalCursorY) {
+          globalCursorY--;
+        }
+        break;
+      case KEY_DOWN:
+        if (globalCursorY < (globalPuzzleH-1)) {
+          globalCursorY++;
+        }
+        break;
+      case KEY_LEFT:
+        if (globalCursorX) {
+          globalCursorX--;
+        }
+        break;
+      case KEY_RIGHT:
+        if (globalCursorX < (globalPuzzleW-1)) {
+          globalCursorX++;
+        }
+        break;
+      case KEY_SP: // toggle through states
+        if (globalBoardValues[globalCursorY][globalCursorX] == "") {
+          if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_INDET) {
+            addMove(STATE_BLACK,globalCursorY,globalCursorX,STATE_INDET);
+          } else if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_BLACK) {
+            addMove(STATE_WHITE,globalCursorY,globalCursorX,STATE_BLACK);
+          } else {
+            addMove(STATE_INDET,globalCursorY,globalCursorX,STATE_WHITE);
+          }
+        }
+        break;
+      case KEY_BS:
+        if (globalBoardValues[globalCursorY][globalCursorX] == "") {
+          addMove(STATE_INDET,globalCursorY,globalCursorX);
+        }
+        break;
+      case KEY_0:
+      case ALT_0:
+        if (globalBoardValues[globalCursorY][globalCursorX] == "") {
+          addMove(STATE_WHITE,globalCursorY,globalCursorX);
+        }
+        break;
+      case KEY_1:
+      case ALT_1:
+        if (globalBoardValues[globalCursorY][globalCursorX] == "") {
+          addMove(STATE_BLACK,globalCursorY,globalCursorX);
+        }
+        break;
+      }
+    updateBoardStatus();
+    drawBoard();
   }
-
-  // refresh with "ESC"
-  if (keynum == KEY_ESC) {
-    refreshPuzzle();
-    console.log(numberGroups);
-    return;
-  }
-  if (keynum >= KEY_LEFT && keynum <= KEY_DOWN) {
-    handleArrowKey(keynum);
-    return;
-  }
-  if (keynum == KEY_BS) {
-    number = "-";
-  } else if (keynum == KEY_SP) {
-    number = " ";
-  } else if (keynum == KEY_PERIOD) {
-    number = ".";
-  } else {
-    return;
-  }
-  handleNumberDrawing(number, lastVert, lastHorz);
-  refreshPuzzle();
 }
 
 function initStructures(puzzle) {
   $("#canvasDiv").css("border-color", "black");
-  invalidNumbers = new Array();
-  undoProgress = new Array();
-  lastVert = "";
-  lastHorz = "";
+  moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let wxh = size.split("x");
-  let puzzData = puzzleSplit[1];
-  puzzleW = parseInt(wxh[0]);
-  puzzleH = parseInt(wxh[1]);
-  if(puzzleW > 20) {
-    gridSize = 40;
-  } else if(puzzleW <= 10) {
-    gridSize = 50;
-  } else {
-    gridSize = 45;
-  }
-  lineWidthThin = gridSize*0.02;
-  lineWidthFat  = gridSize*0.04;
-  stdFont  = (gridSize*0.5)+"pt "+numberFont;
-  boldFont = "bold "+stdFont;
-  canvas.height = puzzleH*gridSize;
-  canvas.width  = puzzleW*gridSize;
+  let numParams = puzzleSplit[1];
+  let hexParams = puzzleSplit[2];
+  globalPuzzleW = parseInt(wxh[0]);
+  globalPuzzleH = parseInt(wxh[1]);
+  setGridSize(globalPuzzleW);
+  canvas.height = globalPuzzleH*globalGridSize;
+  canvas.width  = globalPuzzleW*globalGridSize;
 
-  // set up arrays for solveState and puzzleState
-  solveState = new Array(puzzleH);
-  for (let i=1;i<=puzzleH;i++) {
-    solveState[i] = new Array(puzzleW);
-  }
-  puzzleState = new Array(puzzleH);
-  for (let i=1;i<=puzzleH;i++) {
-    puzzleState[i] = new Array(puzzleW);
-  }
+  globalInitBoardValues = initBoardValuesFromParams(numParams);
+  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalCircleStates =    initYXFromValue(0);     // no circles, lines needed in this puzzle
+  globalLineStates   =    initYXFromValue(0);
+  globalBoardColors =     initYXFromValue(indetCellColor);
+  puzzleBoardStates =     initYXFromValue(STATE_INDET);
+  globalInitWallStates  = initWallStates(constWallStandard);
+  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
 
-  let formattedPuzzle = puzzleSplit[1];
-  formattedPuzzle = formattedPuzzle.replace(/_/gi, "");
-  for (let cv=10;cv<36;cv++) {
-    // replace lowercase values to that many dashes (-)
-    // eventually replace uppercase values with the hex equivalent
-    let c = cv.toString(36);
-    let cre = new RegExp(c, 'g');
-    let dash = '-'.repeat(cv-9);
-    formattedPuzzle = formattedPuzzle.replace(cre, dash);
-  }
-
-  let puzzData2 = formattedPuzzle.split("");
-  let z = 0;
-  for (x=1;x<=puzzleH;x++) {
-    for (y=1;y<=puzzleW;y++) {
-      if (puzzData2[z] == "-") {
-        puzzleState[x][y] = "-";
-        solveState[x][y] = "-";
-      } else if (puzzData2[z] == "*") {
-        puzzleState[x][y] = "(0)";
-        solveState[x][y] = "0";
-      } else {
-        puzzleState[x][y] = "("+puzzData2[z]+")";
-        solveState[x][y] = convertToNum(puzzData2[z]);
+  // override board states and colors for the initial digits, set to WHITE
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (globalBoardValues[y][x] != "") {
+        puzzleBoardStates[y][x] = STATE_WHITE;
+        globalBoardColors[y][x] = emptyCellColor;
       }
-      z++;
     }
   }
+
+  // override state if given (* for black _ for white)
+  let numParamsExt = expandNumParams(numParams).split("");
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      let ptr = y*globalPuzzleW+x;
+      if (numParamsExt[ptr] == '*') {
+        puzzleBoardStates[y][x] = STATE_BLACK;
+      } else if (numParamsExt[ptr] == '_') {
+        puzzleBoardStates[y][x] = STATE_WHITE;
+      }
+    }
+  }
+
+  updateBoardStatus();
+  drawBoard();
 }
 
 function removeDot(strval) {
   return strval.replace(/\./gi, "");
 }
 
-function drawGiven(number, x, y) {
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  if (invalidNumbers.indexOf(x+"-"+y) == -1) {
-    context.fillStyle = inputColor;
-  } else {
-    context.fillStyle = incorrectColor;
-  }
-  context.font = boldFont;
-  context.textAlign = "center";
-  
-  // convert A-Z to 10-35
-  let numExp = convertToNum(number);
-  context.fillText(numExp, drawX+(gridSize*0.5), drawY+(gridSize*0.75));
-}
-
-function drawCursor(x,y) {
-  if (x && y) {
-    let drawY = Math.floor((x-1)*gridSize);
-    let drawX = Math.floor((y-1)*gridSize);
-    if (solveState[x][y] == "0") {
-      context.strokeStyle = cellColor;
-    } else {
-      context.strokeStyle = lineColor;
-    }
-    context.beginPath();
-    context.moveTo(drawX,drawY);
-    context.lineTo(drawX+gridSize*0.2,drawY+gridSize*0.2);
-    context.moveTo(drawX+gridSize,drawY);
-    context.lineTo(drawX+gridSize*0.8,drawY+gridSize*0.2);
-    context.moveTo(drawX+gridSize,drawY+gridSize);
-    context.lineTo(drawX+gridSize*0.8,drawY+gridSize*0.8);
-    context.moveTo(drawX,drawY+gridSize);
-    context.lineTo(drawX+gridSize*0.2,drawY+gridSize*0.8);
-    context.lineWidth = lineWidthFat;
-    context.stroke();
-  }
-}
-
-function refreshPuzzle() {
-  let drawX = 0;
-  let drawY = 0;
-  let number, tileColor;
-  for (x=1;x<=puzzleH;x++) {
-    for (y=1;y<=puzzleW;y++) {
-      number = "-";
-      if (solveState[x][y] == "-") {
-        blankTile(x,y);
-      } else if (solveState[x][y] == ".") {
-        blankTile(x,y);
-        drawNumber(".", x, y);
-      } else if (solveState[x][y] == "0") {
-        blackTile(x,y);
-      } else if (puzzleState[x][y] != "-") {
-        number = convertToNum(solveState[x][y]);
-        tileColor = numberColor[number];
-        drawColor(tileColor, x, y);
-        drawGiven(number, x, y);
-      } else if (solveState[x][y] != "-") {
-        number = convertToNum(solveState[x][y]);
-        tileColor = numberColor[number];
-        drawColor(tileColor, x, y);
-        drawNumber(number, x, y);
-      }
-      drawX += gridSize;
-    }
-    drawX = 0;
-    drawY += gridSize;
-  }
-  calculateGroups();
-  // draw cursor if it exists
-  if (lastVert && lastHorz) {
-    drawCursor(lastVert, lastHorz);
-  }
-  validateSolution();
-}
-
-function calculateGroups() {
-  numberGroups = new Array();
-  let allVisitedCells = new Array();
-  // first peel off number islands
-  for (let x2=1;x2<=puzzleH;x2++) {
-    for (let y2=1;y2<=puzzleW;y2++) {
-      let groupNumber = solveState[x2][y2];
-      if (groupNumber != "-" &&
-          groupNumber != "0" &&
-          groupNumber != "." &&
-          allVisitedCells.indexOf(x2+"-"+y2) == -1) {
-        let visitedCells = travelCells(x2, y2, groupNumber);
-        allVisitedCells.push.apply(allVisitedCells, visitedCells);
-        let group = new Array();
-        group.push(groupNumber);
-        group.push.apply(group, visitedCells);
-        numberGroups.push(group);
-      }
-    }
-  }
-  // strip '-' from non-conforming islands
-  for (let i=0;i<numberGroups.length;i++) {
-    let group = numberGroups[i];
-    let number = group[0];
-    let leader = group[1];
-    let leaderxy = leader.split("-");
-    if (number != "-" && (number != group.length-1) && (puzzleState[leaderxy[0]][leaderxy[1]] != '-')) {
-      group = new Array();
-      group.push(number)
-      group.push(leader);
-      numberGroups[i] = group;
-    }
-  }
-  allVisitedCells = new Array();
-  // now grab the river cells into however many rivers there are
-  for (let x2=1;x2<=puzzleH;x2++) {
-    for (let y2=1;y2<=puzzleW;y2++) {
-      let groupNumber = solveState[x2][y2];
-      if (groupNumber == "0" &&
-          allVisitedCells.indexOf(x2+"-"+y2) == -1 &&
-          numberGroups.indexOf(x2+"-"+y2) == -1) {
-        let visitedCells = travelCells(x2, y2, groupNumber);
-        allVisitedCells.push.apply(allVisitedCells, visitedCells);
-        let group = new Array();
-        group.push(groupNumber);
-        group.push.apply(group, visitedCells);
-        numberGroups.push(group);
-      }
-    }
-  }
-  colorGroups(numberGroups);
-  colorPools(numberGroups);
-}
-
-function colorGroups(numberGroups) {
-  for (let i=0;i<numberGroups.length;i++) {
-    let group = numberGroups[i];
-    let number = group[0];
-    if (number != "-" && (number == group.length-1)) {
-      for (let j=1;j<group.length;j++) {
-        let coords = group[j].split("-");
-        if (puzzleState[coords[0]][coords[1]] == "-") {
-          drawColor(numberColor[number], coords[0], coords[1]);
-        }
-      }
-    }
-  }
-}
-
-function colorPools(numberGroups) {
-  for (let i=0;i<numberGroups.length;i++) {
-    let group = numberGroups[i];
-    let number = group[0];
-    if (number == "0") {
-      for (let j=1;j<group.length;j++) {
-        let xy = group[j].split('-');
-        let x = xy[0]*1;
-        let y = xy[1]*1;
-        if ((group.indexOf((x+1) + '-' +  y   ) != -1) &&
-            (group.indexOf( x    + '-' + (y+1)) != -1) &&
-            (group.indexOf((x+1) + '-' + (y+1)) != -1)) {
-          drawColor(poolColor, x,   y,   1);
-          drawColor(poolColor, x+1, y,   1);
-          drawColor(poolColor, x,   y+1, 1);
-          drawColor(poolColor, x+1, y+1, 1);
-        }
-      }
-    }
-  }
-}
-
-function convertToNum(numstr) {
-  if (isNaN(numstr) == false) {
-    return numstr;
-  }
-  if (numstr.search(/[A-Z1-9]/) != -1) {
-    return parseInt(numstr, 36);
-  }
-  return "-";
-}
-
-function travelCells(xCoord, yCoord, number) {
-  let visitedCells = new Array();
-  let x = xCoord;
-  let y = yCoord;
-  let continueTraveling = true;
-  let target = "-";
-  let alttarget = ".";
-  if (number == "0") {
-    target = "0";
-    alttarget = "0";
-  }
-  while(continueTraveling == true) {
-    if (visitedCells.indexOf(x+"-"+y) == -1) {
-      visitedCells.push(x+"-"+y);
-    }
-    x = x*1;
-    y = y*1;
-    if (x!=puzzleH        && visitedCells.indexOf((x+1)+"-"+y) == -1 &&
-        ((solveState[parseInt(x)+1][y] == target) ||
-         (solveState[parseInt(x)+1][y] == alttarget))) {
-      x++;
-    } else if (x!=1       && visitedCells.indexOf((x-1)+"-"+y) == -1 &&
-               ((solveState[parseInt(x)-1][y] == target) ||
-                (solveState[parseInt(x)-1][y] == alttarget))) {
-      x--;
-    } else if (y!=puzzleW && visitedCells.indexOf(x+"-"+(y+1)) == -1 &&
-               ((solveState[x][parseInt(y)+1] == target) ||
-                (solveState[x][parseInt(y)+1] == alttarget))) {
-      y++;
-    } else if (y!=1       && visitedCells.indexOf(x+"-"+(y-1)) == -1 &&
-               ((solveState[x][parseInt(y)-1] == target) ||
-                (solveState[x][parseInt(y)-1] == alttarget))) {
-      y--;
-    } else {
-      let index = visitedCells.indexOf(x+"-"+y);
-      if (index != 0) {
-        let lastCell = visitedCells[index-1].split("-");
-        x = lastCell[0];
-        y = lastCell[1];
-      } else {
-        continueTraveling = false;
-      }
-    }
-    // in the interest of performance, stop traveling if we're searching
-    // for a "real" number and we've already grown above its size
-    if (number != "-" && parseInt(number)>0 && visitedCells.length>(parseInt(number)+1)) {
-      continueTraveling = false;
-    }
-  }
-  return visitedCells;
-}
-
 function findPosition(evnt, canvas) {
   let canvasElement = document.getElementById(canvas);
   let x = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"));
-  let y = evnt.pageY-$(canvasElement).offset().top-parseInt($(canvasElement).css("border-top-width"));
-  return x+"-"+y;
-}
-
-function getActiveNumber(evnt) {
-  let coords = findPosition(evnt, "puzzleCanvas");
-  coords = coords.split("-");
-  let xCoord = coords[0];
-  let yCoord = coords[1];
-  let vertCell = (Math.floor(yCoord/gridSize)+1);
-  let horzCell = (Math.floor(xCoord/gridSize)+1);
-  if (vertCell>puzzleH) {
-    vertCell = puzzleH;
-  }
-  if (horzCell>puzzleW) {
-    horzCell = puzzleW;
-  }
-  if (vertCell<1) {
-    vertCell = 1;
-  }
-  if (horzCell < 1) {
-    horzCell = 1;
-  }
-  return solveState[vertCell][horzCell];
+  let y = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"));
+  return x+","+y;
 }
 
 function handleClick(evnt) {
-  let tileColor;
+  if (!dragging) {
+    curClickType = clickType(evnt);
+  }
   $("#userPuzzleField").blur();
   let coords = findPosition(evnt, "puzzleCanvas");
-  coords = coords.split("-");
-  let xCoord = coords[0];
-  let yCoord = coords[1];
-  let vertCell = Math.floor(yCoord/gridSize)+1;
-  let horzCell = Math.floor(xCoord/gridSize)+1;
-  let horzDistFromEdgeL = Math.abs((horzCell-1)*gridSize - xCoord);
-  let horzDistFromEdgeR = Math.abs((horzCell  )*gridSize - xCoord);
-  let vertDistFromEdgeU = Math.abs((vertCell-1)*gridSize - yCoord);
-  let vertDistFromEdgeD = Math.abs((vertCell  )*gridSize - yCoord);
-  if (solveState[vertCell][horzCell] != "-") {
-    let number = convertToNum(solveState[vertCell][horzCell]);
-    tileColor = numberColor[number];
-  }
-  if (vertCell>puzzleH) {
-    vertCell = puzzleH;
-  }
-  if (horzCell>puzzleW) {
-    horzCell = puzzleW;
-  }
-  if (vertCell<1) {
-    vertCell = 1;
-  }
-  if (horzCell<1) {
-    horzCell = 1;
-  }
-  let drawY = Math.floor((vertCell-1)*gridSize);
-  let drawX = Math.floor((horzCell-1)*gridSize);
-  
-  if (dragging == true && puzzleState[vertCell][horzCell] == "-") {
-    handleNumberDrawing(activeNumber, vertCell, horzCell);
-  }
+  coords = coords.split(",");
+  let yCell, xCell, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
 
-  //draw color and then redraw the state of the cell
-  if (puzzleState[vertCell][horzCell] == "-") {
-    if (solveState[vertCell][horzCell] != "-") {
-      drawColor(tileColor, vertCell, horzCell);  
-      drawNumber(solveState[vertCell][horzCell], vertCell, horzCell);
-    } else {
-      drawColor(cellColor, vertCell, horzCell);  
-    }
-  } else {
-    drawColor(tileColor, vertCell, horzCell);
-    drawGiven(solveState[vertCell][horzCell], vertCell, horzCell);
-  }
-  //clear the color of the last cell, and redraw the state
-
-  if (lastHorz!="") {
-    if (lastVert!=vertCell || lastHorz!=horzCell) {
-      if (solveState[lastVert][lastHorz] == "-") {
-        drawColor(cellColor, lastVert, lastHorz);
-      } else if (isNaN(solveState[lastVert][lastHorz]) == false) {
-        drawColor(cellColor, lastVert, lastHorz);
-        if (puzzleState[lastVert][lastHorz].indexOf(")") == -1) {
-          drawNumber(solveState[lastVert][lastHorz], lastVert, lastHorz);
-        } else {
-          drawGiven(solveState[lastVert][lastHorz], lastVert, lastHorz);
-        }
-      }
-    }
-  }
-  lastVert = vertCell;
-  lastHorz = horzCell;
-  drawCursor(lastVert,lastHorz);
-}
-
-
-function handleNumberDrawing(number, lastVert, lastHorz) {
-  if (lastVert && number == " " && puzzleState[lastVert][lastHorz] == "-") {  // toggle
-    let oldNumber = solveState[lastVert][lastHorz];
-    if (oldNumber == "-") {
-      solveState[lastVert][lastHorz] = "0";
-    } else {
-      solveState[lastVert][lastHorz] = "-";
-    }
-    redrawCell(lastVert, lastHorz);
-  } else if (lastVert) {
-    let oldNumber = convertToNum(solveState[lastVert][lastHorz]);
-    if (lastHorz && (puzzleState[lastVert][lastHorz].indexOf("(") == -1)) {
-      // record data for undo
-      if (solveState[lastVert][lastHorz] == "-") {
-        if (number != "" && number != "none" && number != "none2" && number != "-") {
-          undoProgress.push(lastVert+"-"+lastHorz+"_"+"none");
-        }
-      } else {
-        if (number != solveState[lastVert][lastHorz]) {
-          undoProgress.push(lastVert+"-"+lastHorz+"_" +
-                            "number_"+solveState[lastVert][lastHorz]);
-        }
-      }
-      
-      solveState[lastVert][lastHorz] = number;
-    }
-  }
-}
-
-function calculateLines(vertCell, horzCell, number) {
-  let x = vertCell;
-  let y = horzCell;
-  let lineX = 2*vertCell-1;
-  let lineY = 2*horzCell-1;
-  let numval = "-";
-  if ((isNaN(number) == false) || number.search(/[A-Z1-9]/) != -1) {
-    numval = convertToNum(number);
-  }
-}
-
-function handleArrowKey(direction) {
-  let vertCell = lastVert;
-  let horzCell = lastHorz;
-  switch (direction) {
-    case KEY_DOWN:
-      vertCell = lastVert+1;
-      break;
-    case KEY_UP:
-      vertCell = lastVert-1;
-      break;
-    case KEY_LEFT:
-      horzCell = lastHorz-1;
-      break;
-    case KEY_RIGHT:
-      horzCell = lastHorz+1;
-      break;
-  }
-  if ((horzCell < 1) || (horzCell > puzzleW) || (vertCell < 1) || (vertCell > puzzleH)) { 
+  // dragging, but no move yet 
+  if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {
     return;
   }
-
-  lastVert = vertCell;
-  lastHorz = horzCell;
-  refreshPuzzle();
+  
+  globalCursorY = yCell;
+  globalCursorX = xCell;
+  // left sets to black, right sets to white, middle sets to indet
+  // ignore if already the same state, or if a numbered tile which
+  // can't be changed
+  if (globalBoardValues[yCell][xCell] == "") {
+    if ((curClickType == CLICK_LEFT)   && puzzleBoardStates[yCell][xCell] != STATE_BLACK) {
+      addMove(STATE_BLACK,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    }
+    if ((curClickType == CLICK_MIDDLE) && puzzleBoardStates[yCell][xCell] != STATE_INDET) {
+      addMove(STATE_INDET,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    }
+    if ((curClickType == CLICK_RIGHT)  && puzzleBoardStates[yCell][xCell] != STATE_WHITE) {
+      addMove(STATE_WHITE,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    }
+  }
+  updateBoardStatus();
+  drawBoard();
 }
 
-function redrawCell(x, y) {
-  if (x!=0 && x!=(puzzleH+1) && y!=0 && y!=(puzzleW +1)) {
-    drawColor(cellColor, x, y);
-    if (solveState[x][y] != "-") {
-      if (puzzleState[x][y].indexOf(")") == -1) {
-        drawNumber(convertToNum(solveState[x][y]), x, y);
+// look for errors
+function updateBoardStatus() {
+  // accounting the errors:
+  //  1) "white rivers" that aren't the length of a number inside
+  //  2) a "white river" that contains two numbers
+  //  3) more than one "black river"
+  //  4) pools in the black river
+  errorCount = 0;
+
+  // also count how many numbers and tiles haven't been completed yet
+  incompleteCount = 0;
+  indeterminates = 0;
+
+  // start by reseting all cell and font colors to "standard"
+  // before evaluating errors
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (puzzleBoardStates[y][x] == STATE_BLACK) {
+        globalBoardColors[y][x] = fillCellColor;
+        globalBoardTextColors[y][x] = offFontColor;
+      } else if (puzzleBoardStates[y][x] == STATE_WHITE) {
+        globalBoardColors[y][x] = emptyCellColor;
+        globalBoardTextColors[y][x] = stdFontColor;
       } else {
-        drawGiven(convertToNum(solveState[x][y]), x, y);
+        globalBoardColors[y][x] = indetCellColor;
+        globalBoardTextColors[y][x] = stdFontColor;
+        indeterminates++;
       }
     }
   }
-}
 
-function drawColor(color, x, y, override = 0) {
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  let number = convertToNum(solveState[x][y]);
-  context.fillStyle = lineColor;
-  context.fillRect(drawX, drawY, gridSize, gridSize);
-  context.fillStyle = color;
-  if (number && !override) {
-    context.fillStyle = numberColor[number];
-  }
-  // inner rectangle as a function of the borders
-  let innerRect = getInnerRect(x,y);
-  context.fillRect(innerRect[0], innerRect[1], innerRect[2], innerRect[3]);
-}
-
-function getInnerRect(x, y) {
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  let edgeX = drawX+lineWidthThin;
-  let edgeY = drawY+lineWidthThin;
-  let edgeW = gridSize-2*lineWidthThin;
-  let edgeH = gridSize-2*lineWidthThin;
-  let returnArray = new Array();
-  returnArray.push(edgeX);
-  returnArray.push(edgeY);
-  returnArray.push(edgeW);
-  returnArray.push(edgeH);
-  return returnArray;
-}
-
-function blankTile(x, y) {
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  // outer black rectangle
-  context.fillStyle = lineColor;
-  context.fillRect(drawX, drawY, gridSize, gridSize);
-  // inner white rectangle as a function of the borders
-  let innerRect = getInnerRect(x,y);
-  context.fillStyle = cellColor;
-  context.fillRect(innerRect[0], innerRect[1], innerRect[2], innerRect[3]);
-}
-
-function blackTile(x, y) {
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  // outer black rectangle
-  context.fillStyle = lineColor;
-  context.fillRect(drawX, drawY, gridSize, gridSize);
-}
-
-function drawNumber(number, x, y) {
-  if (number == 0) {
-    return;
-  }
-  let drawY = Math.floor((x-1)*gridSize);
-  let drawX = Math.floor((y-1)*gridSize);
-  context.font = stdFont;
-
-  if (invalidNumbers.indexOf(x+"-"+y) == -1) {
-    context.fillStyle = inputColor;
-  } else {
-    context.fillStyle = incorrectColor;
-  }
-  
-  if (number == "-") {
-    number = "";
-  }
-  if (number == ".") {
-    number = "·";
-  }
-  context.textAlign = "center";
-  context.fillText(number, drawX+(gridSize*0.5), drawY+(gridSize*0.75));
-}
-
-function undo() {
-  if (undoProgress.length > 0) {
-    let undoState = undoProgress[undoProgress.length-1];
-    let data = undoState.split("_");
-    let coords = data[0].split("-");
-    let undoVertCell = coords[0]*1;
-    let undoHorCell = coords[1]*1;
-
-    let undoColor = cellColor;
-    if (lastVert == undoVertCell && lastHorz == undoHorCell) {
-      undoColor = numberModeColor;
-    }
-    let oldNumber = solveState[undoVertCell][undoHorCell];
-    let number = "-";
-
-    if (data[1] == "none") {
-      drawColor(undoColor, undoHorCell, undoVertCell);
-      drawNumber("", undoHorCell, undoVertCell);
-      solveState[undoVertCell][undoHorCell] = "-";
-    } else if (data[1] == "number") {
-      number = data[2]*1;
-      drawColor(undoColor, undoHorCell, undoVertCell);
-      drawNumber(number, undoHorCell, undoVertCell);
-      solveState[undoVertCell][undoHorCell] = number;
-    }
-
-    calculateLines(undoVertCell, undoHorCell, number);
-    redrawCell(undoVertCell+1, undoHorCell);
-    redrawCell(undoVertCell-1, undoHorCell);
-    redrawCell(undoVertCell, undoHorCell+1);
-    redrawCell(undoVertCell, undoHorCell-1);
-    redrawCell(undoVertCell, undoHorCell);
-    
-    undoProgress.pop();
-    refreshPuzzle();
-  }
-}
-
-function validateSolution() {
-  let isSolved = true;
-  let numRivers = 0;
-  for (let i=0;i<numberGroups.length;i++) {
-    let group = numberGroups[i];
-    let number = group[0];
-    // no unaccounted islands allowed
-    if (number == '-') {
-      isSolved = false;
-    } else if (number == "0") {
-      numRivers++;
-    } else if (number != (group.length-1)) {
-      isSolved = false;
+  // now go through all of the cells with digits. get both
+  // their "== WHITE" rivers and their "!= BLACK" rivers.
+  // if they are not the same, they are still in progress,
+  // so ignore. if they are the same length, then proceed
+  // to check that the length is the digit, else error.
+  // then double-check that there aren't two digits within.
+  let nonBlackCells = new Array();
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      let cellValue = globalBoardValues[y][x];
+      // look for a numerical value
+      if (cellValue != "") {
+        // skip if already in the nonBlackCell list, since it is covered already
+        if (nonBlackCells.indexOf(y+","+x) == -1) {
+          let roomArrayWhite =    travelRiver(puzzleBoardStates,y,x,true, STATE_WHITE);
+          let roomArrayNonBlack = travelRiver(puzzleBoardStates,y,x,false,STATE_BLACK);
+          if (roomArrayWhite.length != roomArrayNonBlack.length) {
+            incompleteCount++;
+          } else if (roomArrayWhite.length == cellValue) {
+            // success
+            if (assistState == 2) {
+              globalBoardTextColors[y][x] = correctFontColor;
+            }
+            // just make sure there aren't two digits in the room
+            let digitCount = 0;
+            for (let r=0;r<roomArrayWhite.length;r++) {
+              let cell = roomArrayWhite[r].split(",");
+              if (globalBoardValues[cell[0]][cell[1]] != "") {
+                digitCount++;
+              }
+            }
+            if (digitCount != 1) {
+              for (let r=0;r<roomArrayWhite.length;r++) {
+                let cell = roomArrayWhite[r].split(",");
+                if (globalBoardValues[cell[0]][cell[1]] != "") {
+                  errorCount++;
+                  if (assistState == 2) {
+                    globalBoardTextColors[y][x] = errorFontColor;
+                  }
+                }
+              }
+            }
+          } else {
+            // violates rule 1
+            errorCount++;
+            if (assistState == 2) {
+              globalBoardTextColors[y][x] = errorFontColor;
+            }
+          }
+        nonBlackCells.push.apply(nonBlackCells, roomArrayNonBlack);
+        }
+      }
     }
   }
-  if (numRivers != 1) {
-    isSolved = false;
+
+  // Now look for non-white rivers, allowing the indeterminate
+  // cells to be counted as potentially black. If there is more
+  // than one, then color all of the black squares in everything
+  // but the first one as erroneous if in assistState 2
+  let nonWhiteCells = new Array();
+  let riverCount = 0;
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if ((puzzleBoardStates[y][x] != STATE_WHITE) &&
+          (nonWhiteCells.indexOf(y+","+x) == -1)) {
+        let visitedCells = travelRiver(puzzleBoardStates,y,x,false,STATE_WHITE);
+        if (riverCount) {
+          errorCount++;
+          // if in assistState==2 then color these second river
+          // cells differently
+          if (assistState==2) {
+            for (let i=0;i<visitedCells.length;i++) {
+              let curCell = visitedCells[i].split(",");
+              let iy = curCell[0];
+              let ix = curCell[1];
+              globalBoardColors[iy][ix] = incorrectRiverColor;
+            }
+          }
+        }
+        nonWhiteCells.push.apply(nonWhiteCells, visitedCells);
+        riverCount++;
+      }
+    }
   }
-  if (isSolved == true) {
-    $("#canvasDiv").css("border-color", "#1BE032");
+
+  // finally look for pools of black cells of 2x2 or larger
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if ((y!=(globalPuzzleH-1)) &&
+          (x!=(globalPuzzleW-1)) &&
+          (puzzleBoardStates[y  ][x  ] == STATE_BLACK) &&
+          (puzzleBoardStates[y+1][x  ] == STATE_BLACK) &&
+          (puzzleBoardStates[y  ][x+1] == STATE_BLACK) &&
+          (puzzleBoardStates[y+1][x+1] == STATE_BLACK)) {
+      errorCount++;
+      globalBoardColors[y  ][x  ] = incorrectPoolColor;
+      globalBoardColors[y+1][x  ] = incorrectPoolColor;
+      globalBoardColors[y  ][x+1] = incorrectPoolColor;
+      globalBoardColors[y+1][x+1] = incorrectPoolColor;
+      }
+    }
+  }
+
+  updateDynTextFields();
+  if ((errorCount == 0) && (incompleteCount == 0) && (indeterminates == 0)) {
+    $("#canvasDiv").css("border-color", constColorSuccess);
   } else {
     $("#canvasDiv").css("border-color", "black");
   }
 }
 
-function clear() {
-  $("#clearButton").blur();
+function undoMove() {
+  if (moveHistory.length > 0) {
+    let lastMove = moveHistory.pop();
+    puzzleBoardStates[lastMove[0]][lastMove[1]] = lastMove[2];
+    updateBoardStatus();
+    drawBoard();
+  }
+}
+
+function resetBoard() {
+  $("#resetButton").blur();
+  $("#showButton").blur();
+  $("#assistButton").blur();
   initStructures(puzzle);
-  calculateGroups();
-  refreshPuzzle();
+}
+
+function updateDemoRegion(demoNum) {
+  let demotext, demomoves;
+  // for brevity in the demo steps below, use B and W for black and white
+  if (demoNum==1) {
+    demotext = [
+      "<p>In this demo we will walk through the steps of solving this puzzle. " +
+        "Press the 'next' button to walk through the solving steps, or the " +
+        "'back' button to return to the previous step.</p>" +
+        "<p>At the beginning of a solve, there are no errors, but there are " +
+        "many indeterminate cell which we need to turn white or black to " +
+        "solve the puzzle. For our first time through we can turn on Assist " +
+        "Mode 2 to see any errors that we might generate in the process of " +
+        "the solve.</p>",
+      "In Nurikabe, the easiest 'freebies' are the '1' digits, which must be " +
+        "surrounded by all black cells in order to keep them contained into a " +
+        "room of size 1.",
+      "The next observation is that all numbered cells must be kept away from " +
+        "other ones to avoid violating rule 3, so we can isolate them if they " +
+        "are too close by setting their neighbor cells to black.",
+      "Now we can see that some directions are already determinable. The '2' " +
+        "in the NW corner must move downward, the '5' in the SW corner must " +
+        "move to the left and then up, and the '2' next to it must move up. We " +
+        "can begin to set their squares to white in those directions.",
+      "For the two '2' rooms that have been created, we can set their borders " +
+        "by setting the boundary squares to black. But sure to not assume that " +
+        "you need to set the diagonal boundary squares.",
+      "It is now clear how to complete the '5' room in the lower left.",
+      "Now two new observations can be made. The first is that the black square " +
+        "in the left column is isolated, as is the one in the bottom row. They " +
+        "must be connected to the others, and the only way to do so is to set " +
+        "their neighbor to black. Secondly, the single isolated indeterminate " +
+        "square in the middle can only be set to black, else setting it to " +
+        "white would isolate it as a '1' room with no digit, which violates " +
+        "rule 2.",
+      "Now we have two potential 'pool violations' brewing, below the '3' and " + 
+        "above the incomplete '2'. Setting a 4th black square to create a 2x2 " +
+        "grid of black squares would violate rule 5, and thus they must be set " +
+        "to white.",
+      "For the unsolved '2', this completes its room, and its neighbors can be " +
+        "set to black. For the cell below the '3', it is now clear that it can " +
+        "only be satisfied from above; all other digits are not long enough to " +
+        "'make it' to that white square.",
+      "In the upper row we have another pool forming, and it must be avoided " +
+        "with a white cell, which can only be reached by the '4' to its right.",
+      "Now the path for the '4', the final remaining unsolved number is clear.",
+      "Congratulations! The puzzle is solved!"];
+    demomoves = [
+      [],
+      [],
+      ["B23","B14","B25","B34"],
+      ["B01","B51","B62","B53"],
+      ["W10","W60","W50","W40","W42"],
+      ["B20","B11","B41","B32","B43"],
+      ["W30","B31"],
+      ["B21","B63","B33"],
+      ["W22","W44"],
+      ["B45","B55","B64","W12","B03","B13"],
+      ["W04","W05","W06","B15","B26"],
+      ["W36","W46","W56","B66","B65"]];
+  } else {
+    demotext = [
+      "<p>In this demo we will walk more quickly through the steps of solving " +
+        "this puzzle. It is recommended to go through demo 1 first. Press the " +
+        "'next' button to walk through the solving steps, or the 'back' button " +
+        "to return to the previous step. You can also use the undo button to move " +
+        "backwards individual steps, or continue playing forward if you wish.</p>" +
+        "<p>The first thing to do is to turn on the assist mode to let us know " +
+        "which rooms still need completion. Let's start with the '1' solves and " +
+        "the number separation like in the first demo.</p>",
+      "We can extend the direction of the '6' in the NW corner, complete the '3' " +
+        "in the SW corner, and begin working on the middle bottom '3' and the '4' " +
+        "in the SE corner. Meanwhile we can extend the black squares where they " +
+        "would otherwise be stranded from connecting with others.",
+      "The bottom row '3' is now completeable, as is the SE '4'. Their completions " +
+        "and the previous ones strand more black 'rivers' that must be extended " +
+        "to connect with others.",
+      "The forcing downwards of the '6' and '3' rooms continues to force the " +
+        "black river between them to grow downwards as well, until it is at risk " +
+        "of being cut off completely. Meanwhile we can grow the '4' in the SW " +
+        "corner upwards.",
+      "Now the need for that left-side river to connect to the others forces it " +
+        "to flow to the right, forcing a turn in the '3' and '4' numbers that " +
+        "are coming together.",
+      "Now the river to the left of the '2' must connect, so the '2' is forced " +
+        "to the right.",
+      "Now there are two inner squares at risk of being 'black pools' and must " +
+        "be set to white. Also, the black square next to the six must extend " +
+        "south one to avoid being stranded.",
+      "Finally it should be clear how to complete the six without stranding the " +
+        "black square on the right column. In this way you've completed the " +
+        "puzzle by attacking those regions that are solveable and saving the " +
+        "rest for last.",
+      "Congratulations! The puzzle is solved!"];
+    demomoves = [
+      [],
+      ["B02","B11","B54","B45","B56","B65","B61","B72","B76"],
+      ["W00","W10","W20","W70","W60","B50","W74","W67","W57","B03","B73","B66"],
+      ["W64","B63","W47","B37","B46","B13","B21","B51","B53"],
+      ["W30","W22","B31","W40","B41","W52","W42"],
+      ["B32","B33","W23","B24","W43","B44","B34"],
+      ["B14","W05","B15","B06"],
+      ["W25","W35","B16"],
+      ["W17","W27","W26","B36"]];
+  }
+  if (demoStepNum < demotext.length) {
+    if (demoStepNum) {
+      assistState = 2;
+    } else {
+      assistState = 0;
+    }
+    updateHtmlText('demotext', demotext[demoStepNum]);
+    // start by reseting all non-number cells to indeterminate
+    for (let y=0;y<globalPuzzleH;y++) {
+      for (let x=0;x<globalPuzzleW;x++) {
+        if (globalBoardValues[y][x] == "") {
+          puzzleBoardStates[y][x] = STATE_INDET;
+        }
+      }
+    }
+    // now add in all of the moves from each step including this one
+    for (let step=0;step<=demoStepNum;step++) {
+      let demosteps = demomoves[step];
+      for (let i=0;i<demosteps.length;i++) {
+        let steps = demosteps[i].split("");
+        let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
+        addMove(s0,steps[1],steps[2]);
+      }
+    }
+    updateBoardStatus();
+    drawBoard();
+  }
+}
+
+function fdelay(num) {
+  let now = new Date();
+  let stop = now.getTime() + num;
+  while (true) {
+    now = new Date();
+    if (now.getTime() > stop) {
+      return;
+    }
+  }
 }
