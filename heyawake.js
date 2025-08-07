@@ -260,11 +260,11 @@ function handleKey(keynum) {
         break;
       case KEY_SP: // toggle through states like the click
         if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_INDET) {
-          addMove(STATE_BLACK,globalCursorY,globalCursorX,STATE_INDET);
+          addMove(STATE_BLACK,globalCursorY,globalCursorX);
         } else if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_BLACK) {
-          addMove(STATE_WHITE,globalCursorY,globalCursorX,STATE_BLACK);
+          addMove(STATE_WHITE,globalCursorY,globalCursorX);
         } else {
-          addMove(STATE_INDET,globalCursorY,globalCursorX,STATE_WHITE);
+          addMove(STATE_INDET,globalCursorY,globalCursorX);
         }
         break;
       case KEY_BS:
@@ -306,6 +306,7 @@ function initStructures(puzzle) {
   globalBoardColors =     initYXFromValue(indetCellColor);
   puzzleBoardStates =     initYXFromValue(STATE_INDET);
   globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
+  globalBoardLineColors = initYXFromValue("black"); // default line is black
 
   // override board colors if the hexParams are included, just for 0th
   // entry of the puzzles (example completed puzzle). this uses hex values
@@ -361,13 +362,13 @@ function handleClick(evnt) {
   // left sets to black, right sets to white, middle sets to indet
   // ignore if already the same state
   if ((curClickType == CLICK_LEFT)   && puzzleBoardStates[yCell][xCell] != STATE_BLACK) {
-    addMove(STATE_BLACK,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    addMove(STATE_BLACK,yCell,xCell);
   }
   if ((curClickType == CLICK_MIDDLE) && puzzleBoardStates[yCell][xCell] != STATE_INDET) {
-    addMove(STATE_INDET,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    addMove(STATE_INDET,yCell,xCell);
   }
   if ((curClickType == CLICK_RIGHT)  && puzzleBoardStates[yCell][xCell] != STATE_WHITE) {
-    addMove(STATE_WHITE,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+    addMove(STATE_WHITE,yCell,xCell);
   }
 
   updateBoardStatus();

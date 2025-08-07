@@ -277,11 +277,11 @@ function handleKey(keynum) {
       case KEY_SP: // toggle through states
         if (globalBoardValues[globalCursorY][globalCursorX] == "") {
           if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_INDET) {
-            addMove(STATE_BLACK,globalCursorY,globalCursorX,STATE_INDET);
+            addMove(STATE_BLACK,globalCursorY,globalCursorX);
           } else if (puzzleBoardStates[globalCursorY][globalCursorX] == STATE_BLACK) {
-            addMove(STATE_WHITE,globalCursorY,globalCursorX,STATE_BLACK);
+            addMove(STATE_WHITE,globalCursorY,globalCursorX);
           } else {
-            addMove(STATE_INDET,globalCursorY,globalCursorX,STATE_WHITE);
+            addMove(STATE_INDET,globalCursorY,globalCursorX);
           }
         }
         break;
@@ -332,6 +332,7 @@ function initStructures(puzzle) {
   globalInitWallStates  = initWallStates(constWallStandard);
   globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
+  globalBoardLineColors = initYXFromValue("black"); // default line is black
 
   // override board states and colors for the initial digits, set to WHITE
   for (let y=0;y<globalPuzzleH;y++) {
@@ -393,13 +394,13 @@ function handleClick(evnt) {
   // can't be changed
   if (globalBoardValues[yCell][xCell] == "") {
     if ((curClickType == CLICK_LEFT)   && puzzleBoardStates[yCell][xCell] != STATE_BLACK) {
-      addMove(STATE_BLACK,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+      addMove(STATE_BLACK,yCell,xCell);
     }
     if ((curClickType == CLICK_MIDDLE) && puzzleBoardStates[yCell][xCell] != STATE_INDET) {
-      addMove(STATE_INDET,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+      addMove(STATE_INDET,yCell,xCell);
     }
     if ((curClickType == CLICK_RIGHT)  && puzzleBoardStates[yCell][xCell] != STATE_WHITE) {
-      addMove(STATE_WHITE,yCell,xCell,puzzleBoardStates[yCell][xCell]);
+      addMove(STATE_WHITE,yCell,xCell);
     }
   }
   updateBoardStatus();

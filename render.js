@@ -5,6 +5,7 @@ const CLICK_UNKNOWN = 9;
 
 const KEY_BS    = 0x08;
 const KEY_CR    = 0x0d;
+const KEY_SHIFT = 0x10;
 const KEY_ESC   = 0x1b;
 const KEY_SP    = 0x20;
 const KEY_LEFT  = 0x25;
@@ -13,14 +14,22 @@ const KEY_RIGHT = 0x27;
 const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
+const KEY_7     = 0x37;
 const KEY_9     = 0x39;
 const ALT_0     = 0x60; // these are the number pad versions
 const ALT_1     = 0x61;
 const ALT_9     = 0x69;
 const KEY_A     = 0x41;
+const KEY_F     = 0x46;
+const KEY_I     = 0x49;
+const KEY_J     = 0x4a;
+const KEY_L     = 0x4c;
 const KEY_Z     = 0x5a;
 const KEY_a     = 0x61;
 const KEY_z     = 0x7a;
+const KEY_DASH  = 0xbd;
+const KEY_DOT   = 0xbe;
+const KEY_VERT  = 0xdc;
 
 const numberColor = [
   // 0 unused     1          2          3          4          5          6           7          8        9
@@ -83,7 +92,8 @@ let globalCursorX = 0;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
 let globalBoardValues, globalBoardColors, globalBoardTextColors;
-let globalWallStates, globalLineStates, globalCircleStates;
+let globalWallStates, globalLineStates, globalBoardLineColors;
+let globalCircleStates;
 
 function expandNumParams(numStr) {
   for (let cv=10;cv<36;cv++) {
@@ -158,11 +168,21 @@ function initYXWithValues(defvalue,avalue,array) {
 }
 
 function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
+  // first figure out if this is a completed path type, in
+  // which case it will have [FJ7L|_] to indicate path segments.
+  // if so, then we need to treat the FJL7|_ characters as line
+  // and ignore in board values
+  let isFullPathType = false;
+  if ((numParamText.search(/F/) != -1) && (numParamText.search(/|/) != -1) &&
+      (numParamText.search(/J/) != -1) && (numParamText.search(/_/) != -1) &&
+      (numParamText.search(/7/) != -1) && (numParamText.search(/L/) != -1)) {
+    isFullPathType = true;
+  }
   // special case for hasDir; 1v (2v 3v etc) indicates a south
   // arrow so we need to convert those to another character
   // before expandNumParams
   if (hasDir) {
-    numParamText = numParamText.replace(/([0-9])v/g, "$1*");
+    numParamText = numParamText.replace(/([0-9])v/g, "$1%");
   }
   let numParams = expandNumParams(numParamText).split("");
   if (charForNum) {
@@ -176,7 +196,7 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
       }
     }
   }
-  if (numParams.length != (globalPuzzleH*globalPuzzleW)) {
+  if (!hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW))) {
     console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
                 " expected " + (globalPuzzleH*globalPuzzleW));
     return;
@@ -186,10 +206,15 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
   for (let y=0;y<globalPuzzleH;y++) {
     boardValues[y] = new Array(globalPuzzleW);
     for (let x=0;x<globalPuzzleW;x++) {
-      let param = numParams[y*globalPuzzleW+x+scoot];
-      if (hasDir && param != '-') {
+      let ptr = y*globalPuzzleW+x+scoot;
+      let param = numParams[ptr];
+      if (hasDir &&
+          // 7 is saved in fullpath params (example completed
+          // puzzles) for path turns
+          (( isFullPathType && param.search(/[0-6]/) != -1) ||
+           (!isFullPathType && param.search(/[0-9]/) != -1))) {
         let paramDir = numParams[y*globalPuzzleW+x+scoot+1];
-        paramDir = paramDir.replace(/\*/,"v");
+        paramDir = paramDir.replace(/\%/,"v");
         scoot++;
         // look for a number always followed by direction
         boardValues[y][x] = param + paramDir;
@@ -197,11 +222,68 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
         boardValues[y][x] =
           (param == '-') ? "" :
           (param == '*') ? "" :
-          (param == '_') ? "" : parseInt(param,36);
+          (param == '_') ? "" :
+          (isFullPathType && (param.search(/[FJL7\|]/)!=-1)) ? "" :
+            parseInt(param,36);
       }
     }
   }
+  if (hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW+scoot))) {
+    console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
+                " expected " + (globalPuzzleH*globalPuzzleW+scoot));
+    return;
+  }
   return boardValues;
+}
+
+function initLineValuesFromParams(numParamText,hasDir=false) {
+  // first figure out if this is even a completed type, in
+  // which case it will have |s and _s to indicate path segments.
+  // if not, then there are no line values. if so, then we need
+  // to treat the FJL7|_ characters as line segments
+  let lineValues;
+  if ((numParamText.search(/F/)!=-1) && (numParamText.search(/|/)!=-1) &&
+      (numParamText.search(/J/)!=-1) && (numParamText.search(/_/)!=-1) &&
+      (numParamText.search(/7/)!=-1) && (numParamText.search(/L/)!=-1)) {
+    // special case for hasDir; 1v (2v 3v etc) indicates a south
+    // arrow so we need to convert those to another character
+    // before expandNumParams
+    if (hasDir) {
+      numParamText = numParamText.replace(/([0-9])v/g, "$1%");
+    }
+    let numParams = expandNumParams(numParamText).split("");
+    lineValues = new Array(globalPuzzleH);
+    let scoot = 0;  // only used for hasDir
+    for (let y=0;y<globalPuzzleH;y++) {
+      lineValues[y] = new Array(globalPuzzleW);
+      for (let x=0;x<globalPuzzleW;x++) {
+        let ptr = y*globalPuzzleW+x+scoot;
+        let param = numParams[ptr];
+        // for filled-in final solutions, only works for digit-arrows
+        // up to 6 since 7 is used for path turns
+        if (hasDir && param.search(/[0-6]/) != -1) {
+          let paramDir = numParams[y*globalPuzzleW+x+scoot+1];
+          paramDir = paramDir.replace(/\%/,"v");
+          scoot++;
+          // look for a number always followed by direction
+          lineValues[y][x] = param + paramDir;
+        } else {
+          lineValues[y][x] =
+            (param == '-') ? "" :
+            (param == '*') ? "" :
+            (param == '_') ? "-" : param;
+        }
+      }
+    }
+    if (hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW+scoot))) {
+      console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
+                  " expected " + (globalPuzzleH*globalPuzzleW+scoot));
+      return;
+    }
+  } else {
+    lineValues = initYXFromValue(0);
+  }
+  return lineValues;
 }
 
 // for heyawake and other box-based puzzles, need 0-9A-Za-z encoding for coordinate locations
@@ -465,7 +547,14 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
 function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      drawTile(x,y,globalBoardColors[y][x],globalBoardValues[y][x],globalCircleStates[y][x],globalLineStates[y][x],lineFirst,globalBoardTextColors[y][x]);
+      drawTile(x,y,
+               globalBoardColors[y][x],
+               globalBoardValues[y][x],
+               globalCircleStates[y][x],
+               globalLineStates[y][x],
+               lineFirst,
+               globalBoardTextColors[y][x],
+               globalBoardLineColors[y][x]);
     }
   }
   // draw horizontal walls
@@ -491,13 +580,13 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   }
 }
 
-function drawTile(x,y,color,value,circle,line,lineFirst,textColor) {
+function drawTile(x,y,color,value,circle,line,lineFirst,textColor,lineColor) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.fillStyle = color;
   globalContext.fillRect(drawX,drawY,globalGridSize,globalGridSize);
   if (lineFirst) {
-    drawLine(x,y,line);
+    drawLine(x,y,line,lineColor);
   }
   // draw circle next if it exists
   if (circle) {
@@ -542,7 +631,7 @@ function drawTile(x,y,color,value,circle,line,lineFirst,textColor) {
   globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.5+globalFontSize*0.5)));
 
   if (!lineFirst) {
-    drawLine(x,y,line);
+    drawLine(x,y,line,lineColor);
   }
 }
 
@@ -609,7 +698,7 @@ function drawDot(x,y) {
   globalContext.fill();
 }
 
-function drawLine(x,y,state) {
+function drawLine(x,y,state,color) {
   let segments = 0;
   let count = 1;
   if (state && state.search(/2/) != -1) {
@@ -617,6 +706,7 @@ function drawLine(x,y,state) {
     state = state.replace(/2/, "");
   }
   let drawX1, drawX2, drawX3, drawX4, drawY1, drawY2, drawY3, drawY4;
+  globalContext.strokeStyle = color;
   for (let i=0;i<count;i++) {
     let offset = (count==1) ? 0 : (i==0) ? (-0.075*globalGridSize) : (0.075*globalGridSize);
     switch (state) {
@@ -642,6 +732,7 @@ function drawLine(x,y,state) {
         drawY2 = Math.floor((y+1.0)*globalGridSize);
         break;
       case "-":
+      case "_":
         segments = 1;
         drawX1 = Math.floor((x    )*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
@@ -712,7 +803,7 @@ function drawLine(x,y,state) {
         break;
     }
     if (segments) {
-      globalContext.lineWidth = 1;
+      globalContext.lineWidth = 1.5;
       globalContext.beginPath();
       globalContext.moveTo(drawX1,drawY1);
       globalContext.lineTo(drawX2,drawY2);
@@ -729,6 +820,16 @@ function drawLine(x,y,state) {
         globalContext.stroke();
       }
     }
+  }
+  // special case for "line dot"
+  if (state == ".") {
+    let drawX = Math.floor((x+0.5)*globalGridSize);
+    let drawY = Math.floor((y+0.5)*globalGridSize);
+    globalContext.lineWidth = 1;
+    globalContext.fillStyle = "black";
+    globalContext.beginPath();
+    globalContext.arc(drawX,drawY,0.05*globalGridSize,0,2*Math.PI);
+    globalContext.fill();
   }
 }
 
@@ -797,6 +898,132 @@ function travelRiver(arrayYX,y,x,isEqual,testValue) {
     tryindex++;
   }
   return riverCells;
+}
+
+function advanceLine(y,x,state,dir,clockwise) {
+  let inerror = false;
+  let alive = true;
+  switch (state) {
+    case '.':
+      alive = false;
+      break;
+    case '-':
+      if ((clockwise && dir==0) || dir=='W')
+        { x++; dir = 'W'; }
+      else if ((!clockwise && dir==0) || dir=='E')
+        { x--; dir = 'E'; }
+      else
+        { inerror = true; }
+      break;
+    case '|':
+      if ((clockwise && dir==0) || dir=='N')
+        { y++; dir = 'N'; }
+      else if ((!clockwise && dir==0) || dir=='S')
+        { y--; dir = 'S'; }
+      else
+        { inerror = true; }
+      break;
+    case 'N':
+      if (dir!=0 && dir!='N')
+        { inerror = true; }
+      alive = false;
+      break;
+    case 'S':
+      if (dir!=0 && dir!='S')
+        { inerror = true; }
+      alive = false;
+      break;
+    case 'E':
+      if (dir!=0 && dir!='E')
+        { inerror = true; }
+      alive = false;
+      break;
+    case 'W':
+      if (dir!=0 && dir!='W')
+        { inerror = true; }
+      alive = false;
+      break;
+    case 'F':
+      if ((clockwise && dir==0) || dir=='S')
+        { x++; dir = 'W'; }
+      else if ((!clockwise && dir==0) || dir=='E')
+        { y++; dir = 'N'; }
+      else
+        { inerror = true; }
+      break;
+    case 'J':
+      if ((clockwise && dir==0) || dir=='N')
+        { x--; dir = 'E'; }
+      else if ((!clockwise && dir==0) || dir=='W')
+        { y--; dir = 'S'; }
+      else
+        { inerror = true; }
+      break;
+    case 'L':
+      if ((clockwise && dir==0) || dir=='N')
+        { x++; dir = 'W'; }
+      else if ((!clockwise && dir==0) || dir=='E')
+        { y--; dir = 'S'; }
+      else
+        { inerror = true; }
+      break;
+    case '7':
+      if ((clockwise && dir==0) || dir=='S')
+        { x--; dir = 'E'; }
+      else if ((!clockwise && dir==0) || dir=='W')
+        { y++; dir = 'N'; }
+      else
+        { inerror = true; }
+      break;
+    default:
+      ended = true;
+      break;
+    }
+  if (inerror) {
+    console.log("FATAL: makes no sense, coming from " + y + "," + x + " with dir " + dir + " and found " + state);
+  }
+  return [alive,y,x,dir];
+}
+
+function travelLineLoop(arrayYX,y,x) {
+  let lineCells = new Array();
+  let tryindex = 0;
+  let isLoop = false;
+  lineCells.push(y+","+x);
+  // we really only need to try one direction to find out if it is
+  // a loop or not. but if after completion it is not a loop, then
+  // prepend in the other direction to get the full list of connected
+  // cells
+  let alive = true;
+  let cy = y;
+  let cx = x;
+  let dir = 0;
+  while (alive) {
+    if ((dir!=0) && cy==y && cx==x) {
+      isLoop = true;
+      alive = false;
+    } else {
+      [alive,cy,cx,dir] = advanceLine(cy,cx,arrayYX[cy][cx],dir,true);
+      if (alive) {
+        lineCells.push(cy+","+cx);
+      }
+    }
+  }
+
+  // if not a loop, go backwards from beginning and prepend to path
+  if (!isLoop) {
+    alive = true;
+    cy = y;
+    cx = x;
+    dir = 0;
+    while (alive) {
+      [alive,cy,cx,dir] = advanceLine(cy,cx,arrayYX[cy][cx],dir,false);
+      if (alive) {
+        lineCells.unshift(cy+","+cx);
+      }
+    }
+  }
+  return [lineCells,isLoop];
 }
 
 function roomIsRectangle(roomSquares) {

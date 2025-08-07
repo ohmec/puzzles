@@ -304,6 +304,7 @@ function initStructures(puzzle) {
   }
   globalBoardColors = initYXFromValue(emptyCellColor);
   globalBoardTextColors = initYXFromValue(stdFontColor);
+  globalBoardLineColors = initYXFromValue("black"); // default line is black
   globalInitWallStates  = initWallStates(constWallLight);
   globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   updateBoardStatus();
