@@ -3,6 +3,23 @@ const CLICK_MIDDLE  = 1;
 const CLICK_RIGHT   = 2;
 const CLICK_UNKNOWN = 9;
 
+const PATH_NONE   = 0b0000000;
+const PATH_DOT    = 0b0010000;
+const PATH_CLEAR  = 0b0010001;
+const PATH_SINGLE = 0b0100000;
+const PATH_DOUBLE = 0b1000000;
+const PATH_N      = 0b0100001;
+const PATH_W      = 0b0100010;
+const PATH_S      = 0b0100100;
+const PATH_E      = 0b0101000;
+const PATH_NW     = PATH_N | PATH_W;
+const PATH_NE     = PATH_N | PATH_E;
+const PATH_SW     = PATH_S | PATH_W;
+const PATH_SE     = PATH_S | PATH_E;
+const PATH_NS     = PATH_N | PATH_S;
+const PATH_WE     = PATH_W | PATH_E;
+const PATH_PLUS   = PATH_NS | PATH_WE;
+
 const KEY_BS    = 0x08;
 const KEY_CR    = 0x0d;
 const KEY_SHIFT = 0x10;
@@ -701,60 +718,58 @@ function drawDot(x,y) {
 function drawLine(x,y,state,color) {
   let segments = 0;
   let count = 1;
-  if (state && state.search(/2/) != -1) {
+  if ((state & PATH_DOUBLE) != 0) {
     count = 2;
-    state = state.replace(/2/, "");
+    state = (state & ~PATH_DOUBLE) | PATH_SINGLE;
   }
   let drawX1, drawX2, drawX3, drawX4, drawY1, drawY2, drawY3, drawY4;
   globalContext.strokeStyle = color;
   for (let i=0;i<count;i++) {
     let offset = (count==1) ? 0 : (i==0) ? (-0.075*globalGridSize) : (0.075*globalGridSize);
     switch (state) {
-      case "|":
+      case PATH_NS:
         segments = 1;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y    )*globalGridSize);
         drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY2 = Math.floor((y+1.0)*globalGridSize);
         break;
-      case "N":
+      case PATH_N:
         segments = 1;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y    )*globalGridSize);
         drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY2 = Math.floor((y+0.5)*globalGridSize);
         break;
-      case "S":
+      case PATH_S:
         segments = 1;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y+0.5)*globalGridSize);
         drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY2 = Math.floor((y+1.0)*globalGridSize);
         break;
-      case "-":
-      case "_":
+      case PATH_WE:
         segments = 1;
         drawX1 = Math.floor((x    )*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
         drawX2 = Math.floor((x+1.0)*globalGridSize);
         drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
         break;
-      case "E":
+      case PATH_E:
         segments = 1;
         drawX1 = Math.floor((x+0.5)*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
         drawX2 = Math.floor((x+1.0)*globalGridSize);
         drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
         break;
-      case "W":
+      case PATH_W:
         segments = 1;
         drawX1 = Math.floor((x    )*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
         drawX2 = Math.floor((x+0.5)*globalGridSize);
         drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
         break;
-      case 7:
-      case "7":
+      case PATH_SW:
         segments = 2;
         drawX1 = Math.floor((x    )*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
@@ -763,7 +778,7 @@ function drawLine(x,y,state,color) {
         drawX3 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY3 = Math.floor((y+1.0)*globalGridSize);
         break;
-      case "F":
+      case PATH_SE:
         segments = 2;
         drawX1 = Math.floor((x+1.0)*globalGridSize);
         drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
@@ -772,7 +787,7 @@ function drawLine(x,y,state,color) {
         drawX3 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY3 = Math.floor((y+1.0)*globalGridSize);
         break;
-      case "L":
+      case PATH_NE:
         segments = 2;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y    )*globalGridSize);
@@ -781,7 +796,7 @@ function drawLine(x,y,state,color) {
         drawX3 = Math.floor((x+1.0)*globalGridSize);
         drawY3 = Math.floor((y+0.5)*globalGridSize)+offset;
         break;
-      case "J":
+      case PATH_NW:
         segments = 2;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y    )*globalGridSize);
@@ -790,7 +805,7 @@ function drawLine(x,y,state,color) {
         drawX3 = Math.floor((x    )*globalGridSize);
         drawY3 = Math.floor((y+0.5)*globalGridSize)+offset;
         break;
-      case "+":
+      case PATH_PLUS:
         segments = 3;
         drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
         drawY1 = Math.floor((y    )*globalGridSize);
@@ -822,7 +837,7 @@ function drawLine(x,y,state,color) {
     }
   }
   // special case for "line dot"
-  if (state == ".") {
+  if (state == PATH_DOT) {
     let drawX = Math.floor((x+0.5)*globalGridSize);
     let drawY = Math.floor((y+0.5)*globalGridSize);
     globalContext.lineWidth = 1;
@@ -904,10 +919,13 @@ function advanceLine(y,x,state,dir,clockwise) {
   let inerror = false;
   let alive = true;
   switch (state) {
-    case '.':
+    case PATH_NONE:
       alive = false;
       break;
-    case '-':
+    case PATH_DOT:
+      alive = false;
+      break;
+    case PATH_WE:
       if ((clockwise && dir==0) || dir=='W')
         { x++; dir = 'W'; }
       else if ((!clockwise && dir==0) || dir=='E')
@@ -915,7 +933,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else
         { inerror = true; }
       break;
-    case '|':
+    case PATH_NS:
       if ((clockwise && dir==0) || dir=='N')
         { y++; dir = 'N'; }
       else if ((!clockwise && dir==0) || dir=='S')
@@ -923,27 +941,27 @@ function advanceLine(y,x,state,dir,clockwise) {
       else
         { inerror = true; }
       break;
-    case 'N':
+    case PATH_N:
       if (dir!=0 && dir!='N')
         { inerror = true; }
       alive = false;
       break;
-    case 'S':
+    case PATH_S:
       if (dir!=0 && dir!='S')
         { inerror = true; }
       alive = false;
       break;
-    case 'E':
+    case PATH_E:
       if (dir!=0 && dir!='E')
         { inerror = true; }
       alive = false;
       break;
-    case 'W':
+    case PATH_W:
       if (dir!=0 && dir!='W')
         { inerror = true; }
       alive = false;
       break;
-    case 'F':
+    case PATH_SE:
       if ((clockwise && dir==0) || dir=='S')
         { x++; dir = 'W'; }
       else if ((!clockwise && dir==0) || dir=='E')
@@ -951,7 +969,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else
         { inerror = true; }
       break;
-    case 'J':
+    case PATH_NW:
       if ((clockwise && dir==0) || dir=='N')
         { x--; dir = 'E'; }
       else if ((!clockwise && dir==0) || dir=='W')
@@ -959,7 +977,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else
         { inerror = true; }
       break;
-    case 'L':
+    case PATH_NE:
       if ((clockwise && dir==0) || dir=='N')
         { x++; dir = 'W'; }
       else if ((!clockwise && dir==0) || dir=='E')
@@ -967,7 +985,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else
         { inerror = true; }
       break;
-    case '7':
+    case PATH_SW:
       if ((clockwise && dir==0) || dir=='S')
         { x--; dir = 'E'; }
       else if ((!clockwise && dir==0) || dir=='W')
@@ -976,7 +994,7 @@ function advanceLine(y,x,state,dir,clockwise) {
         { inerror = true; }
       break;
     default:
-      ended = true;
+      alive = false;
       break;
     }
   if (inerror) {

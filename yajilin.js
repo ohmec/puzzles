@@ -22,18 +22,6 @@ let debugMode = false;
 const CELL_WHITE =  1;
 const CELL_BLACK =  2;
 const CELL_FIXED =  3;
-const PATH_CLEAR =  4;
-const PATH_DOT   =  5;
-const PATH_N     =  6;
-const PATH_S     =  7;
-const PATH_E     =  8;
-const PATH_W     =  9;
-const PATH_EW    = 10;
-const PATH_NS    = 11;
-const PATH_NE    = 12;
-const PATH_SE    = 13;
-const PATH_SW    = 14;
-const PATH_NW    = 15;
 
 // which keys are handled
 let handledKeys =
@@ -74,15 +62,15 @@ function puzzleInit() {
 
   // a click (except right-click i.e. ctrl-click) on tabs.
   // hide old, show new
-  $("#tabs li").click(function() {      
-    $("#tabs li").removeClass('active');    
-    $(this).addClass("active");     
+  $("#tabs li").click(function() {
+    $("#tabs li").removeClass('active');
+    $(this).addClass("active");
     $(".tab_content").hide();
     $($(this).find("a").attr("href")).show();
     clicking = false;
     return false;
   });
-  
+
   $("#tab1").show();
   $("#demotab").hide();
 
@@ -177,7 +165,7 @@ function puzzleInit() {
 
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
 
-  canvas = document.getElementById('puzzleCanvas');  
+  canvas = document.getElementById('puzzleCanvas');
   globalContext = canvas.getContext('2d');
 
   if(cannedPuzzles[puzzleChoice]) {
@@ -200,7 +188,7 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) { 
+  if (assistState == 0) {
     if (errorCount && incompleteDigits && incompleteCells) {
       etext = "there are errors and incomplete numbers and white cells that don't have a path";
     } else if (incompleteDigits && incompleteCells) {
@@ -239,84 +227,87 @@ function addHistory(y,x,prevvalue,movetype) {
 }
 
 function mergeLines(line1,line2) {
-  if (line1==0 || line1=='.') {
+  if (line1==0 || line1==PATH_DOT) {
     return line2;
   } else if (line1==line2) {
     return line1;
   } else {
     // often the merges are incompatible, just need to return
     // the new one
-    if (((line1=='-') && (line2=='N' || line2=='S')) ||
-        ((line1=='|') && (line2=='W' || line2=='E')) ||
-        ((line1=='F') && (line2=='N' || line2=='W')) ||
-        ((line1=='L') && (line2=='S' || line2=='W')) ||
-        ((line1=='J') && (line2=='S' || line2=='E')) ||
-        ((line1=='7') && (line2=='N' || line2=='E'))) {
+    if (((line1==PATH_WE) && (line2==PATH_N || line2==PATH_S)) ||
+        ((line1==PATH_NS) && (line2==PATH_W || line2==PATH_E)) ||
+        ((line1==PATH_SE) && (line2==PATH_N || line2==PATH_W)) ||
+        ((line1==PATH_NE) && (line2==PATH_S || line2==PATH_W)) ||
+        ((line1==PATH_NW) && (line2==PATH_S || line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_N || line2==PATH_E))) {
       return line2;
     }
     // often the merges are identical, just return the old one
-    if (((line1=='-') && (line2=='W' || line2=='E')) ||
-        ((line1=='|') && (line2=='N' || line2=='S')) ||
-        ((line1=='F') && (line2=='S' || line2=='E')) ||
-        ((line1=='L') && (line2=='N' || line2=='E')) ||
-        ((line1=='J') && (line2=='N' || line2=='W')) ||
-        ((line1=='7') && (line2=='S' || line2=='W'))) {
+    if (((line1==PATH_WE) && (line2==PATH_W || line2==PATH_E)) ||
+        ((line1==PATH_NS) && (line2==PATH_N || line2==PATH_S)) ||
+        ((line1==PATH_SE) && (line2==PATH_S || line2==PATH_E)) ||
+        ((line1==PATH_NE) && (line2==PATH_N || line2==PATH_E)) ||
+        ((line1==PATH_NW) && (line2==PATH_N || line2==PATH_W)) ||
+        ((line1==PATH_SW) && (line2==PATH_S || line2==PATH_W))) {
       return line1;
     }
     // these are actual merges
-    if ((line1=='W' && line2=='E') ||
-        (line1=='E' && line2=='W')) {
-      return '-';
+    if ((line1==PATH_W && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_W)) {
+      return PATH_WE;
     }
-    if ((line1=='N' && line2=='S') ||
-        (line1=='S' && line2=='N')) {
-      return '|';
+    if ((line1==PATH_N && line2==PATH_S) ||
+        (line1==PATH_S && line2==PATH_N)) {
+      return PATH_NS;
     }
-    if ((line1=='N' && line2=='W') ||
-        (line1=='W' && line2=='N')) {
-      return 'J';
+    if ((line1==PATH_N && line2==PATH_W) ||
+        (line1==PATH_W && line2==PATH_N)) {
+      return PATH_NW;
     }
-    if ((line1=='S' && line2=='E') ||
-        (line1=='E' && line2=='S')) {
-      return 'F';
+    if ((line1==PATH_S && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_S)) {
+      return PATH_SE;
     }
-    if ((line1=='N' && line2=='E') ||
-        (line1=='E' && line2=='N')) {
-      return 'L';
+    if ((line1==PATH_N && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_N)) {
+      return PATH_NE;
     }
-    if ((line1=='S' && line2=='W') ||
-        (line1=='W' && line2=='S')) {
-      return '7';
+    if ((line1==PATH_S && line2==PATH_W) ||
+        (line1==PATH_W && line2==PATH_S)) {
+      return PATH_SW;
     }
     return line1;
   }
 }
 
 function unmergeLines(line1,line2) {
-  if (line1==0) {
-    return 0;
+  if (line1==PATH_NONE) {
+    return PATH_NONE;
   } else if (line1==line2) {
-    return 0;
+    return PATH_NONE;
+  // if there is no intersection, ignore
+  } else if ((line1&line2)==PATH_SINGLE) {
+    return line1;
   } else {
-    if (((line1=='-') && (line2=='W')) ||
-        ((line1=='F') && (line2=='S')) ||
-        ((line1=='L') && (line2=='N'))) {
-      return 'E';
+    if (((line1==PATH_WE) && (line2==PATH_W)) ||
+        ((line1==PATH_SE) && (line2==PATH_S)) ||
+        ((line1==PATH_NE) && (line2==PATH_N))) {
+      return PATH_E;
     }
-    if (((line1=='-') && (line2=='E')) ||
-        ((line1=='7') && (line2=='S')) ||
-        ((line1=='J') && (line2=='N'))) {
-      return 'W';
+    if (((line1==PATH_WE) && (line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_S)) ||
+        ((line1==PATH_NW) && (line2==PATH_N))) {
+      return PATH_W;
     }
-    if (((line1=='|') && (line2=='N')) ||
-        ((line1=='F') && (line2=='E')) ||
-        ((line1=='7') && (line2=='W'))) {
-      return 'S';
+    if (((line1==PATH_NS) && (line2==PATH_N)) ||
+        ((line1==PATH_SE) && (line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_W))) {
+      return PATH_S;
     }
-    if (((line1=='|') && (line2=='S')) ||
-        ((line1=='L') && (line2=='E')) ||
-        ((line1=='J') && (line2=='W'))) {
-      return 'N';
+    if (((line1==PATH_NS) && (line2==PATH_S)) ||
+        ((line1==PATH_NE) && (line2==PATH_E)) ||
+        ((line1==PATH_NW) && (line2==PATH_W))) {
+      return PATH_N;
     }
     // everything else is incompatible, return 0
     return 0;
@@ -325,41 +316,41 @@ function unmergeLines(line1,line2) {
 
 function preClearNeighbors(y,x,state) {
   switch (state) {
-    case '-':
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],'E');
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],'W');
+    case PATH_WE:
+      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
       break;
-    case '|':
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],'S');
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],'N');
+    case PATH_NS:
+      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
       break;
-    case 'F':
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],'W');
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],'N');
+    case PATH_SE:
+      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
       break;
-    case 'L':
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],'W');
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],'S');
+    case PATH_NE:
+      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
       break;
-    case 'J':
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],'E');
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],'S');
+    case PATH_NW:
+      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
       break;
-    case '7':
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],'E');
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],'N');
+    case PATH_SW:
+      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
       break;
-    case 'W':
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],'E');
+    case PATH_W:
+      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
       break;
-    case 'E':
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],'W');
+    case PATH_E:
+      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
       break;
-    case 'N':
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],'S');
+    case PATH_N:
+      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
       break;
-    case 'S':
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],'N');
+    case PATH_S:
+      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
       break;
   }
 }
@@ -374,22 +365,41 @@ function contains(state,list) {
   return hit;
 }
 
-function addMove(moveType,y,x) {
+function addMove(moveType,y,x,noHistory=false) {
   // don't try and change a fixed cell
   if (puzzleBoardStates[y][x] == CELL_FIXED) {
     return;
   }
   if (moveType <= CELL_FIXED) {
-    addHistory(y,x,puzzleBoardStates[y][x],moveType);
+    if (!noHistory) {
+      addHistory(y,x,puzzleBoardStates[y][x],moveType);
+    }
     puzzleBoardStates[y][x] = moveType;
-    globalBoardColors[y][x] =
-      (moveType == CELL_WHITE) ? emptyCellColor :
-      (moveType == CELL_BLACK) ? fillCellColor  :
-                                 digitCellColor;
+    globalBoardColors[y][x] = (moveType == CELL_WHITE) ? emptyCellColor : fillCellColor;
+    // if putting down a black cell, kill all path segments
+    // in this cell, and into and out of this cell
+    if (moveType == CELL_BLACK) {
+      globalLineStates[y][x] = PATH_NONE;
+      if (y) {
+        globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
+      }
+      if (y<(globalPuzzleH-1)) {
+        globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
+      }
+      if (x) {
+        globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
+      }
+      if (x<(globalPuzzleW-1)) {
+        globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
+      }
+    }
     return;
   }
   // the rest are path changes, make sure they're legal
-  // dont' try and add paths that move into a fixed cell or edge or black cell
+  // don't try and add paths that move into a black or fixed cell or edge or black cell
+  if (puzzleBoardStates[y][x] == CELL_BLACK) {
+    return;
+  }
   if (((y==0) || (puzzleBoardStates[y-1][x]!=CELL_WHITE)) &&
       ((moveType==PATH_N) || (moveType==PATH_NS) || (moveType==PATH_NW) || (moveType==PATH_NE))) {
     return; // illegal north moves
@@ -399,35 +409,35 @@ function addMove(moveType,y,x) {
     return; // illegal south moves
   }
   if (((x==0) || (puzzleBoardStates[y][x-1]!=CELL_WHITE)) &&
-      ((moveType==PATH_W) || (moveType==PATH_EW) || (moveType==PATH_NW) || (moveType==PATH_SW))) {
+      ((moveType==PATH_W) || (moveType==PATH_WE) || (moveType==PATH_NW) || (moveType==PATH_SW))) {
     return; // illegal west moves
   }
   if (((x==(globalPuzzleW-1)) || (puzzleBoardStates[y][x+1]!=CELL_WHITE)) &&
-      ((moveType==PATH_E) || (moveType==PATH_EW) || (moveType==PATH_NE) || (moveType==PATH_SE))) {
+      ((moveType==PATH_E) || (moveType==PATH_WE) || (moveType==PATH_NE) || (moveType==PATH_SE))) {
     return; // illegal east moves
   }
 
-  addHistory(y,x,globalLineStates[y][x],moveType);
+  if (!noHistory) {
+    addHistory(y,x,globalLineStates[y][x],moveType);
+  }
   if (moveType==PATH_N || moveType==PATH_E || moveType==PATH_W || moveType==PATH_S) {
     // for "dragging/shifting" adds, we might need to pre-clear the existing
     // paths on both sides of the move if they are conflicting
-
-    // the following need clearing for this cell
-    if ((moveType==PATH_N && contains(globalLineStates[y][x],["7","F","-"])) ||
-        (moveType==PATH_S && contains(globalLineStates[y][x],["J","L","-"])) ||
-        (moveType==PATH_W && contains(globalLineStates[y][x],["F","L","|"])) ||
-        (moveType==PATH_E && contains(globalLineStates[y][x],["7","J","|"]))) {
+    if ((moveType==PATH_N && contains(globalLineStates[y][x],[PATH_SW,PATH_SE,PATH_WE])) ||
+        (moveType==PATH_S && contains(globalLineStates[y][x],[PATH_NW,PATH_NE,PATH_WE])) ||
+        (moveType==PATH_W && contains(globalLineStates[y][x],[PATH_SE,PATH_NE,PATH_NS])) ||
+        (moveType==PATH_E && contains(globalLineStates[y][x],[PATH_SW,PATH_NW,PATH_NS]))) {
       preClearNeighbors(y,x,globalLineStates[y][x]);
     }
 
     // and the following need clearing for the precursor cell
-    if (moveType==PATH_N && contains(globalLineStates[y-1][x],["J","L","-"])) {
+    if (moveType==PATH_N && contains(globalLineStates[y-1][x],[PATH_NW,PATH_NE,PATH_WE])) {
       preClearNeighbors(y-1,x,globalLineStates[y-1][x]);
-    } else if (moveType==PATH_S && contains(globalLineStates[y+1][x],["7","F","-"])) {
+    } else if (moveType==PATH_S && contains(globalLineStates[y+1][x],[PATH_SW,PATH_SE,PATH_WE])) {
       preClearNeighbors(y+1,x,globalLineStates[y+1][x]);
-    } else if (moveType==PATH_W && contains(globalLineStates[y][x-1],["7","J","|"])) {
+    } else if (moveType==PATH_W && contains(globalLineStates[y][x-1],[PATH_SW,PATH_NW,PATH_NS])) {
       preClearNeighbors(y,x-1,globalLineStates[y][x-1]);
-    } else if (moveType==PATH_E && contains(globalLineStates[y][x+1],["F","L","|"])) {
+    } else if (moveType==PATH_E && contains(globalLineStates[y][x+1],[PATH_SE,PATH_NE,PATH_NS])) {
       preClearNeighbors(y,x+1,globalLineStates[y][x+1]);
     }
   } else {
@@ -439,56 +449,56 @@ function addMove(moveType,y,x) {
   // now merge in the new half-segments in the neighbors
   switch (moveType) {
     case PATH_CLEAR:
-      globalLineStates[y][x] = 0;
+      globalLineStates[y][x] = PATH_NONE;
       break;
     case PATH_DOT:
-      globalLineStates[y][x] = '.';
+      globalLineStates[y][x] = PATH_DOT;
       break;
     case PATH_N:
-      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],'N');
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],'S');
+      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],PATH_N);
+      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
       break
     case PATH_S:
-      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],'S');
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],'N');
+      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],PATH_S);
+      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
       break
     case PATH_W:
-      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],'W');
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],'E');
+      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],PATH_W);
+      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
       break
     case PATH_E:
-      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],'E');
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],'W');
+      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],PATH_E);
+      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
       break
-    case PATH_EW:
-      globalLineStates[y][x] = '-';
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],'E');
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],'W');
+    case PATH_WE:
+      globalLineStates[y][x] = PATH_WE;
+      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_NS:
-      globalLineStates[y][x] = '|';
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],'S');
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],'N');
+      globalLineStates[y][x] = PATH_NS;
+      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
       break;
     case PATH_NE:
-      globalLineStates[y][x] = 'L';
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],'S');
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],'W');
+      globalLineStates[y][x] = PATH_NE;
+      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_SE:
-      globalLineStates[y][x] = 'F';
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],'N');
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],'W');
+      globalLineStates[y][x] = PATH_SE;
+      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_SW:
-      globalLineStates[y][x] = '7';
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],'N');
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],'E');
+      globalLineStates[y][x] = PATH_SW;
+      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
       break;
     case PATH_NW:
-      globalLineStates[y][x] = 'J';
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],'S');
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],'E');
+      globalLineStates[y][x] = PATH_NW;
+      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
       break;
   }
 }
@@ -526,6 +536,8 @@ function handleKey(keynum) {
     switch (keynum) {
       case KEY_ESC:
         console.log(puzzleBoardStates);
+        console.log(globalBoardValues);
+        console.log(globalLineStates);
         debugMode = true;
         break;
       case KEY_UP:
@@ -580,12 +592,11 @@ function handleKey(keynum) {
         break;
       case KEY_DOT:
         if (puzzleBoardStates[globalCursorY][globalCursorX] != CELL_FIXED) {
-          addMove(CELL_WHITE,globalCursorY,globalCursorX);
           addMove(PATH_DOT,globalCursorY,globalCursorX);
         }
         break;
       case KEY_DASH:
-        addMove(PATH_EW,globalCursorY,globalCursorX);
+        addMove(PATH_WE,globalCursorY,globalCursorX);
         break;
       case KEY_VERT:
       case KEY_I:
@@ -691,13 +702,17 @@ function handleClick(evnt) {
   let yCell, xCell, isEdge, yEdge, xEdge;
   [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
 
-  // dragging, but no move yet 
+  // dragging, but no move yet
   if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {
+    return;
+  }
+  // skip dragging with anything but left click
+  if (dragging && curClickType!=CLICK_LEFT) {
     return;
   }
 
   // if dragging, begin to make a path from previous cursor
-  if (dragging && curClickType==CLICK_LEFT) {
+  if (dragging) {
     if (yCell==(globalCursorY+1)) { // moving S
       addMove(PATH_S,globalCursorY,globalCursorX);
     }
@@ -861,7 +876,7 @@ function updateBoardStatus() {
     for (let x=0;x<globalPuzzleW;x++) {
       if (puzzleBoardStates[y][x]==CELL_WHITE &&
           globalLineStates[y][x] &&
-          (globalLineStates[y][x] != '.') &&
+          (globalLineStates[y][x] != PATH_DOT) &&
           (checkedLineCells.indexOf(y+","+x)==-1)) {
         let lineCellArray, isLoop;
         [lineCellArray,isLoop] = travelLineLoop(globalLineStates,y,x);
@@ -903,7 +918,13 @@ function updateBoardStatus() {
 function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
-    puzzleBoardStates[lastMove[0]][lastMove[1]] = lastMove[2];
+    if (lastMove[3] <= CELL_FIXED) {
+      addMove(lastMove[2],lastMove[0],lastMove[1],true);
+    } else if (lastMove[2] == 0) {
+      addMove(PATH_CLEAR,lastMove[0],lastMove[1],true);
+    } else {
+      addMove(lastMove[2],lastMove[0],lastMove[1],true);
+    }
     updateBoardStatus();
     drawBoard();
   }
@@ -918,63 +939,100 @@ function resetBoard() {
 
 function updateDemoRegion(demoNum) {
   let demotext, demomoves;
-  // for brevity in the demo steps below, use B and W for black and white
+  // for brevity in the demo steps below, use a special character for the action
   if (demoNum==1) {
     demotext = [
       "<p>In this demo we will walk through the steps of solving this puzzle. " +
         "Press the 'next' button to walk through the solving steps, or the " +
         "'back' button to return to the previous step.</p>" +
         "<p>At the beginning of a solve, there are no errors, but there are " +
-        "many indeterminate cell which we need to turn white or black to " +
-        "solve the puzzle. For our first time through we can turn on Assist " +
+        "many unsolved numbers which we need to satisfy by turning cells black " +
+        "in the arrow direction before being able to solve the puzzle. Then we " +
+        "must craft a path through all remaining white cells that makes a complete " +
+        "loop. For our first time through we can turn on Assist " +
         "Mode 2 to see any errors that we might generate in the process of " +
-        "the solve.</p>",
-      "In Nurikabe, the easiest 'freebies' are the '1' digits, which must be " +
-        "surrounded by all black cells in order to keep them contained into a " +
-        "room of size 1.",
-      "The next observation is that all numbered cells must be kept away from " +
-        "other ones to avoid violating rule 3, so we can isolate them if they " +
-        "are too close by setting their neighbor cells to black.",
-      "Now we can see that some directions are already determinable. The '2' " +
-        "in the NW corner must move downward, the '5' in the SW corner must " +
-        "move to the left and then up, and the '2' next to it must move up. We " +
-        "can begin to set their squares to white in those directions.",
-      "For the two '2' rooms that have been created, we can set their borders " +
-        "by setting the boundary squares to black. But sure to not assume that " +
-        "you need to set the diagonal boundary squares.",
-      "It is now clear how to complete the '5' room in the lower left.",
-      "Now two new observations can be made. The first is that the black square " +
-        "in the left column is isolated, as is the one in the bottom row. They " +
-        "must be connected to the others, and the only way to do so is to set " +
-        "their neighbor to black. Secondly, the single isolated indeterminate " +
-        "square in the middle can only be set to black, else setting it to " +
-        "white would isolate it as a '1' room with no digit, which violates " +
-        "rule 2.",
-      "Now we have two potential 'pool violations' brewing, below the '3' and " + 
-        "above the incomplete '2'. Setting a 4th black square to create a 2x2 " +
-        "grid of black squares would violate rule 5, and thus they must be set " +
-        "to white.",
-      "For the unsolved '2', this completes its room, and its neighbors can be " +
-        "set to black. For the cell below the '3', it is now clear that it can " +
-        "only be satisfied from above; all other digits are not long enough to " +
-        "'make it' to that white square.",
-      "In the upper row we have another pool forming, and it must be avoided " +
-        "with a white cell, which can only be reached by the '4' to its right.",
-      "Now the path for the '4', the final remaining unsolved number is clear.",
+        "the solve, as well as get an indicator as to when numbers have been " +
+        "satisfied.</p>",
+      "As shown with the green text, the '0&larr;' cell is already satisfied, " +
+        "but we can put dots in the cells to its left to remind ourselves that " +
+        "we will need a path through them. Next, we can look for 'freebies', " +
+        "that is easy cells to satisfy. Looking at the board, we can see four " +
+        "such easy ones. There are three '1' digits that have only one cell " +
+        "between them and the wall in the direction of their arrow. Those cells " +
+        "must by definition be black. In addition, the '2&uarr;' has three " +
+        "cells above it. In order to not violate the rule about adjacent black " +
+        "cells, we can determine where the two black cells must lie.",
+      "<p>Now the task is to determine where to put the black cells to satisfy " +
+        "the three unsolved numbers, and how to create the path loop to go " +
+        "through the remaining white cells. Recall there are many cells that " +
+        "are not under the 'control' of any arrow cells, so they could be black " +
+        "or white as required by the creation of the path.</p><p>Thinking about " +
+        "the nature of the loop, we can infer its shape in some corners of the " +
+        "board. For instance, in the cells next to black cells near the edge " +
+        "of the board, there can not be black cells (in order to avoid the " +
+        "adjacency rule violations), so thus they must be white cells with a " +
+        "path going through them. Given that they are in a corner, that path " +
+        "must by definition be a turn. We can place path segments in those " +
+        "corners to begin to visualize the loop required. We can also place " +
+        "dot placeholders in other cells next to the existing black squares.</p>",
+      "<p>Now let's look at what we can, and at what we can't determine at this " +
+         "stage of the solution. It appears tempting to put a path bend just " +
+         "below the upper-left '1&uarr;' square, as we did in the other corners " +
+         "of the path. But note here that, first off, gray number squares do not " +
+         "have a rule of requiring a white square next to them; and secondly, " +
+         "there are no number/arrow squares that dictate the rules of this " +
+         "particular cell. Thus at this time we must leave it unknown.</p><p>" +
+         "Areas we can make progress are those such as the lower left and right " +
+         "squares, where an existing path must turn back into the board, and any " +
+         "dotted cell (which must contain a path) that is one cell wide, thus " +
+         "requiring a straight path. There are two of these in the upper right. " +
+         "Similarly the square below the '2&uarr;' must continue inwards.</p>",
+      "Looking in the bottom row, we can see two segments which can now progress. " +
+         "Given that there can only be one loop, the small segments can not connect " +
+         "to themselves, so thus the must move inward until there is room for them " +
+         "to connect to another segment. For the segment on the left, there is still " +
+         "an unsatisfied '1&larr;' rule, and thus it is clear that it must be just " +
+         "to the left of the number in order for there to be room for the segment " +
+         "to move upwards. With this in place, and with the right segment also " +
+         "forced upwards, the bottom two rows can thus be completed.",
+      "Now looking at the dotted square in the upper right region, knowing that it " +
+        "must have a path through it, and its above neighbor is completed, it must " +
+        "have a bend down and into the center of the board. Once that segment is " +
+        "placed, it is clear there is only one square left that can be black on " +
+        "that row with the '2&rarr;' in it. It can be set to black and its " +
+        "neighboring cells dotted.",
+      "Of the two new dotted squares, it is clear that the one below the black " +
+        "cell must have a turn. Once that turn is placed, there is only one " +
+        "other cell left to satisfy the '1&uarr;' square that remains. Setting " +
+        "it to black satisfies all of the numerical squares, and only the final "+
+        "connection of the path remains.",
+      "Now progress must be made piecemeal on the path segments. In the upper " +
+        "row, the path must continue left, while the dotted square below that " +
+        "must contain a bend. That completes those rows, and forces the direction " +
+        "of its leftmost leg.",
+      "Now on the left side, the dotted square must contain a path, so it is " +
+        "clear that it must come from above, then turn left to avoid stranding " +
+        "the end in the left column. This indicates that the white square above must " +
+        "be turned black. Doing so will not violate any of the numerical constraints.",
+      "Now the safest way to proceed is to connect path ends where only one choice " +
+        "remains, such as the one two to the right of the '2&rarr;' cell. Connecting " +
+        "that one leaves only one choice for the one SE of that.",
+      "Finally, there is only one solution that creates one contiguous loop, rather " +
+        "than two indepedent ones. Connecting the ends completes the path.",
       "Congratulations! The puzzle is solved!"];
     demomoves = [
       [],
       [],
-      ["B23","B14","B25","B34"],
-      ["B01","B51","B62","B53"],
-      ["W10","W60","W50","W40","W42"],
-      ["B20","B11","B41","B32","B43"],
-      ["W30","B31"],
-      ["B21","B63","B33"],
-      ["W22","W44"],
-      ["B45","B55","B64","W12","B03","B13"],
-      ["W04","W05","W06","B15","B26"],
-      ["W36","W46","W56","B66","B65"]];
+      [".30",".31","100","150","157","106","126"],
+      ["F01","L40","F60","705","J47","767",".16",".25",".27"],
+      ["-16","|27","L70","J77","-46"],
+      ["J62","163","-72","-74","-75","L65"],
+      ["725","123",".13",".33"],
+      ["F33","114"],
+      ["F03","L12","|11"],
+      ["J31","120","-41"],
+      ["J34","L45"],
+      ["742","L53","-54"]];
   } else {
     demotext = [
       "<p>In this demo we will walk more quickly through the steps of solving " +
@@ -983,42 +1041,48 @@ function updateDemoRegion(demoNum) {
         "to return to the previous step. You can also use the undo button to move " +
         "backwards individual steps, or continue playing forward if you wish.</p>" +
         "<p>The first thing to do is to turn on the assist mode to let us know " +
-        "which rooms still need completion. Let's start with the '1' solves and " +
-        "the number separation like in the first demo.</p>",
-      "We can extend the direction of the '6' in the NW corner, complete the '3' " +
-        "in the SW corner, and begin working on the middle bottom '3' and the '4' " +
-        "in the SE corner. Meanwhile we can extend the black squares where they " +
-        "would otherwise be stranded from connecting with others.",
-      "The bottom row '3' is now completeable, as is the SE '4'. Their completions " +
-        "and the previous ones strand more black 'rivers' that must be extended " +
-        "to connect with others.",
-      "The forcing downwards of the '6' and '3' rooms continues to force the " +
-        "black river between them to grow downwards as well, until it is at risk " +
-        "of being cut off completely. Meanwhile we can grow the '4' in the SW " +
-        "corner upwards.",
-      "Now the need for that left-side river to connect to the others forces it " +
-        "to flow to the right, forcing a turn in the '3' and '4' numbers that " +
-        "are coming together.",
-      "Now the river to the left of the '2' must connect, so the '2' is forced " +
-        "to the right.",
-      "Now there are two inner squares at risk of being 'black pools' and must " +
-        "be set to white. Also, the black square next to the six must extend " +
-        "south one to avoid being stranded.",
-      "Finally it should be clear how to complete the six without stranding the " +
-        "black square on the right column. In this way you've completed the " +
-        "puzzle by attacking those regions that are solveable and saving the " +
-        "rest for last.",
+        "which rooms still need completion. Let's start with the '0' squares and " +
+        "either put a path segment where definitive, or a dot where not.</p>",
+      "Next we can fill the '1' and '2' digit freebies, and begin to place path " +
+        "corners where they are deterministic.",
+      "These path segments help us satisfy a few other number square requirements, " +
+        "and then determine more path segments, such as in the lower left and " +
+        "upper right corners.",
+      "Looking at the left side, it is unclear at the moment if the square between " +
+        "the '1&uarr;' and '0&darr;' squares is black or white since it is under " +
+        "no numerical constraints. But looking above it is evident that the incomplete " +
+        "path can only connect downwards in a snaking pattern, in order to connect " +
+        "both dots.",
+      "The incomplete segment in the upper middle must turn downwards on both ends, " +
+        "which leaves the remaining white cell in the second row isolated, meaning " +
+        "it must be set to black.",
+      "The center '1&darr;' square can be satisfied as well, forcing some bends in " +
+        "path segments. These path segments allow the final unsolved digit to be " +
+        "completed.",
+      "A few more line segments have only one option to progress, and there " +
+        "is one corner bend that can be definitely added as well in the second " +
+        "to bottom row.",
+      "The two segment ends in the lower left must join now, and there is only " +
+        "is only one way to join them while also connecting the remaining " +
+        "dots. This requires that the stranded cell must be set to black.",
+      "The remaining dotted square requires a path segment, which forces the " +
+        "connectivity with the row below.",
+      "Finally, the two remaining path ends must be connected. They can't isolate " +
+        "all 5 remaining empty squares, so there is only one solution that doesn't " +
+        "require adjoining black squares.",
       "Congratulations! The puzzle is solved!"];
     demomoves = [
       [],
-      ["B02","B11","B54","B45","B56","B65","B61","B72","B76"],
-      ["W00","W10","W20","W70","W60","B50","W74","W67","W57","B03","B73","B66"],
-      ["W64","B63","W47","B37","B46","B13","B21","B51","B53"],
-      ["W30","W22","B31","W40","B41","W52","W42"],
-      ["B32","B33","W23","B24","W43","B44","B34"],
-      ["B14","W05","B15","B06"],
-      ["W25","W35","B16"],
-      ["W17","W27","W26","B36"]];
+      ["|10","-01","-05","-25","-47",".07",".17",".67",".77",".87",".97","|60",".52",".62",".72",".82",".92"],
+      ["130",".31","193","103","123",".22","-13","109","199","702","F04","L20","F50","J92","L94","719","J98"],
+      ["181","|80","L90","|82","128","185",".86","|39","|84","-95","707","L17"],
+      ["722","F31","|41"],
+      ["|34","|36","116"],
+      ["164","774","L65",".63","176"],
+      ["745","-66","F86","787"],
+      ["F52","753","|62","|63","143"],
+      ["L77","778"],
+      ["|58","|59","L68","J69","179"]];
   }
   if (demoStepNum < demotext.length) {
     if (demoStepNum) {
@@ -1031,6 +1095,9 @@ function updateDemoRegion(demoNum) {
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
         if (globalBoardValues[y][x] == "") {
+          puzzleBoardStates[y][x] = CELL_WHITE;
+          globalLineStates[y][x] = 0;
+        } else {
           puzzleBoardStates[y][x] = CELL_FIXED;
         }
       }
@@ -1040,8 +1107,19 @@ function updateDemoRegion(demoNum) {
       let demosteps = demomoves[step];
       for (let i=0;i<demosteps.length;i++) {
         let steps = demosteps[i].split("");
-        let s0 = (steps[0] == 'W') ? CELL_WHITE : CELL_BLACK;
-        addMove(s0,steps[1],steps[2]);
+        let s0;
+        switch (steps[0]) {
+          case '1': s0 = CELL_BLACK; break;
+          case '.': s0 = PATH_DOT;   break;
+          case '-': s0 = PATH_WE;    break;
+          case '|': s0 = PATH_NS;    break;
+          case 'F': s0 = PATH_SE;    break;
+          case '7': s0 = PATH_SW;    break;
+          case 'J': s0 = PATH_NW;    break;
+          case 'L': s0 = PATH_NE;    break;
+          default:  console.log("what is this: " + steps[0]);
+        }
+        addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }
     }
     updateBoardStatus();
