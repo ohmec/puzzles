@@ -106,20 +106,19 @@
         </p>
         <p>
           To describe a puzzle, the character string must be of the
-          form: "WxH:&lt;digit-arrow-descriptor&gt;", where W is a
+          form: "WxH:&lt;circle-descriptor&gt;", where W is a
           number indicating the width of the grid, and H the height.
-          The digit descriptor is a list of the pre-defined
-          digit contents plus an arrow direction, from left to right,
-          then top to bottom. The arrow directions are indicated with
-          ^ for up, v for down, &lt; for left, or &gt; for right.
-          Blank cells are represented with a '-' character. To assist
-          in the definition of a sparse board, a combination of <i>b</i>
-          consecutive blanks can be represented with a lowercase letter
-          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
-          Digit values greater than '9' should be represented with
-          capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
-          can be used as a visual separator, for example between rows.
-          An example descriptor is as follows for entry 1:
+          The circle descriptor is a list of the pre-defined circle
+          contents plus the spaces in between them, from left to right,
+          then top to bottom.  For the circles, the number 1 is used
+          to indicate a white circle; 2 for a black circle. Blank
+          cells are represented with a '-' character. To assist in
+          the definition of a sparse board, a combination of
+          <i>b</i> consecutive blanks can be represented
+          with a lowercase letter from 'a' to 'z', corresponding to
+          1 to 26 consecutive blanks. A dot '.' can be used as a
+          visual separator, for example between rows.  An example
+          descriptor is as follows for entry 1:
           '<span id="descr1">descr</span>'.
         </p>
         <p>

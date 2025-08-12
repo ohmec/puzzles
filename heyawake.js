@@ -62,7 +62,6 @@ function puzzleInit() {
   $("#demotab").hide();
 
   $("#displayButton").click(function() {
-    $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
@@ -306,7 +305,8 @@ function initStructures(puzzle) {
   globalBoardColors =     initYXFromValue(indetCellColor);
   puzzleBoardStates =     initYXFromValue(STATE_INDET);
   globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
-  globalBoardLineColors = initYXFromValue("black"); // default line is black
+  globalLineColors =      initYXFromValue("black"); // default line is black
+  globalCircleColors =    initYXFromValue("black");
 
   // override board colors if the hexParams are included, just for 0th
   // entry of the puzzles (example completed puzzle). this uses hex values
@@ -750,16 +750,5 @@ function updateDemoRegion(demoNum) {
     }
     updateBoardStatus();
     drawBoard();
-  }
-}
-
-function fdelay(num) {
-  let now = new Date();
-  let stop = now.getTime() + num;
-  while (true) {
-    now = new Date();
-    if (now.getTime() > stop) {
-      return;
-    }
   }
 }

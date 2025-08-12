@@ -3,6 +3,10 @@ const CLICK_MIDDLE  = 1;
 const CLICK_RIGHT   = 2;
 const CLICK_UNKNOWN = 9;
 
+const CIRCLE_NONE  = 0;
+const CIRCLE_WHITE = 1;
+const CIRCLE_BLACK = 2;
+
 const PATH_NONE   = 0b0000000;
 const PATH_DOT    = 0b0010000;
 const PATH_CLEAR  = 0b0010001;
@@ -31,6 +35,7 @@ const KEY_RIGHT = 0x27;
 const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
+const KEY_2     = 0x32;
 const KEY_7     = 0x37;
 const KEY_9     = 0x39;
 const ALT_0     = 0x60; // these are the number pad versions
@@ -109,8 +114,8 @@ let globalCursorX = 0;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
 let globalBoardValues, globalBoardColors, globalBoardTextColors;
-let globalWallStates, globalLineStates, globalBoardLineColors;
-let globalCircleStates;
+let globalWallStates, globalLineStates, globalLineColors;
+let globalCircleStates, globalCircleColors;
 
 function expandNumParams(numStr) {
   for (let cv=10;cv<36;cv++) {
@@ -125,7 +130,9 @@ function expandNumParams(numStr) {
 }
 
 function setGridSize(puzzleW) {
-  if(puzzleW > 20) {
+  if(puzzleW > 30) {
+    globalGridSize = 35;
+  } else if(puzzleW > 20) {
     globalGridSize = 40;
   } else if(puzzleW <= 10) {
     globalGridSize = 50;
@@ -214,9 +221,8 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
     }
   }
   if (!hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW))) {
-    console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
-                " expected " + (globalPuzzleH*globalPuzzleW));
-    return;
+    throw "ERROR in puzzle descriptor nums, got length " + numParams.length +
+          " expected " + (globalPuzzleH*globalPuzzleW);
   }
   let boardValues = new Array(globalPuzzleH);
   let scoot = 0;  // only used for hasDir
@@ -246,9 +252,8 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
     }
   }
   if (hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW+scoot))) {
-    console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
-                " expected " + (globalPuzzleH*globalPuzzleW+scoot));
-    return;
+    throw "ERROR in puzzle descriptor nums, got length " + numParams.length +
+          " expected " + (globalPuzzleH*globalPuzzleW+scoot);
   }
   return boardValues;
 }
@@ -259,7 +264,8 @@ function initLineValuesFromParams(numParamText,hasDir=false) {
   // if not, then there are no line values. if so, then we need
   // to treat the FJL7|_ characters as line segments
   let lineValues;
-  if ((numParamText.search(/F/)!=-1) && (numParamText.search(/|/)!=-1) &&
+  if (numParamText &&
+      (numParamText.search(/F/)!=-1) && (numParamText.search(/|/)!=-1) &&
       (numParamText.search(/J/)!=-1) && (numParamText.search(/_/)!=-1) &&
       (numParamText.search(/7/)!=-1) && (numParamText.search(/L/)!=-1)) {
     // special case for hasDir; 1v (2v 3v etc) indicates a south
@@ -287,14 +293,13 @@ function initLineValuesFromParams(numParamText,hasDir=false) {
         } else {
           lineValues[y][x] =
             (param == '-') ? "" :
-            (param == '*') ? "" :
-            (param == '_') ? "-" : param;
+            (param == '*') ? "" : convertPathCharToCode(param);
         }
       }
     }
     if (hasDir && (numParams.length != (globalPuzzleH*globalPuzzleW+scoot))) {
-      console.log("ERROR in puzzle descriptor nums, got length " + numParams.length +
-                  " expected " + (globalPuzzleH*globalPuzzleW+scoot));
+      throw "ERROR in puzzle descriptor nums, got length " + numParams.length +
+            " expected " + (globalPuzzleH*globalPuzzleW+scoot);
       return;
     }
   } else {
@@ -344,16 +349,16 @@ function initBoardValuesFromBoxes(boxParams) {
     for (let y=by;y<(by+bh);y++) {
       for (let x=bx;x<(bx+bw);x++) {
         if (y>=globalPuzzleH) {
-          console.log("ERROR: cell " + y + "," + x + " extends beyond puzzle board");
+          throw "ERROR: cell " + y + "," + x + " extends beyond puzzle board";
           inError = 1;
         }
         if (x>=globalPuzzleW) {
-          console.log("ERROR: cell " + y + "," + x + " extends beyond puzzle board");
+          throw "ERROR: cell " + y + "," + x + " extends beyond puzzle board";
           inError = 1;
         }
         totalCount++;
         if (cellCounts[y][x] != 0) {
-          console.log("ERROR: cell " + y + "," + x + " is used by two box descriptors");
+          throw "ERROR: cell " + y + "," + x + " is used by two box descriptors";
           inError = 1;
         }
         cellCounts[y][x]++;
@@ -361,7 +366,8 @@ function initBoardValuesFromBoxes(boxParams) {
     }
   }
   if (totalCount != (globalPuzzleH*globalPuzzleW)) {
-    console.log("ERROR: box descriptors only cover " + totalCount + " of the required " + (globalPuzzleH*globalPuzzleW) + " cells");
+    throw "ERROR: box descriptors only cover " + totalCount +
+          " of the required " + (globalPuzzleH*globalPuzzleW) + " cells";
     inError = 1;
   }
   if (inError) {
@@ -492,13 +498,13 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
   let expLenH = Math.floor((globalPuzzleW+2)/4)*globalPuzzleH;
   let expLenW = Math.floor((globalPuzzleH+2)/4)*globalPuzzleW;
   if (expLenH != hexParamArrayRows.length) {
-    console.log("ERROR in puzzle descriptor row walls, got length " + hexParamArrayRows.length +
-                " expected " + expLenH);
+    throw "ERROR in puzzle descriptor row walls, got length " + hexParamArrayRows.length +
+          " expected " + expLenH;
     return;
   }
   if (expLenW != hexParamArrayCols.length) {
-    console.log("ERROR in puzzle descriptor col walls, got length " + hexParamArrayCols.length +
-                " expected " + expLenW);
+    throw "ERROR in puzzle descriptor col walls, got length " + hexParamArrayCols.length +
+          " expected " + expLenW;
     return;
   }
   // "true" wall states are all dashes at first
@@ -568,10 +574,11 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
                globalBoardColors[y][x],
                globalBoardValues[y][x],
                globalCircleStates[y][x],
+               globalCircleColors[y][x],
                globalLineStates[y][x],
+               globalLineColors[y][x],
                lineFirst,
-               globalBoardTextColors[y][x],
-               globalBoardLineColors[y][x]);
+               globalBoardTextColors[y][x]);
     }
   }
   // draw horizontal walls
@@ -597,7 +604,7 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   }
 }
 
-function drawTile(x,y,color,value,circle,line,lineFirst,textColor,lineColor) {
+function drawTile(x,y,color,value,circle,circlecolor,line,lineColor,lineFirst,textColor) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.fillStyle = color;
@@ -607,9 +614,9 @@ function drawTile(x,y,color,value,circle,line,lineFirst,textColor,lineColor) {
   }
   // draw circle next if it exists
   if (circle) {
-    globalContext.lineWidth = 2.5;
-    globalContext.strokeStyle = "black";
-    globalContext.fillStyle = (circle==2) ? "black" : "white";
+    globalContext.lineWidth = 4.0;
+    globalContext.strokeStyle = circlecolor;
+    globalContext.fillStyle = (circle==2) ? circlecolor : "white";
     globalContext.beginPath();
     globalContext.arc(drawX+globalGridSize/2,
                 drawY+globalGridSize/2,
@@ -998,7 +1005,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       break;
     }
   if (inerror) {
-    console.log("FATAL: makes no sense, coming from " + y + "," + x + " with dir " + dir + " and found " + state);
+    throw "FATAL: makes no sense, coming from " + y + "," + x + " with dir " + dir + " and found " + state;
   }
   return [alive,y,x,dir];
 }
@@ -1159,4 +1166,156 @@ function clickType(evnt) {
     return CLICK_RIGHT;
   }
   return CLICK_UNKNOWN;
+}
+
+function pathHasTurn(line) {
+  if (line==PATH_NW || line==PATH_NE || line==PATH_SW || line==PATH_SE) {
+    return true;
+  }
+  return false;
+}
+
+function mergePathLines(line1,line2) {
+  if ((line1==0) || (line1==PATH_DOT)) {
+    return line2;
+  } else if (line1==line2) {
+    return line1;
+  } else {
+    // often the merges are incompatible, just need to return
+    // the new one
+    if (((line1==PATH_WE) && (line2==PATH_N || line2==PATH_S)) ||
+        ((line1==PATH_NS) && (line2==PATH_W || line2==PATH_E)) ||
+        ((line1==PATH_SE) && (line2==PATH_N || line2==PATH_W)) ||
+        ((line1==PATH_NE) && (line2==PATH_S || line2==PATH_W)) ||
+        ((line1==PATH_NW) && (line2==PATH_S || line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_N || line2==PATH_E))) {
+      return line2;
+    }
+    // often the merges are identical, just return the old one
+    if (((line1==PATH_WE) && (line2==PATH_W || line2==PATH_E)) ||
+        ((line1==PATH_NS) && (line2==PATH_N || line2==PATH_S)) ||
+        ((line1==PATH_SE) && (line2==PATH_S || line2==PATH_E)) ||
+        ((line1==PATH_NE) && (line2==PATH_N || line2==PATH_E)) ||
+        ((line1==PATH_NW) && (line2==PATH_N || line2==PATH_W)) ||
+        ((line1==PATH_SW) && (line2==PATH_S || line2==PATH_W))) {
+      return line1;
+    }
+    // these are actual merges
+    if ((line1==PATH_W && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_W)) {
+      return PATH_WE;
+    }
+    if ((line1==PATH_N && line2==PATH_S) ||
+        (line1==PATH_S && line2==PATH_N)) {
+      return PATH_NS;
+    }
+    if ((line1==PATH_N && line2==PATH_W) ||
+        (line1==PATH_W && line2==PATH_N)) {
+      return PATH_NW;
+    }
+    if ((line1==PATH_S && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_S)) {
+      return PATH_SE;
+    }
+    if ((line1==PATH_N && line2==PATH_E) ||
+        (line1==PATH_E && line2==PATH_N)) {
+      return PATH_NE;
+    }
+    if ((line1==PATH_S && line2==PATH_W) ||
+        (line1==PATH_W && line2==PATH_S)) {
+      return PATH_SW;
+    }
+    return line1;
+  }
+}
+
+function unmergePathLines(line1,line2) {
+  if (line1==PATH_NONE) {
+    return PATH_NONE;
+  } else if (line1==PATH_DOT) {
+    return PATH_DOT;
+  } else if (line1==line2) {
+    return PATH_NONE;
+  // if there is no intersection, ignore
+  } else if ((line1&line2)==PATH_SINGLE) {
+    return line1;
+  } else {
+    if (((line1==PATH_WE) && (line2==PATH_W)) ||
+        ((line1==PATH_SE) && (line2==PATH_S)) ||
+        ((line1==PATH_NE) && (line2==PATH_N))) {
+      return PATH_E;
+    }
+    if (((line1==PATH_WE) && (line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_S)) ||
+        ((line1==PATH_NW) && (line2==PATH_N))) {
+      return PATH_W;
+    }
+    if (((line1==PATH_NS) && (line2==PATH_N)) ||
+        ((line1==PATH_SE) && (line2==PATH_E)) ||
+        ((line1==PATH_SW) && (line2==PATH_W))) {
+      return PATH_S;
+    }
+    if (((line1==PATH_NS) && (line2==PATH_S)) ||
+        ((line1==PATH_NE) && (line2==PATH_E)) ||
+        ((line1==PATH_NW) && (line2==PATH_W))) {
+      return PATH_N;
+    }
+    // everything else is incompatible, return 0
+    return 0;
+  }
+}
+
+function preClearPathNeighbors(y,x,state) {
+  switch (state) {
+    case PATH_WE:
+      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
+      break;
+    case PATH_NS:
+      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+      break;
+    case PATH_SE:
+      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+      break;
+    case PATH_NE:
+      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+      break;
+    case PATH_NW:
+      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+      break;
+    case PATH_SW:
+      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+      break;
+    case PATH_W:
+      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
+      break;
+    case PATH_E:
+      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
+      break;
+    case PATH_N:
+      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+      break;
+    case PATH_S:
+      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+      break;
+  }
+}
+
+function convertPathCharToCode (pathChar) {
+  switch (pathChar) {
+    case '.': return PATH_DOT;
+    case '_': return PATH_WE;
+    case '-': return PATH_WE;
+    case '|': return PATH_NS;
+    case 'F': return PATH_SE;
+    case '7': return PATH_SW;
+    case 'J': return PATH_NW;
+    case 'L': return PATH_NE;
+  }
+  return PATH_NONE;
 }
