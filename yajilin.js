@@ -19,16 +19,16 @@ let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
 let debugMode = false;
 
-const CELL_WHITE =  1;
-const CELL_BLACK =  2;
-const CELL_FIXED =  3;
+const CELL_WHITE = 1;
+const CELL_BLACK = 2;
+const CELL_FIXED = 3;
 
 // which keys are handled
 let handledKeys =
   [ KEY_BS, KEY_CR, KEY_ESC, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_DOT,
     KEY_1, ALT_1, KEY_0, ALT_0, KEY_DASH, KEY_VERT, KEY_L, KEY_I, KEY_J, KEY_7, KEY_F ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList, puzzleBoardStates;
+let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = true;
@@ -75,7 +75,6 @@ function puzzleInit() {
   $("#demotab").hide();
 
   $("#displayButton").click(function() {
-    $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
@@ -226,135 +225,6 @@ function addHistory(y,x,prevvalue,movetype) {
   moveHistory.push([y,x,prevvalue,movetype]);
 }
 
-function mergeLines(line1,line2) {
-  if (line1==0 || line1==PATH_DOT) {
-    return line2;
-  } else if (line1==line2) {
-    return line1;
-  } else {
-    // often the merges are incompatible, just need to return
-    // the new one
-    if (((line1==PATH_WE) && (line2==PATH_N || line2==PATH_S)) ||
-        ((line1==PATH_NS) && (line2==PATH_W || line2==PATH_E)) ||
-        ((line1==PATH_SE) && (line2==PATH_N || line2==PATH_W)) ||
-        ((line1==PATH_NE) && (line2==PATH_S || line2==PATH_W)) ||
-        ((line1==PATH_NW) && (line2==PATH_S || line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_N || line2==PATH_E))) {
-      return line2;
-    }
-    // often the merges are identical, just return the old one
-    if (((line1==PATH_WE) && (line2==PATH_W || line2==PATH_E)) ||
-        ((line1==PATH_NS) && (line2==PATH_N || line2==PATH_S)) ||
-        ((line1==PATH_SE) && (line2==PATH_S || line2==PATH_E)) ||
-        ((line1==PATH_NE) && (line2==PATH_N || line2==PATH_E)) ||
-        ((line1==PATH_NW) && (line2==PATH_N || line2==PATH_W)) ||
-        ((line1==PATH_SW) && (line2==PATH_S || line2==PATH_W))) {
-      return line1;
-    }
-    // these are actual merges
-    if ((line1==PATH_W && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_W)) {
-      return PATH_WE;
-    }
-    if ((line1==PATH_N && line2==PATH_S) ||
-        (line1==PATH_S && line2==PATH_N)) {
-      return PATH_NS;
-    }
-    if ((line1==PATH_N && line2==PATH_W) ||
-        (line1==PATH_W && line2==PATH_N)) {
-      return PATH_NW;
-    }
-    if ((line1==PATH_S && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_S)) {
-      return PATH_SE;
-    }
-    if ((line1==PATH_N && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_N)) {
-      return PATH_NE;
-    }
-    if ((line1==PATH_S && line2==PATH_W) ||
-        (line1==PATH_W && line2==PATH_S)) {
-      return PATH_SW;
-    }
-    return line1;
-  }
-}
-
-function unmergeLines(line1,line2) {
-  if (line1==PATH_NONE) {
-    return PATH_NONE;
-  } else if (line1==line2) {
-    return PATH_NONE;
-  // if there is no intersection, ignore
-  } else if ((line1&line2)==PATH_SINGLE) {
-    return line1;
-  } else {
-    if (((line1==PATH_WE) && (line2==PATH_W)) ||
-        ((line1==PATH_SE) && (line2==PATH_S)) ||
-        ((line1==PATH_NE) && (line2==PATH_N))) {
-      return PATH_E;
-    }
-    if (((line1==PATH_WE) && (line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_S)) ||
-        ((line1==PATH_NW) && (line2==PATH_N))) {
-      return PATH_W;
-    }
-    if (((line1==PATH_NS) && (line2==PATH_N)) ||
-        ((line1==PATH_SE) && (line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_W))) {
-      return PATH_S;
-    }
-    if (((line1==PATH_NS) && (line2==PATH_S)) ||
-        ((line1==PATH_NE) && (line2==PATH_E)) ||
-        ((line1==PATH_NW) && (line2==PATH_W))) {
-      return PATH_N;
-    }
-    // everything else is incompatible, return 0
-    return 0;
-  }
-}
-
-function preClearNeighbors(y,x,state) {
-  switch (state) {
-    case PATH_WE:
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
-      break;
-    case PATH_NS:
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
-      break;
-    case PATH_SE:
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
-      break;
-    case PATH_NE:
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
-      break;
-    case PATH_NW:
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
-      break;
-    case PATH_SW:
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
-      break;
-    case PATH_W:
-      globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
-      break;
-    case PATH_E:
-      globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
-      break;
-    case PATH_N:
-      globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
-      break;
-    case PATH_S:
-      globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
-      break;
-  }
-}
-
 function contains(state,list) {
   let hit = false;
   for (let i=0;i<list.length;i++) {
@@ -381,16 +251,16 @@ function addMove(moveType,y,x,noHistory=false) {
     if (moveType == CELL_BLACK) {
       globalLineStates[y][x] = PATH_NONE;
       if (y) {
-        globalLineStates[y-1][x] = unmergeLines(globalLineStates[y-1][x],PATH_S);
+        globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
       }
       if (y<(globalPuzzleH-1)) {
-        globalLineStates[y+1][x] = unmergeLines(globalLineStates[y+1][x],PATH_N);
+        globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
       }
       if (x) {
-        globalLineStates[y][x-1] = unmergeLines(globalLineStates[y][x-1],PATH_E);
+        globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
       }
       if (x<(globalPuzzleW-1)) {
-        globalLineStates[y][x+1] = unmergeLines(globalLineStates[y][x+1],PATH_W);
+        globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
       }
     }
     return;
@@ -400,21 +270,11 @@ function addMove(moveType,y,x,noHistory=false) {
   if (puzzleBoardStates[y][x] == CELL_BLACK) {
     return;
   }
-  if (((y==0) || (puzzleBoardStates[y-1][x]!=CELL_WHITE)) &&
-      ((moveType==PATH_N) || (moveType==PATH_NS) || (moveType==PATH_NW) || (moveType==PATH_NE))) {
-    return; // illegal north moves
-  }
-  if (((y==(globalPuzzleH-1)) || (puzzleBoardStates[y+1][x]!=CELL_WHITE)) &&
-      ((moveType==PATH_S) || (moveType==PATH_NS) || (moveType==PATH_SW) || (moveType==PATH_SE))) {
-    return; // illegal south moves
-  }
-  if (((x==0) || (puzzleBoardStates[y][x-1]!=CELL_WHITE)) &&
-      ((moveType==PATH_W) || (moveType==PATH_WE) || (moveType==PATH_NW) || (moveType==PATH_SW))) {
-    return; // illegal west moves
-  }
-  if (((x==(globalPuzzleW-1)) || (puzzleBoardStates[y][x+1]!=CELL_WHITE)) &&
-      ((moveType==PATH_E) || (moveType==PATH_WE) || (moveType==PATH_NE) || (moveType==PATH_SE))) {
-    return; // illegal east moves
+  if ((((y==0)                 || (puzzleBoardStates[y-1][x]!=CELL_WHITE)) && ((moveType & PATH_N) == PATH_N)) ||
+      (((y==(globalPuzzleH-1)) || (puzzleBoardStates[y+1][x]!=CELL_WHITE)) && ((moveType & PATH_S) == PATH_S)) ||
+      (((x==0)                 || (puzzleBoardStates[y][x-1]!=CELL_WHITE)) && ((moveType & PATH_W) == PATH_W)) ||
+      (((x==(globalPuzzleW-1)) || (puzzleBoardStates[y][x+1]!=CELL_WHITE)) && ((moveType & PATH_E) == PATH_E))) {
+    return;
   }
 
   if (!noHistory) {
@@ -427,23 +287,23 @@ function addMove(moveType,y,x,noHistory=false) {
         (moveType==PATH_S && contains(globalLineStates[y][x],[PATH_NW,PATH_NE,PATH_WE])) ||
         (moveType==PATH_W && contains(globalLineStates[y][x],[PATH_SE,PATH_NE,PATH_NS])) ||
         (moveType==PATH_E && contains(globalLineStates[y][x],[PATH_SW,PATH_NW,PATH_NS]))) {
-      preClearNeighbors(y,x,globalLineStates[y][x]);
+      preClearPathNeighbors(y,x,globalLineStates[y][x]);
     }
 
     // and the following need clearing for the precursor cell
-    if (moveType==PATH_N && contains(globalLineStates[y-1][x],[PATH_NW,PATH_NE,PATH_WE])) {
-      preClearNeighbors(y-1,x,globalLineStates[y-1][x]);
+    if (       moveType==PATH_N && contains(globalLineStates[y-1][x],[PATH_NW,PATH_NE,PATH_WE])) {
+      preClearPathNeighbors(y-1,x,globalLineStates[y-1][x]);
     } else if (moveType==PATH_S && contains(globalLineStates[y+1][x],[PATH_SW,PATH_SE,PATH_WE])) {
-      preClearNeighbors(y+1,x,globalLineStates[y+1][x]);
+      preClearPathNeighbors(y+1,x,globalLineStates[y+1][x]);
     } else if (moveType==PATH_W && contains(globalLineStates[y][x-1],[PATH_SW,PATH_NW,PATH_NS])) {
-      preClearNeighbors(y,x-1,globalLineStates[y][x-1]);
+      preClearPathNeighbors(y,x-1,globalLineStates[y][x-1]);
     } else if (moveType==PATH_E && contains(globalLineStates[y][x+1],[PATH_SE,PATH_NE,PATH_NS])) {
-      preClearNeighbors(y,x+1,globalLineStates[y][x+1]);
+      preClearPathNeighbors(y,x+1,globalLineStates[y][x+1]);
     }
   } else {
     // for the others, we always need to clear any existing state ("unmerge")
     // and its neighboring effects
-    preClearNeighbors(y,x,globalLineStates[y][x]);
+    preClearPathNeighbors(y,x,globalLineStates[y][x]);
   }
 
   // now merge in the new half-segments in the neighbors
@@ -455,50 +315,50 @@ function addMove(moveType,y,x,noHistory=false) {
       globalLineStates[y][x] = PATH_DOT;
       break;
     case PATH_N:
-      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],PATH_N);
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y  ][x] = mergePathLines(globalLineStates[y  ][x],PATH_N);
+      globalLineStates[y-1][x] = mergePathLines(globalLineStates[y-1][x],PATH_S);
       break
     case PATH_S:
-      globalLineStates[y  ][x] = mergeLines(globalLineStates[y  ][x],PATH_S);
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y  ][x] = mergePathLines(globalLineStates[y  ][x],PATH_S);
+      globalLineStates[y+1][x] = mergePathLines(globalLineStates[y+1][x],PATH_N);
       break
     case PATH_W:
-      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],PATH_W);
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y][x  ] = mergePathLines(globalLineStates[y][x  ],PATH_W);
+      globalLineStates[y][x-1] = mergePathLines(globalLineStates[y][x-1],PATH_E);
       break
     case PATH_E:
-      globalLineStates[y][x  ] = mergeLines(globalLineStates[y][x  ],PATH_E);
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y][x  ] = mergePathLines(globalLineStates[y][x  ],PATH_E);
+      globalLineStates[y][x+1] = mergePathLines(globalLineStates[y][x+1],PATH_W);
       break
     case PATH_WE:
       globalLineStates[y][x] = PATH_WE;
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y][x-1] = mergePathLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y][x+1] = mergePathLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_NS:
       globalLineStates[y][x] = PATH_NS;
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y-1][x] = mergePathLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y+1][x] = mergePathLines(globalLineStates[y+1][x],PATH_N);
       break;
     case PATH_NE:
       globalLineStates[y][x] = PATH_NE;
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y-1][x] = mergePathLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y][x+1] = mergePathLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_SE:
       globalLineStates[y][x] = PATH_SE;
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
-      globalLineStates[y][x+1] = mergeLines(globalLineStates[y][x+1],PATH_W);
+      globalLineStates[y+1][x] = mergePathLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y][x+1] = mergePathLines(globalLineStates[y][x+1],PATH_W);
       break;
     case PATH_SW:
       globalLineStates[y][x] = PATH_SW;
-      globalLineStates[y+1][x] = mergeLines(globalLineStates[y+1][x],PATH_N);
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y+1][x] = mergePathLines(globalLineStates[y+1][x],PATH_N);
+      globalLineStates[y][x-1] = mergePathLines(globalLineStates[y][x-1],PATH_E);
       break;
     case PATH_NW:
       globalLineStates[y][x] = PATH_NW;
-      globalLineStates[y-1][x] = mergeLines(globalLineStates[y-1][x],PATH_S);
-      globalLineStates[y][x-1] = mergeLines(globalLineStates[y][x-1],PATH_E);
+      globalLineStates[y-1][x] = mergePathLines(globalLineStates[y-1][x],PATH_S);
+      globalLineStates[y][x-1] = mergePathLines(globalLineStates[y][x-1],PATH_E);
       break;
   }
 }
@@ -628,7 +488,6 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  let hexParams = puzzleSplit[2];
   globalPuzzleW = parseInt(wxh[0]);
   globalPuzzleH = parseInt(wxh[1]);
   setGridSize(globalPuzzleW);
@@ -637,14 +496,15 @@ function initStructures(puzzle) {
 
   globalInitBoardValues = initBoardValuesFromParams(numParams,true);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalCircleStates =    initYXFromValue(0);     // no circles, lines needed in this puzzle
+  globalCircleStates =    initYXFromValue(CIRCLE_NONE);     // no circles, lines needed in this puzzle
   globalLineStates   =    initLineValuesFromParams(numParams,true);
   globalBoardColors =     initYXFromValue(emptyCellColor);
   puzzleBoardStates =     initYXFromValue(CELL_WHITE);
   globalInitWallStates  = initWallStates(constWallLight);
   globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
-  globalBoardLineColors = initYXFromValue("black"); // default line is black
+  globalLineColors =      initYXFromValue("black"); // default line is black
+  globalCircleColors =    initYXFromValue("black");
 
   // override board states and colors for the initial digits, set to gray
   for (let y=0;y<globalPuzzleH;y++) {
@@ -714,16 +574,16 @@ function handleClick(evnt) {
   // if dragging, begin to make a path from previous cursor
   if (dragging) {
     if (yCell==(globalCursorY+1)) { // moving S
-      addMove(PATH_S,globalCursorY,globalCursorX);
+      addMove(PATH_N,yCell,xCell);
     }
     if (yCell==(globalCursorY-1)) { // moving N
-      addMove(PATH_N,globalCursorY,globalCursorX);
+      addMove(PATH_S,yCell,xCell);
     }
     if (xCell==(globalCursorX+1)) { // moving E
-      addMove(PATH_E,globalCursorY,globalCursorX);
+      addMove(PATH_W,yCell,xCell);
     }
     if (xCell==(globalCursorX-1)) { // moving W
-      addMove(PATH_W,globalCursorY,globalCursorX);
+      addMove(PATH_E,yCell,xCell);
     }
   }
 
@@ -763,7 +623,7 @@ function updateBoardStatus() {
   // before evaluating errors
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      globalBoardLineColors[y][x] = "black";
+      globalLineColors[y][x] = "black";
       if (puzzleBoardStates[y][x] == CELL_BLACK) {
         globalBoardColors[y][x] = fillCellColor;
         globalBoardTextColors[y][x] = offFontColor;
@@ -898,7 +758,7 @@ function updateBoardStatus() {
         for (let i=0;i<loop.length;i++) {
           let y,x;
           [y,x] = loop[i].split(",");
-          globalBoardLineColors[y][x] = "red";
+          globalLineColors[y][x] = "red";
         }
       }
     }
@@ -1096,7 +956,7 @@ function updateDemoRegion(demoNum) {
       for (let x=0;x<globalPuzzleW;x++) {
         if (globalBoardValues[y][x] == "") {
           puzzleBoardStates[y][x] = CELL_WHITE;
-          globalLineStates[y][x] = 0;
+          globalLineStates[y][x] = PATH_NONE;
         } else {
           puzzleBoardStates[y][x] = CELL_FIXED;
         }
@@ -1107,33 +967,11 @@ function updateDemoRegion(demoNum) {
       let demosteps = demomoves[step];
       for (let i=0;i<demosteps.length;i++) {
         let steps = demosteps[i].split("");
-        let s0;
-        switch (steps[0]) {
-          case '1': s0 = CELL_BLACK; break;
-          case '.': s0 = PATH_DOT;   break;
-          case '-': s0 = PATH_WE;    break;
-          case '|': s0 = PATH_NS;    break;
-          case 'F': s0 = PATH_SE;    break;
-          case '7': s0 = PATH_SW;    break;
-          case 'J': s0 = PATH_NW;    break;
-          case 'L': s0 = PATH_NE;    break;
-          default:  console.log("what is this: " + steps[0]);
-        }
+        let s0 = (steps[0] == '1') ? CELL_BLACK : convertPathCharToCode(steps[0]);
         addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }
     }
     updateBoardStatus();
     drawBoard();
-  }
-}
-
-function fdelay(num) {
-  let now = new Date();
-  let stop = now.getTime() + num;
-  while (true) {
-    now = new Date();
-    if (now.getTime() > stop) {
-      return;
-    }
   }
 }

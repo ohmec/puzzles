@@ -1,16 +1,17 @@
 // Yajilin puzzle definitions, must be of the form: WxH:<entries>
 // where W is puzzle width, H is height, and entries define
-// the initial or current values. 1-9 are digit values, a-z
-// define from 1-26 spaces in between digits, A-Z are digit
-// values 10-35, '-' is one space, and '*' is blackened.
+// the initial or current values. 0-9 are digit values followed by
+// a direction ^v<L; a-z define from 1-26 spaces in between digits
+// '-' is one space. the first one has the path information that
+// defines the solution.
 let cannedPuzzles = [
   // example completed one
   "8x8:*F7F_7*1v.1^|LJ*L_7.*|2>*F7*|.FJ0<FJ|2^|.L_7|1^L_J.*1<|L_71>*.F_J*1<L_7.L______J",
   // demos
   "8x8:g1v.1^g.b2>e.b0<c2^a.d1^c.a1<d1>a.d1<c.h",
-  // D1
   "10x10:h1>a.a0^c0^d.g0^b.c2^a0^a0v1^a.1^a0vg.d1va1v0vb.a0<h." +
         "a1vc1vd.c1ve1v.j",                                               // 2022 #1
+  // D1
   "10x10:e0<d.h0^a.c2<f.h1>a.c3va2^d.j.f2>c.j.a0^h.f1^0>b",               // 2022 #3
   "10x10:c0vb0<0>b.j.d3ve.c2<b0>b1v.j.c1<a0>d.j.0vc2>e.g1vb.j",           // 2022 #5
   // D2

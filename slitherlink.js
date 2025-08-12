@@ -86,7 +86,6 @@ function puzzleInit() {
   // if the field in front of it doesn't work
   // Length in displayPuzzle (height?)
   $("#displayButton").click(function() {
-    $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
       puzzle = removeDot(cannedPuzzles[pval]);

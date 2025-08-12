@@ -66,7 +66,6 @@ function puzzleInit() {
   $("#demotab").hide();
 
   $("#displayButton").click(function() {
-    $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
@@ -194,7 +193,7 @@ function updateDynTextFields() {
   } else {
     if (errorCount || incompleteCircles) {
       etext = "there are " + errorCount  + " errors and " +
-                      incompleteCircles  + " incomplete cells";
+                      incompleteCircles  + " incomplete circles";
     } else if (incompleteLoop) {
       etext = "the loop isn't complete yet";
     } else {
@@ -204,8 +203,8 @@ function updateDynTextFields() {
   updateDynamicHtmlEntries(etext,assistState);
 }
 
-function addHistory(y,x,prevvalue,movetype) {
-  moveHistory.push([y,x,prevvalue,movetype]);
+function addHistory(y,x,prevvalue) {
+  moveHistory.push([y,x,prevvalue]);
 }
 
 function contains(state,list) {
@@ -228,7 +227,7 @@ function addMove(moveType,y,x,noHistory=false) {
   }
 
   if (!noHistory) {
-    addHistory(y,x,globalLineStates[y][x],moveType);
+    addHistory(y,x,globalLineStates[y][x]);
   }
   if (moveType==PATH_N || moveType==PATH_E || moveType==PATH_W || moveType==PATH_S) {
     // for "dragging/shifting" adds, we might need to pre-clear the existing
@@ -414,7 +413,7 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  let hexParams = puzzleSplit[2];
+  let pathParams = puzzleSplit[2];
   globalPuzzleW = parseInt(wxh[0]);
   globalPuzzleH = parseInt(wxh[1]);
   setGridSize(globalPuzzleW);
@@ -423,7 +422,7 @@ function initStructures(puzzle) {
 
   globalInitBoardValues = initYXFromValue("");
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalLineStates   =    initLineValuesFromParams(numParams,true);
+  globalLineStates   =    initLineValuesFromParams(pathParams);
   globalBoardColors =     initYXFromValue(emptyCellColor);
   globalInitWallStates  = initWallStates(constWallDash);
   globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
@@ -433,6 +432,10 @@ function initStructures(puzzle) {
   globalCircleColors =    initYXFromValue("black");
 
   let numParamsExp = expandNumParams(numParams);
+  if (numParamsExp.length != (globalPuzzleH*globalPuzzleW)) {
+    throw "ERROR in puzzle descriptor nums, got length " + numParamsExp.length +
+          " expected " + (globalPuzzleH*globalPuzzleW);
+  }
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (numParamsExp[y*globalPuzzleW+x] != '-')  {
@@ -478,16 +481,16 @@ function handleClick(evnt) {
   // if dragging, begin to make a path from previous cursor
   if (dragging) {
     if (yCell==(globalCursorY+1)) { // moving S
-      addMove(PATH_S,globalCursorY,globalCursorX);
+      addMove(PATH_N,yCell,xCell);
     }
     if (yCell==(globalCursorY-1)) { // moving N
-      addMove(PATH_N,globalCursorY,globalCursorX);
+      addMove(PATH_S,yCell,xCell);
     }
     if (xCell==(globalCursorX+1)) { // moving E
-      addMove(PATH_E,globalCursorY,globalCursorX);
+      addMove(PATH_W,yCell,xCell);
     }
     if (xCell==(globalCursorX-1)) { // moving W
-      addMove(PATH_W,globalCursorY,globalCursorX);
+      addMove(PATH_E,yCell,xCell);
     }
   }
 
@@ -500,9 +503,10 @@ function handleClick(evnt) {
 // look for errors
 function updateBoardStatus() {
   // accounting the errors:
-  //  1) number cells with more black squares than accounted for
-  //  2) two black cells that touch
-  //  3) a continuous loop while there are other loop segments
+  //  1) white circles that have a change of direction
+  //  2) white circles that don't have a bend just next to them
+  //  3) black circles that don't have a change of direction
+  //  4) black circles that don't have a straight segment on both adjoining cells
   errorCount = 0;
 
   // also count how many numbers haven't been completed yet, how
@@ -723,9 +727,7 @@ function updateBoardStatus() {
 function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
-    if (lastMove[3] <= CELL_FIXED) {
-      addMove(lastMove[2],lastMove[0],lastMove[1],true);
-    } else if (lastMove[2] == 0) {
+    if (lastMove[2] == PATH_NONE) {
       addMove(PATH_CLEAR,lastMove[0],lastMove[1],true);
     } else {
       addMove(lastMove[2],lastMove[0],lastMove[1],true);
@@ -750,94 +752,76 @@ function updateDemoRegion(demoNum) {
       "<p>In this demo we will walk through the steps of solving this puzzle. " +
         "Press the 'next' button to walk through the solving steps, or the " +
         "'back' button to return to the previous step.</p>" +
-        "<p>At the beginning of a solve, there are no errors, but there are " +
-        "many unsolved numbers which we need to satisfy by turning cells black " +
-        "in the arrow direction before being able to solve the puzzle. Then we " +
-        "must craft a path through all remaining white cells that makes a complete " +
-        "loop. For our first time through we can turn on Assist " +
-        "Mode 2 to see any errors that we might generate in the process of " +
-        "the solve, as well as get an indicator as to when numbers have been " +
-        "satisfied.</p>",
-      "As shown with the green text, the '0&larr;' cell is already satisfied, " +
-        "but we can put dots in the cells to its left to remind ourselves that " +
-        "we will need a path through them. Next, we can look for 'freebies', " +
-        "that is easy cells to satisfy. Looking at the board, we can see four " +
-        "such easy ones. There are three '1' digits that have only one cell " +
-        "between them and the wall in the direction of their arrow. Those cells " +
-        "must by definition be black. In addition, the '2&uarr;' has three " +
-        "cells above it. In order to not violate the rule about adjacent black " +
-        "cells, we can determine where the two black cells must lie.",
-      "<p>Now the task is to determine where to put the black cells to satisfy " +
-        "the three unsolved numbers, and how to create the path loop to go " +
-        "through the remaining white cells. Recall there are many cells that " +
-        "are not under the 'control' of any arrow cells, so they could be black " +
-        "or white as required by the creation of the path.</p><p>Thinking about " +
-        "the nature of the loop, we can infer its shape in some corners of the " +
-        "board. For instance, in the cells next to black cells near the edge " +
-        "of the board, there can not be black cells (in order to avoid the " +
-        "adjacency rule violations), so thus they must be white cells with a " +
-        "path going through them. Given that they are in a corner, that path " +
-        "must by definition be a turn. We can place path segments in those " +
-        "corners to begin to visualize the loop required. We can also place " +
-        "dot placeholders in other cells next to the existing black squares.</p>",
-      "<p>Now let's look at what we can, and at what we can't determine at this " +
-         "stage of the solution. It appears tempting to put a path bend just " +
-         "below the upper-left '1&uarr;' square, as we did in the other corners " +
-         "of the path. But note here that, first off, gray number squares do not " +
-         "have a rule of requiring a white square next to them; and secondly, " +
-         "there are no number/arrow squares that dictate the rules of this " +
-         "particular cell. Thus at this time we must leave it unknown.</p><p>" +
-         "Areas we can make progress are those such as the lower left and right " +
-         "squares, where an existing path must turn back into the board, and any " +
-         "dotted cell (which must contain a path) that is one cell wide, thus " +
-         "requiring a straight path. There are two of these in the upper right. " +
-         "Similarly the square below the '2&uarr;' must continue inwards.</p>",
-      "Looking in the bottom row, we can see two segments which can now progress. " +
-         "Given that there can only be one loop, the small segments can not connect " +
-         "to themselves, so thus the must move inward until there is room for them " +
-         "to connect to another segment. For the segment on the left, there is still " +
-         "an unsatisfied '1&larr;' rule, and thus it is clear that it must be just " +
-         "to the left of the number in order for there to be room for the segment " +
-         "to move upwards. With this in place, and with the right segment also " +
-         "forced upwards, the bottom two rows can thus be completed.",
-      "Now looking at the dotted square in the upper right region, knowing that it " +
-        "must have a path through it, and its above neighbor is completed, it must " +
-        "have a bend down and into the center of the board. Once that segment is " +
-        "placed, it is clear there is only one square left that can be black on " +
-        "that row with the '2&rarr;' in it. It can be set to black and its " +
-        "neighboring cells dotted.",
-      "Of the two new dotted squares, it is clear that the one below the black " +
-        "cell must have a turn. Once that turn is placed, there is only one " +
-        "other cell left to satisfy the '1&uarr;' square that remains. Setting " +
-        "it to black satisfies all of the numerical squares, and only the final "+
-        "connection of the path remains.",
-      "Now progress must be made piecemeal on the path segments. In the upper " +
-        "row, the path must continue left, while the dotted square below that " +
-        "must contain a bend. That completes those rows, and forces the direction " +
-        "of its leftmost leg.",
-      "Now on the left side, the dotted square must contain a path, so it is " +
-        "clear that it must come from above, then turn left to avoid stranding " +
-        "the end in the left column. This indicates that the white square above must " +
-        "be turned black. Doing so will not violate any of the numerical constraints.",
-      "Now the safest way to proceed is to connect path ends where only one choice " +
-        "remains, such as the one two to the right of the '2&rarr;' cell. Connecting " +
-        "that one leaves only one choice for the one SE of that.",
-      "Finally, there is only one solution that creates one contiguous loop, rather " +
-        "than two indepedent ones. Connecting the ends completes the path.",
+        "<p>At the beginning of a solve, there are no errors, but all the " +
+        "circles are unsolved. We need to satisfy them by beginning to connect " +
+        "the path through the circles. Then we must craft a path through all " +
+        "remaining circles and cells that makes a complete loop. For our first " +
+        "time through we can turn on Assist Mode 2 to see any errors that we " +
+        "might generate in the process of the solve, as well as get an " +
+        "indicator as to when the circles have been satisfied.</p>",
+      "For Masyu, there are many easy starting steps where right off the bat " +
+        "there are paths that can be drawn. Let's start with the black circles " +
+        "that are constrained in at least on direction. Circles that are " +
+        "on or next to an edge must point one or both legs of the path inward, " +
+        "in order to both turn within the circle, and continue through the " +
+        "adjacent cell after the turn. In this demo puzzle, all of the black " +
+        "circles except one can, by this method, define both of their path " +
+        "legs.",
+      "Next we can make two observations about white circles on the edge, and " +
+        "strings of white circles. White circles on the edge must have the " +
+        "path go through them parallel to the edge, since they must continue " +
+        "straight onwards. In addition, 3 or more white circles in a row must " +
+        "have paths perpindicular to the row of circles in order to satisfy " +
+        "the path rule about turning within one cell of the white circle. It " +
+        "would be impossible to satisfy this rule for the middle circle if " +
+        "the path went through all 3 circles in a row. In this manner we " +
+        "can draw the path through 9 of the white circles.",
+      "Now we must apply some general logic about the path segments that have " +
+         "been placed to this point. Since the path must be a continuous loop, " +
+         "we must find a destination for each of the dangling path segments " +
+         "placed so far. As an example, in the upper right corner, that segment " +
+         "is 'stuck' and only has one place it can go, to the right and then " +
+         "down. Similarly, a few other segments - especially after that " +
+         "segment is connected - are forced to one destination.",
+      "In a similar manner, the dangling segment in the lower left must at " +
+         "least continue until it has a chance to connect, though we don't " +
+         "know yet to which other segment. Similarly the segment in the " +
+         "second row second column can only move right and down one.",
+      "Now we can go back to evaluating the remaining black circle. It must have a " +
+         "path that turns and then continues for two cells. This can only be " +
+         "satisfied with a turn to the north and the east. If it turned to the " +
+         "south, then its segment would be isolated with nowhere to go.",
+      "There are some tempting connections that coule be made, but we must make " +
+        "sure they are the only options. The only segments that are forced in a " +
+        "particular location are the ones in the 3rd row 4th column (extending " +
+        "to the right), the one in the last column (to avoid making a mini-loop, " +
+        "it must go up and at least two to the left), and then the segment below " +
+        "it which is then forced to go left into the neighboring white circle.",
+      "Now two observations can be made about white circles and their existing " +
+        "paths. The one in the leftmost row is still 'incomplete' since it " +
+        "has its straight line but doesn't yet have a turn next to it. Thus " +
+        "it is forced to turn right, being on the edge. Similarly, the " +
+        "remaining incomplete one on the bottom row must now turn upwards.",
+      "Once those segments are placed, the option for the dangling segment " +
+        "in the left column is reduced, as is the segment on the bottom " +
+        "row. These can be connected.",
+      "Finally we have two links that must be made. It appears that they could " +
+        "have two options, connecting vertically or horizontally. But clearly " +
+        "connecting them horizontally would create two loop paths. The answer " +
+        "then is they must be connected vertically.",
       "Congratulations! The puzzle is solved!"];
     demomoves = [
       [],
       [],
-      [".30",".31","100","150","157","106","126"],
-      ["F01","L40","F60","705","J47","767",".16",".25",".27"],
-      ["-16","|27","L70","J77","-46"],
-      ["J62","163","-72","-74","-75","L65"],
-      ["725","123",".13",".33"],
-      ["F33","114"],
-      ["F03","L12","|11"],
-      ["J31","120","-41"],
-      ["J34","L45"],
-      ["742","L53","-54"]];
+      ["|10","-01","-02","|13","|14","-05","|51","-62","|53"],
+      ["|20","|21","-16","-26","-36","|66","|67","-71","-73"],
+      ["707","F15","727","J77"],
+      ["L70","|50","712"],
+      ["L32","-33"],
+      ["L23","747","-46","-55"],
+      ["L30","J74"],
+      ["F40","F54"],
+      ["J44","L45"]];
   } else {
     demotext = [
       "<p>In this demo we will walk more quickly through the steps of solving " +
@@ -846,48 +830,43 @@ function updateDemoRegion(demoNum) {
         "to return to the previous step. You can also use the undo button to move " +
         "backwards individual steps, or continue playing forward if you wish.</p>" +
         "<p>The first thing to do is to turn on the assist mode to let us know " +
-        "which rooms still need completion. Let's start with the '0' squares and " +
-        "either put a path segment where definitive, or a dot where not.</p>",
-      "Next we can fill the '1' and '2' digit freebies, and begin to place path " +
-        "corners where they are deterministic.",
-      "These path segments help us satisfy a few other number square requirements, " +
-        "and then determine more path segments, such as in the lower left and " +
-        "upper right corners.",
-      "Looking at the left side, it is unclear at the moment if the square between " +
-        "the '1&uarr;' and '0&darr;' squares is black or white since it is under " +
-        "no numerical constraints. But looking above it is evident that the incomplete " +
-        "path can only connect downwards in a snaking pattern, in order to connect " +
-        "both dots.",
-      "The incomplete segment in the upper middle must turn downwards on both ends, " +
-        "which leaves the remaining white cell in the second row isolated, meaning " +
-        "it must be set to black.",
-      "The center '1&darr;' square can be satisfied as well, forcing some bends in " +
-        "path segments. These path segments allow the final unsolved digit to be " +
-        "completed.",
-      "A few more line segments have only one option to progress, and there " +
-        "is one corner bend that can be definitely added as well in the second " +
-        "to bottom row.",
-      "The two segment ends in the lower left must join now, and there is only " +
-        "is only one way to join them while also connecting the remaining " +
-        "dots. This requires that the stranded cell must be set to black.",
-      "The remaining dotted square requires a path segment, which forces the " +
-        "connectivity with the row below.",
-      "Finally, the two remaining path ends must be connected. They can't isolate " +
-        "all 5 remaining empty squares, so there is only one solution that doesn't " +
-        "require adjoining black squares.",
+        "which rooms still need completion. Then let's start with the easy black " +
+        "circles near edges, and the white circles on edges, including the turns " +
+        "where required.</p>",
+      "Now we can use some intuition above some of the dangling paths, and " +
+        "partially completed circles. For example, the path end in the upper " +
+        "right is forced downwards, which means that it must pass horizontally " +
+        "through the two circles. This then forces the direction of other path " +
+        "segments nearby. In the lower right, the dangling end must " +
+        "escape upwards, but that means it must satisfy the rules of the black " +
+        "circle and thus must head down for one cell first before heading up.",
+      "The black circle on the left column would hit a dead-end if it went down, " +
+        "thus must go up. Then that white circle is forced to turn its path " +
+        "inward to comply with the rules of white circles. Then looking at the " +
+        "circular path segment in the lower left, the left path must move upwards " +
+        "to the black circle to avoid completing the small loop. This forces the " +
+        "segment next to it upwards as well.",
+      "Now the completion of the two black circles is clear. In addition, we can " +
+        "see that the path segment open near the right column in the middle has " +
+        "only one escape choice left.",
+      "The two segment ends in the upper left are at risk of closing a small loop, " +
+        "and thus the left one must move down. This forces the right one down, and " +
+        "there is only on location for it to avoid looping as well.",
+      "Finally, we can see that the solution requires keeping the two large path " +
+        "segments - roughly one in the NW corner, and one in the SE corner - from " +
+        "closing in on themselves. It should be clear that there is only one way " +
+        "to keep them in one path while satisfying the rules of the remaining " +
+        "white circle.",
       "Congratulations! The puzzle is solved!"];
     demomoves = [
       [],
-      ["|10","-01","-05","-25","-47",".07",".17",".67",".77",".87",".97","|60",".52",".62",".72",".82",".92"],
-      ["130",".31","193","103","123",".22","-13","109","199","702","F04","L20","F50","J92","L94","719","J98"],
-      ["181","|80","L90","|82","128","185",".86","|39","|84","-95","707","L17"],
-      ["722","F31","|41"],
-      ["|34","|36","116"],
-      ["164","774","L65",".63","176"],
-      ["745","-66","F86","787"],
-      ["F52","753","|62","|63","143"],
-      ["L77","778"],
-      ["|58","|59","L68","J69","179"]];
+      ["|10","-01","|12","F03","-05","707","|23","709","|29","-37","-38","-48","|59",
+       "-68","|89","-98","L96","|86","L91","-93","|84","F71","-72","-61","|40"],
+      ["|18","-27","-26","-16","|46","F78","L87","|77"],
+      ["L60","F30","|63","|52"],
+      ["-75","-54","J57"],
+      ["721","L32"],
+      ["|45","F34","-43","F15"]];
   }
   if (demoStepNum < demotext.length) {
     if (demoStepNum) {
@@ -907,17 +886,7 @@ function updateDemoRegion(demoNum) {
       let demosteps = demomoves[step];
       for (let i=0;i<demosteps.length;i++) {
         let steps = demosteps[i].split("");
-        let s0;
-        switch (steps[0]) {
-          case '.': s0 = PATH_DOT;   break;
-          case '-': s0 = PATH_WE;    break;
-          case '|': s0 = PATH_NS;    break;
-          case 'F': s0 = PATH_SE;    break;
-          case '7': s0 = PATH_SW;    break;
-          case 'J': s0 = PATH_NW;    break;
-          case 'L': s0 = PATH_NE;    break;
-          default:  console.log("what is this: " + steps[0]);
-        }
+        let s0 = convertPathCharToCode(steps[0]);
         addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }
     }
@@ -926,13 +895,114 @@ function updateDemoRegion(demoNum) {
   }
 }
 
-function fdelay(num) {
-  let now = new Date();
-  let stop = now.getTime() + num;
-  while (true) {
-    now = new Date();
-    if (now.getTime() > stop) {
-      return;
+function solveInitialPaths() {
+  // look for black circles within one cell of the edge, turn path inward
+  for (let y=0;y<globalPuzzleH;y++) {
+    if (globalCircleStates[y][0] == CIRCLE_BLACK) {
+      addMove(PATH_WE,y,1);
+    }
+    if (globalCircleStates[y][1] == CIRCLE_BLACK) {
+      addMove(PATH_WE,y,2);
+    }
+    if (globalCircleStates[y][globalPuzzleW-1] == CIRCLE_BLACK) {
+      addMove(PATH_WE,y,globalPuzzleW-2);
+    }
+    if (globalCircleStates[y][globalPuzzleW-2] == CIRCLE_BLACK) {
+      addMove(PATH_WE,y,globalPuzzleW-3);
     }
   }
+  for (let x=0;x<globalPuzzleW;x++) {
+    if (globalCircleStates[0][x] == CIRCLE_BLACK) {
+      addMove(PATH_NS,1,x);
+    }
+    if (globalCircleStates[1][x] == CIRCLE_BLACK) {
+      addMove(PATH_NS,2,x);
+    }
+    if (globalCircleStates[globalPuzzleH-1][x] == CIRCLE_BLACK) {
+      addMove(PATH_NS,globalPuzzleH-2,x);
+    }
+    if (globalCircleStates[globalPuzzleH-2][x] == CIRCLE_BLACK) {
+      addMove(PATH_NS,globalPuzzleH-3,x);
+    }
+  }
+  // look for white circles on the edge, force path parallel to edge
+  for (let y=0;y<globalPuzzleH;y++) {
+    if (globalCircleStates[y][0] == CIRCLE_WHITE) {
+      addMove(PATH_NS,y,0);
+    }
+    if (globalCircleStates[y][globalPuzzleW-1] == CIRCLE_WHITE) {
+      addMove(PATH_NS,y,globalPuzzleW-1);
+    }
+  }
+  for (let x=0;x<globalPuzzleW;x++) {
+    if (globalCircleStates[0][x] == CIRCLE_WHITE) {
+      addMove(PATH_WE,0,x);
+    }
+    if (globalCircleStates[globalPuzzleH-1][x] == CIRCLE_WHITE) {
+      addMove(PATH_WE,globalPuzzleH-1,x);
+    }
+  }
+  updateBoardStatus();
+  drawBoard();
+}
+
+function solveWhiteCircles() {
+  // look for black circles within one cell of the edge, turn path inward
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if ((globalCircleStates[y][x] == CIRCLE_WHITE) &&
+          (globalLineStates[y][x] == PATH_NS) &&
+          !pathHasTurn(globalLineStates[y-1][x]) &&
+          !pathHasTurn(globalLineStates[y+1][x])) {
+        // this cell needs to be solved, and one side is already set,
+        // the other one has to turn. check if only one side is available
+        if (globalLineStates[y-1][x] == PATH_NS) {
+          if (x==0) {
+            addMove(PATH_NE,y+1,x);
+          } else if (x==(globalPuzzleW-1)) {
+            addMove(PATH_NW,y+1,x);
+          }
+        }
+        if (globalLineStates[y+1][x] == PATH_NS) {
+          if (x==0) {
+            addMove(PATH_SE,y-1,x);
+          } else if (x==(globalPuzzleW-1)) {
+            addMove(PATH_SW,y-1,x);
+          }
+        }
+      }
+      if ((globalCircleStates[y][x] == CIRCLE_WHITE) &&
+          (globalLineStates[y][x] == PATH_WE) &&
+          !pathHasTurn(globalLineStates[y][x-1]) &&
+          !pathHasTurn(globalLineStates[y][x+1])) {
+        if (globalLineStates[y][x-1] == PATH_WE) {
+          if (y==0) {
+            addMove(PATH_SW,y,x+1);
+          } else if (y==(globalPuzzleH-1)) {
+            addMove(PATH_NW,y,x+1);
+          }
+        }
+        if (globalLineStates[y][x+1] == PATH_WE) {
+          if (y==0) {
+            addMove(PATH_SE,y,x-1);
+          } else if (y==(globalPuzzleH-1)) {
+            addMove(PATH_NE,y,x-1);
+          }
+        }
+      }
+      // now look for partial segments in white, need to move them forward
+      if ((globalCircleStates[y][x] == CIRCLE_WHITE) &&
+          ((globalLineStates[y][x] == PATH_W) || 
+           (globalLineStates[y][x] == PATH_E))) {
+        addMove(PATH_WE,y,x);
+      }
+      if ((globalCircleStates[y][x] == CIRCLE_WHITE) &&
+          ((globalLineStates[y][x] == PATH_N) || 
+           (globalLineStates[y][x] == PATH_S))) {
+        addMove(PATH_NS,y,x);
+      }
+    }
+  }
+  updateBoardStatus();
+  drawBoard();
 }

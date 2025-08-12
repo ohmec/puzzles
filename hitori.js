@@ -55,7 +55,6 @@ function puzzleInit() {
   $("#demotab").hide();
 
   $("#displayButton").click(function() {
-    $("#userSolvePuzzle").val("");
     let pval = $("#userPuzzle").val();
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
@@ -304,7 +303,8 @@ function initStructures(puzzle) {
   }
   globalBoardColors = initYXFromValue(emptyCellColor);
   globalBoardTextColors = initYXFromValue(stdFontColor);
-  globalBoardLineColors = initYXFromValue("black"); // default line is black
+  globalLineColors = initYXFromValue("black"); // default line is black
+  globalCircleColors = initYXFromValue("black");
   globalInitWallStates  = initWallStates(constWallLight);
   globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   updateBoardStatus();
@@ -578,16 +578,5 @@ function updateDemoRegion(demoNum) {
     }
     updateBoardStatus();
     drawBoard();
-  }
-}
-
-function fdelay(num) {
-  let now = new Date();
-  let stop = now.getTime() + num;
-  while (true) {
-    now = new Date();
-    if (now.getTime() > stop) {
-      return;
-    }
   }
 }
