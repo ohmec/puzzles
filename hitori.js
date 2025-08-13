@@ -23,10 +23,7 @@ let initPuzzle, puzzle, moveHistory, boardStates, demoStepNum;
 function puzzleInit() {
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
-    $("#saveButton").blur();
-    $("#loadButton").blur();
     $("#resetButton").blur();
-    $("#showButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -99,7 +96,7 @@ function puzzleInit() {
     clicking = false;
   });
 
-  // click (down) within puzzle frame, find out if contains number already
+  // click (down) within puzzle frame
   $("#puzzleCanvas").mousedown(function(evnt) {
     clicking = true;
     $("#puzzleCanvas").css("border-color", "black");
@@ -316,20 +313,11 @@ function removeDot(strval) {
   return strval.replace(/\./gi, "");
 }
 
-function findPosition(evnt, canvas) {
-  let canvasElement = document.getElementById(canvas);
-  let x = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"));
-  let y = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"));
-  return x+","+y;
-}
-
 function handleClick(evnt) {
   let tileColor;
   $("#userPuzzleField").blur();
-  let coords = findPosition(evnt, "puzzleCanvas");
-  coords = coords.split(",");
   let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(coords);
+  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
   
   globalCursorY = yCell;
   globalCursorX = xCell;
@@ -475,7 +463,6 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
-  $("#showButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
