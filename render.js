@@ -245,6 +245,7 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
         boardValues[y][x] =
           (param == '-') ? "" :
           (param == '*') ? "" :
+          (param == '@') ? "" :
           (param == '_') ? "" :
           (isFullPathType && (param.search(/[FJL7\|]/)!=-1)) ? "" :
             parseInt(param,36);
@@ -397,7 +398,8 @@ function initBoardColorsBlackWhite(numParamText) {
     boardColors[y] = new Array(globalPuzzleW);
     for (let x=0;x<globalPuzzleW;x++) {
       boardColors[y][x] =
-        (numParams[y*globalPuzzleW+x] == '-') ? "white" : "black";
+        (numParams[y*globalPuzzleW+x] == '-') ? "white" :
+        (numParams[y*globalPuzzleW+x] == '@') ? "white" : "black";
     }
   }
   return boardColors;
@@ -567,10 +569,10 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
   return wallStates;
 }
 
-function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
+function drawBoard(lineFirst = false, drawDots = false) {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      drawTile(x,y,
+      drawTile(y,x,
                globalBoardColors[y][x],
                globalBoardValues[y][x],
                globalCircleStates[y][x],
@@ -584,12 +586,12 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   // draw horizontal walls
   for (let y=2;y<=2*globalPuzzleH;y+=2) {
     for (let x=1;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constHoriz,x,y,globalWallStates[y][x]);
+      drawWall(constHoriz,y,x,globalWallStates[y][x]);
     }
   }
   for (let y=1;y<=2*globalPuzzleH;y+=2) {
     for (let x=2;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constVert,x,y,globalWallStates[y][x]);
+      drawWall(constVert,y,x,globalWallStates[y][x]);
     }
   }
   if (globalCursorOn) {
@@ -598,19 +600,19 @@ function drawBoard(lineFirst = false, textColor = "black", drawDots = false) {
   if (drawDots) {
     for (let y=0;y<=globalPuzzleH;y++) {
       for (let x=0;x<=globalPuzzleW;x++) {
-        drawDot(x,y);
+        drawDot(y,x);
       }
     }
   }
 }
 
-function drawTile(x,y,color,value,circle,circlecolor,line,lineColor,lineFirst,textColor) {
+function drawTile(y,x,color,value,circle,circlecolor,line,lineColor,lineFirst,textColor) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.fillStyle = color;
   globalContext.fillRect(drawX,drawY,globalGridSize,globalGridSize);
   if (lineFirst) {
-    drawLine(x,y,line,lineColor);
+    drawLine(y,x,line,lineColor);
   }
   // draw circle next if it exists
   if (circle) {
@@ -655,7 +657,7 @@ function drawTile(x,y,color,value,circle,circlecolor,line,lineColor,lineFirst,te
   globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.5+globalFontSize*0.5)));
 
   if (!lineFirst) {
-    drawLine(x,y,line,lineColor);
+    drawLine(y,x,line,lineColor);
   }
 }
 
@@ -667,7 +669,7 @@ function drawCursor() {
   globalContext.strokeRect(drawX,drawY,globalGridSize-2,globalGridSize-2);
 }
 
-function drawWall(horv,x,y,wallState) {
+function drawWall(horv,y,x,wallState) {
   let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : x*globalGridSize*0.5;
   let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : x*globalGridSize*0.5;
   let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : y*globalGridSize*0.5;
@@ -696,23 +698,7 @@ function drawWall(horv,x,y,wallState) {
   globalContext.setLineDash([]);
 }
 
-function drawCircle(x,y,state,radius) {
-  let drawX = Math.floor((x+0.5)*globalGridSize);
-  let drawY = Math.floor((y+0.5)*globalGridSize);
-  if (state) {
-    globalContext.lineWidth = 1.5;
-    globalContext.fillStyle = "black";
-    globalContext.beginPath();
-    globalContext.arc(drawX,drawY,radius*globalGridSize,0,2*Math.PI);
-    if (state == 1) {
-      globalContext.stroke();
-    } else {
-      globalContext.fill();
-    }
-  }
-}
-
-function drawDot(x,y) {
+function drawDot(y,x) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.lineWidth = 1;
@@ -722,7 +708,7 @@ function drawDot(x,y) {
   globalContext.fill();
 }
 
-function drawLine(x,y,state,color) {
+function drawLine(y,x,state,color) {
   let segments = 0;
   let count = 1;
   if ((state & PATH_DOUBLE) != 0) {
@@ -856,10 +842,10 @@ function drawLine(x,y,state,color) {
 }
 
 // convert click coordinates to tile and edge click info
-
-function getClickCellInfo(coords) {
-  let xCoord = coords[0];
-  let yCoord = coords[1];
+function getClickCellInfo(evnt, canvas) {
+  let canvasElement = document.getElementById(canvas);
+  let yCoord = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"));
+  let xCoord = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"));
   let vertCell = Math.floor(yCoord/globalGridSize);
   let horzCell = Math.floor(xCoord/globalGridSize);
   let horzDistFromEdgeL = Math.abs((horzCell  )*globalGridSize - xCoord);
