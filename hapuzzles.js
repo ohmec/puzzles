@@ -154,3 +154,120 @@ const cannedPuzzles = [
 let puzzleChoice = 16;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,4];
+
+const demoText = [
+ ["<p>In this demo we will walk through the steps of solving this puzzle. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>At the beginning of a solve, there are no errors, but there are " +
+    "many incomplete rooms. For our first time through we can " +
+    "turn on Assist Mode 2 to see any errors that we might generate in the " +
+    "process of the solve.</p>",
+  "In Heyawake, it is always easiest to solve two types of rooms: those " +
+    "where there is only solution (e.g. single-square rooms with a '1' " +
+    "digit within, or a 3-wide or 3-tall room with a '2' digit within.) " +
+    "There are two of the 2-digit variety on this board. We can also " +
+    "go ahead and clear out all rooms with a zero digit inside.",
+  "Always in Heyawake the next step after setting any cell black is " +
+    "set all neighboring cells white so as to not violate rule 2 of the " +
+    "puzzle involving adjoining black cells. We will do that now and for " +
+    "all subsequent black cells.",
+  "<p>Now let's look at two interesting edge cases that are similar to the " +
+    "minimum-sized room attack. First, the '2' digit room in the upper " +
+    "right of the puzzle: there are only two legal arrangements of the " +
+    "two black squares required, effectively a diagonal in one of two " +
+    "directions. Considering rule 4 about not isolating the 'river of " +
+    "white cells', you can quickly determine that only the diagonal " +
+    "pointing into the center of the puzzle board is legal.</p><p>" +
+    "Similarly, let's look at the '3' digit room near the upper left. " +
+    "This also has only two possible arrangements of the three black " +
+    "squares, and only one of them is legal so as to not violate rule 4. " +
+    "We can paint these squares black and their surrounding squares white.",
+  "OK now we can begin to take advantage of the other cells that could " +
+    "otherwise be potentially violating rule 4 about the continuous river " +
+    "of white cells. Several cells that are currently white on the edges " +
+    "of the board would be isolated if their neighbors were painted black. " +
+    "One example is the cell below the upper left square. If that square " +
+    "were painted black, the one below would be isolated, and thus the " +
+    "upper left must be set to white. Similarly there are 7 more cells " +
+    "that must be white to avoid isolation of their neighbors. We must " +
+    "be careful to not make any false assumptions in this process, rivers " +
+    "can flow in multiple directions, so do not clear too many squares.",
+  "Once these cells are determined, the '2' digit room in the upper " +
+    "portion of the board is reduced to a 'minimalist state', i.e. there " +
+    "is only one arrangement of black squares to complete it.",
+  "Now we can begin to see some potential trouble with rule 3, the one that " + 
+    "requires that no string of white cells can pass through three consecutive " +
+    "rooms. Looking at the right-most columns, we can see that the black " +
+    "cell in the 5th row, must be set to black, else it will violate the " +
+    "border rule. Once that is set (and its adjacent cells cleared) it is " +
+    "clear that the cell near the bottom right corner must also be set to " +
+    "avoid another rule 3 violation.",
+  "Another rule 3 violation is nearing in the 5th row from the top on the " +
+    "right side. We can set that cell to black to avoid violation.",
+  "At this time the 4x2 room in the upper half has three potential spots  " +
+    "remaining for its 2 black squares. Clearly one of them would isolate " +
+    "a white cell and thus violate rule 4. The other two can be set.",
+  "There is a large 'river' of white squares potentially blocked above a " +
+    "black square in the 6th row 4th column. It must be set to white.",
+  "Now there are two black cells that must be set to keep from violating " +
+    "the three-room rule. Once those two are set, and their neighbors cleared, " +
+    "it is complete.",
+  "Congratulations! The puzzle is solved!"],
+ ["<p>In this demo we will walk more quickly through the steps of solving " +
+    "this puzzle. It is recommended to go through demo 1 first. Press the " +
+    "'next' button to walk through the solving steps, or the 'back' button " +
+    "to return to the previous step. You can also use the undo button to move " +
+    "backwards individual steps, or continue playing forward if you wish.</p>" +
+    "<p>The first thing to do is to turn on the assist mode to let us know " +
+    "which rooms still need completion. Then there are several 'minimalistic' " +
+    "rooms (those with only one choice of black cell arrangements), and zero " +
+    "rooms that we can solve immediately, setting neighbors of black cells " +
+    "to white in the process.</p>",
+  "Now we can see two 3-rooms that have only one possible arrangement that " +
+    "doesn't isolate their white cells, and a 1-cell in the bottom row that " +
+    "only have one remaining cell to set black. Once that is set its " +
+    "neighbor to the right can be completed as well.",
+  "We can see some white cells at risk of being isolated, so their neighbors " +
+    "need to be set to white to keep the river flowing.",
+  "Now we can see several potential rule 3 violations pending, requiring the " +
+    "edges of the consecutive squares to be set to black to avoid violating " +
+    "the three consecutive rooms of white squares rule.",
+  "The two remaining 3-rooms are now deterministic, and can be set.",
+  "Back again to preventing rule 4 violations, certain cells can be set to " +
+    "white to not block their neighbors.",
+  "Two cells must be set to black to avoid violating rule 3",
+  "Either of the final two undetermined squares could be used to keep the " +
+    "left column from being a long string of which cells, however setting " +
+    "the upper one to black would isolate the corner from the rest of the " +
+    "white stream.",
+  "Congratulations! The puzzle is solved!"]];
+
+const demoMoves = [
+ [[],
+  [],
+  ["B35","B55","B70","B72","W56","W57","W66","W67","W77"],
+  ["W25","W34","W36","W45","W54","W65","W60","W71","W62","W73"],
+  ["B07","B16","B11","B20","B31","W06","W15","W17","W26","W01","W10","W12","W21","W30","W32","W41"],
+  ["W00","W02","W05","W27","W22","W40","W61"],
+  ["B04","B24","W03","W14","W23"],
+  ["B47","W37","W46","B76","W75"],
+  ["B44","W43"],
+  ["B13","W33","B42","W52"],
+  ["W53"],
+  ["B51","B63","W50","W64","W74"],[]],
+ [[],
+  ["W01","W08","W09","W11","W16","W17","W26","W27","W36","W37","W70",
+   "W80","W90","W87","W88","W89","W12","W13","W22","W23","W32","W33",
+   "B06","W05","W07","W16","B81","W71","W82","W91","B86","W76","W85",
+   "W96","B97","B99","W98"],
+  ["B18","B29","B38","W19","W28","W39","W48","B92","W93","B94","W84",
+   "W95","B67","B78","B69","W57","W66","W68","W59","W77","W79"],
+  ["W49","W58","W83"],
+  ["B10","B14","B47","B72","B75","W00","W20","W04","W15","W24","W62",
+   "W46","W73","W65","W74","B02","W03","B21","W31","B43","W42","W44",
+   "W53"],
+  ["B25","B34","W35","B52","B63","W51","W64"],
+  ["W30","W57","W54","W56","W61"],
+  ["B55","W45","B41","W40"],
+  ["B60","W50"]]];

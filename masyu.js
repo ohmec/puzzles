@@ -732,136 +732,15 @@ function resetBoard() {
 }
 
 function updateDemoRegion(demoNum) {
-  let demotext, demomoves;
-  // for brevity in the demo steps below, use a special character for the action
-  if (demoNum==1) {
-    demotext = [
-      "<p>In this demo we will walk through the steps of solving this puzzle. " +
-        "Press the 'next' button to walk through the solving steps, or the " +
-        "'back' button to return to the previous step.</p>" +
-        "<p>At the beginning of a solve, there are no errors, but all the " +
-        "circles are unsolved. We need to satisfy them by beginning to connect " +
-        "the path through the circles. Then we must craft a path through all " +
-        "remaining circles and cells that makes a complete loop. For our first " +
-        "time through we can turn on Assist Mode 2 to see any errors that we " +
-        "might generate in the process of the solve, as well as get an " +
-        "indicator as to when the circles have been satisfied.</p>",
-      "For Masyu, there are many easy starting steps where right off the bat " +
-        "there are paths that can be drawn. Let's start with the black circles " +
-        "that are constrained in at least on direction. Circles that are " +
-        "on or next to an edge must point one or both legs of the path inward, " +
-        "in order to both turn within the circle, and continue through the " +
-        "adjacent cell after the turn. In this demo puzzle, all of the black " +
-        "circles except one can, by this method, define both of their path " +
-        "legs.",
-      "Next we can make two observations about white circles on the edge, and " +
-        "strings of white circles. White circles on the edge must have the " +
-        "path go through them parallel to the edge, since they must continue " +
-        "straight onwards. In addition, 3 or more white circles in a row must " +
-        "have paths perpindicular to the row of circles in order to satisfy " +
-        "the path rule about turning within one cell of the white circle. It " +
-        "would be impossible to satisfy this rule for the middle circle if " +
-        "the path went through all 3 circles in a row. In this manner we " +
-        "can draw the path through 9 of the white circles.",
-      "Now we must apply some general logic about the path segments that have " +
-         "been placed to this point. Since the path must be a continuous loop, " +
-         "we must find a destination for each of the dangling path segments " +
-         "placed so far. As an example, in the upper right corner, that segment " +
-         "is 'stuck' and only has one place it can go, to the right and then " +
-         "down. Similarly, a few other segments - especially after that " +
-         "segment is connected - are forced to one destination.",
-      "In a similar manner, the dangling segment in the lower left must at " +
-         "least continue until it has a chance to connect, though we don't " +
-         "know yet to which other segment. Similarly the segment in the " +
-         "second row second column can only move right and down one.",
-      "Now we can go back to evaluating the remaining black circle. It must have a " +
-         "path that turns and then continues for two cells. This can only be " +
-         "satisfied with a turn to the north and the east. If it turned to the " +
-         "south, then its segment would be isolated with nowhere to go.",
-      "There are some tempting connections that coule be made, but we must make " +
-        "sure they are the only options. The only segments that are forced in a " +
-        "particular location are the ones in the 3rd row 4th column (extending " +
-        "to the right), the one in the last column (to avoid making a mini-loop, " +
-        "it must go up and at least two to the left), and then the segment below " +
-        "it which is then forced to go left into the neighboring white circle.",
-      "Now two observations can be made about white circles and their existing " +
-        "paths. The one in the leftmost row is still 'incomplete' since it " +
-        "has its straight line but doesn't yet have a turn next to it. Thus " +
-        "it is forced to turn right, being on the edge. Similarly, the " +
-        "remaining incomplete one on the bottom row must now turn upwards.",
-      "Once those segments are placed, the option for the dangling segment " +
-        "in the left column is reduced, as is the segment on the bottom " +
-        "row. These can be connected.",
-      "Finally we have two links that must be made. It appears that they could " +
-        "have two options, connecting vertically or horizontally. But clearly " +
-        "connecting them horizontally would create two loop paths. The answer " +
-        "then is they must be connected vertically.",
-      "Congratulations! The puzzle is solved!"];
-    demomoves = [
-      [],
-      [],
-      ["|10","-01","-02","|13","|14","-05","|51","-62","|53"],
-      ["|20","|21","-16","-26","-36","|66","|67","-71","-73"],
-      ["707","F15","727","J77"],
-      ["L70","|50","712"],
-      ["L32","-33"],
-      ["L23","747","-46","-55"],
-      ["L30","J74"],
-      ["F40","F54"],
-      ["J44","L45"]];
-  } else {
-    demotext = [
-      "<p>In this demo we will walk more quickly through the steps of solving " +
-        "this puzzle. It is recommended to go through demo 1 first. Press the " +
-        "'next' button to walk through the solving steps, or the 'back' button " +
-        "to return to the previous step. You can also use the undo button to move " +
-        "backwards individual steps, or continue playing forward if you wish.</p>" +
-        "<p>The first thing to do is to turn on the assist mode to let us know " +
-        "which rooms still need completion. Then let's start with the easy black " +
-        "circles near edges, and the white circles on edges, including the turns " +
-        "where required.</p>",
-      "Now we can use some intuition above some of the dangling paths, and " +
-        "partially completed circles. For example, the path end in the upper " +
-        "right is forced downwards, which means that it must pass horizontally " +
-        "through the two circles. This then forces the direction of other path " +
-        "segments nearby. In the lower right, the dangling end must " +
-        "escape upwards, but that means it must satisfy the rules of the black " +
-        "circle and thus must head down for one cell first before heading up.",
-      "The black circle on the left column would hit a dead-end if it went down, " +
-        "thus must go up. Then that white circle is forced to turn its path " +
-        "inward to comply with the rules of white circles. Then looking at the " +
-        "circular path segment in the lower left, the left path must move upwards " +
-        "to the black circle to avoid completing the small loop. This forces the " +
-        "segment next to it upwards as well.",
-      "Now the completion of the two black circles is clear. In addition, we can " +
-        "see that the path segment open near the right column in the middle has " +
-        "only one escape choice left.",
-      "The two segment ends in the upper left are at risk of closing a small loop, " +
-        "and thus the left one must move down. This forces the right one down, and " +
-        "there is only on location for it to avoid looping as well.",
-      "Finally, we can see that the solution requires keeping the two large path " +
-        "segments - roughly one in the NW corner, and one in the SE corner - from " +
-        "closing in on themselves. It should be clear that there is only one way " +
-        "to keep them in one path while satisfying the rules of the remaining " +
-        "white circle.",
-      "Congratulations! The puzzle is solved!"];
-    demomoves = [
-      [],
-      ["|10","-01","|12","F03","-05","707","|23","709","|29","-37","-38","-48","|59",
-       "-68","|89","-98","L96","|86","L91","-93","|84","F71","-72","-61","|40"],
-      ["|18","-27","-26","-16","|46","F78","L87","|77"],
-      ["L60","F30","|63","|52"],
-      ["-75","-54","J57"],
-      ["721","L32"],
-      ["|45","F34","-43","F15"]];
-  }
-  if (demoStepNum < demotext.length) {
+  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
+  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
+  if (demoStepNum < dtext.length) {
     if (demoStepNum) {
       assistState = 2;
     } else {
       assistState = 0;
     }
-    updateHtmlText('demotext', demotext[demoStepNum]);
+    updateHtmlText('demotext', dtext[demoStepNum]);
     // start by reseting all non-number cells to indeterminate
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
@@ -870,9 +749,9 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let demosteps = demomoves[step];
-      for (let i=0;i<demosteps.length;i++) {
-        let steps = demosteps[i].split("");
+      let dsteps = dmoves[step];
+      for (let i=0;i<dsteps.length;i++) {
+        let steps = dsteps[i].split("");
         let s0 = convertPathCharToCode(steps[0]);
         addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }

@@ -553,116 +553,15 @@ function resetBoard() {
 }
 
 function updateDemoRegion(demoNum) {
-  let demotext, demomoves;
-  // for brevity in the demo steps below, use B and W for black and white
-  if (demoNum==1) {
-    demotext = [
-      "<p>In this demo we will walk through the steps of solving this puzzle. " +
-        "Press the 'next' button to walk through the solving steps, or the " +
-        "'back' button to return to the previous step.</p>" +
-        "<p>At the beginning of a solve, there are no errors, but there are " +
-        "many indeterminate cell which we need to turn white or black to " +
-        "solve the puzzle. For our first time through we can turn on Assist " +
-        "Mode 2 to see any errors that we might generate in the process of " +
-        "the solve.</p>",
-      "In Nurikabe, the easiest 'freebies' are the '1' digits, which must be " +
-        "surrounded by all black cells in order to keep them contained into a " +
-        "room of size 1.",
-      "The next observation is that all numbered cells must be kept away from " +
-        "other ones to avoid violating rule 3, so we can isolate them if they " +
-        "are too close by setting their neighbor cells to black.",
-      "Now we can see that some directions are already determinable. The '2' " +
-        "in the NW corner must move downward, the '5' in the SW corner must " +
-        "move to the left and then up, and the '2' next to it must move up. We " +
-        "can begin to set their squares to white in those directions.",
-      "For the two '2' rooms that have been created, we can set their borders " +
-        "by setting the boundary squares to black. But sure to not assume that " +
-        "you need to set the diagonal boundary squares.",
-      "It is now clear how to complete the '5' room in the lower left.",
-      "Now two new observations can be made. The first is that the black square " +
-        "in the left column is isolated, as is the one in the bottom row. They " +
-        "must be connected to the others, and the only way to do so is to set " +
-        "their neighbor to black. Secondly, the single isolated indeterminate " +
-        "square in the middle can only be set to black, else setting it to " +
-        "white would isolate it as a '1' room with no digit, which violates " +
-        "rule 2.",
-      "Now we have two potential 'pool violations' brewing, below the '3' and " + 
-        "above the incomplete '2'. Setting a 4th black square to create a 2x2 " +
-        "grid of black squares would violate rule 5, and thus they must be set " +
-        "to white.",
-      "For the unsolved '2', this completes its room, and its neighbors can be " +
-        "set to black. For the cell below the '3', it is now clear that it can " +
-        "only be satisfied from above; all other digits are not long enough to " +
-        "'make it' to that white square.",
-      "In the upper row we have another pool forming, and it must be avoided " +
-        "with a white cell, which can only be reached by the '4' to its right.",
-      "Now the path for the '4', the final remaining unsolved number is clear.",
-      "Congratulations! The puzzle is solved!"];
-    demomoves = [
-      [],
-      [],
-      ["B23","B14","B25","B34"],
-      ["B01","B51","B62","B53"],
-      ["W10","W60","W50","W40","W42"],
-      ["B20","B11","B41","B32","B43"],
-      ["W30","B31"],
-      ["B21","B63","B33"],
-      ["W22","W44"],
-      ["B45","B55","B64","W12","B03","B13"],
-      ["W04","W05","W06","B15","B26"],
-      ["W36","W46","W56","B66","B65"]];
-  } else {
-    demotext = [
-      "<p>In this demo we will walk more quickly through the steps of solving " +
-        "this puzzle. It is recommended to go through demo 1 first. Press the " +
-        "'next' button to walk through the solving steps, or the 'back' button " +
-        "to return to the previous step. You can also use the undo button to move " +
-        "backwards individual steps, or continue playing forward if you wish.</p>" +
-        "<p>The first thing to do is to turn on the assist mode to let us know " +
-        "which rooms still need completion. Let's start with the '1' solves and " +
-        "the number separation like in the first demo.</p>",
-      "We can extend the direction of the '6' in the NW corner, complete the '3' " +
-        "in the SW corner, and begin working on the middle bottom '3' and the '4' " +
-        "in the SE corner. Meanwhile we can extend the black squares where they " +
-        "would otherwise be stranded from connecting with others.",
-      "The bottom row '3' is now completeable, as is the SE '4'. Their completions " +
-        "and the previous ones strand more black 'rivers' that must be extended " +
-        "to connect with others.",
-      "The forcing downwards of the '6' and '3' rooms continues to force the " +
-        "black river between them to grow downwards as well, until it is at risk " +
-        "of being cut off completely. Meanwhile we can grow the '4' in the SW " +
-        "corner upwards.",
-      "Now the need for that left-side river to connect to the others forces it " +
-        "to flow to the right, forcing a turn in the '3' and '4' numbers that " +
-        "are coming together.",
-      "Now the river to the left of the '2' must connect, so the '2' is forced " +
-        "to the right.",
-      "Now there are two inner squares at risk of being 'black pools' and must " +
-        "be set to white. Also, the black square next to the six must extend " +
-        "south one to avoid being stranded.",
-      "Finally it should be clear how to complete the six without stranding the " +
-        "black square on the right column. In this way you've completed the " +
-        "puzzle by attacking those regions that are solveable and saving the " +
-        "rest for last.",
-      "Congratulations! The puzzle is solved!"];
-    demomoves = [
-      [],
-      ["B02","B11","B54","B45","B56","B65","B61","B72","B76"],
-      ["W00","W10","W20","W70","W60","B50","W74","W67","W57","B03","B73","B66"],
-      ["W64","B63","W47","B37","B46","B13","B21","B51","B53"],
-      ["W30","W22","B31","W40","B41","W52","W42"],
-      ["B32","B33","W23","B24","W43","B44","B34"],
-      ["B14","W05","B15","B06"],
-      ["W25","W35","B16"],
-      ["W17","W27","W26","B36"]];
-  }
-  if (demoStepNum < demotext.length) {
+  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
+  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
+  if (demoStepNum < dtext.length) {
     if (demoStepNum) {
       assistState = 2;
     } else {
       assistState = 0;
     }
-    updateHtmlText('demotext', demotext[demoStepNum]);
+    updateHtmlText('demotext', dtext[demoStepNum]);
     // start by reseting all non-number cells to indeterminate
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
@@ -673,9 +572,9 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let demosteps = demomoves[step];
-      for (let i=0;i<demosteps.length;i++) {
-        let steps = demosteps[i].split("");
+      let dsteps = dmoves[step];
+      for (let i=0;i<dsteps.length;i++) {
+        let steps = dsteps[i].split("");
         let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
         addMove(s0,steps[1],steps[2]);
       }
