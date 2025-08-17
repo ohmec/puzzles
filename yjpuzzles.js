@@ -69,3 +69,144 @@ let cannedPuzzles = [
 let puzzleChoice = 1;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,2];
+
+const demoText = [
+ ["<p>In this demo we will walk through the steps of solving this puzzle. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>At the beginning of a solve, there are no errors, but there are " +
+    "many unsolved numbers which we need to satisfy by turning cells black " +
+    "in the arrow direction before being able to solve the puzzle. Then we " +
+    "must craft a path through all remaining white cells that makes a complete " +
+    "loop. For our first time through we can turn on Assist " +
+    "Mode 2 to see any errors that we might generate in the process of " +
+    "the solve, as well as get an indicator as to when numbers have been " +
+    "satisfied.</p>",
+  "As shown with the green text, the '0&larr;' cell is already satisfied, " +
+    "but we can put dots in the cells to its left to remind ourselves that " +
+    "we will need a path through them. Next, we can look for 'freebies', " +
+    "that is easy cells to satisfy. Looking at the board, we can see four " +
+    "such easy ones. There are three '1' digits that have only one cell " +
+    "between them and the wall in the direction of their arrow. Those cells " +
+    "must by definition be black. In addition, the '2&uarr;' has three " +
+    "cells above it. In order to not violate the rule about adjacent black " +
+    "cells, we can determine where the two black cells must lie.",
+  "<p>Now the task is to determine where to put the black cells to satisfy " +
+    "the three unsolved numbers, and how to create the path loop to go " +
+    "through the remaining white cells. Recall there are many cells that " +
+    "are not under the 'control' of any arrow cells, so they could be black " +
+    "or white as required by the creation of the path.</p><p>Thinking about " +
+    "the nature of the loop, we can infer its shape in some corners of the " +
+    "board. For instance, in the cells next to black cells near the edge " +
+    "of the board, there can not be black cells (in order to avoid the " +
+    "adjacency rule violations), so thus they must be white cells with a " +
+    "path going through them. Given that they are in a corner, that path " +
+    "must by definition be a turn. We can place path segments in those " +
+    "corners to begin to visualize the loop required. We can also place " +
+    "dot placeholders in other cells next to the existing black squares.</p>",
+  "<p>Now let's look at what we can, and at what we can't determine at this " +
+     "stage of the solution. It appears tempting to put a path bend just " +
+     "below the upper-left '1&uarr;' square, as we did in the other corners " +
+     "of the path. But note here that, first off, gray number squares do not " +
+     "have a rule of requiring a white square next to them; and secondly, " +
+     "there are no number/arrow squares that dictate the rules of this " +
+     "particular cell. Thus at this time we must leave it unknown.</p><p>" +
+     "Areas we can make progress are those such as the lower left and right " +
+     "squares, where an existing path must turn back into the board, and any " +
+     "dotted cell (which must contain a path) that is one cell wide, thus " +
+     "requiring a straight path. There are two of these in the upper right. " +
+     "Similarly the square below the '2&uarr;' must continue inwards.</p>",
+  "Looking in the bottom row, we can see two segments which can now progress. " +
+     "Given that there can only be one loop, the small segments can not connect " +
+     "to themselves, so thus the must move inward until there is room for them " +
+     "to connect to another segment. For the segment on the left, there is still " +
+     "an unsatisfied '1&larr;' rule, and thus it is clear that it must be just " +
+     "to the left of the number in order for there to be room for the segment " +
+     "to move upwards. With this in place, and with the right segment also " +
+     "forced upwards, the bottom two rows can thus be completed.",
+  "Now looking at the dotted square in the upper right region, knowing that it " +
+    "must have a path through it, and its above neighbor is completed, it must " +
+    "have a bend down and into the center of the board. Once that segment is " +
+    "placed, it is clear there is only one square left that can be black on " +
+    "that row with the '2&rarr;' in it. It can be set to black and its " +
+    "neighboring cells dotted.",
+  "Of the two new dotted squares, it is clear that the one below the black " +
+    "cell must have a turn. Once that turn is placed, there is only one " +
+    "other cell left to satisfy the '1&uarr;' square that remains. Setting " +
+    "it to black satisfies all of the numerical squares, and only the final "+
+    "connection of the path remains.",
+  "Now progress must be made piecemeal on the path segments. In the upper " +
+    "row, the path must continue left, while the dotted square below that " +
+    "must contain a bend. That completes those rows, and forces the direction " +
+    "of its leftmost leg.",
+  "Now on the left side, the dotted square must contain a path, so it is " +
+    "clear that it must come from above, then turn left to avoid stranding " +
+    "the end in the left column. This indicates that the white square above must " +
+    "be turned black. Doing so will not violate any of the numerical constraints.",
+  "Now the safest way to proceed is to connect path ends where only one choice " +
+    "remains, such as the one two to the right of the '2&rarr;' cell. Connecting " +
+    "that one leaves only one choice for the one SE of that.",
+  "Finally, there is only one solution that creates one contiguous loop, rather " +
+    "than two indepedent ones. Connecting the ends completes the path.",
+  "Congratulations! The puzzle is solved!"],
+ ["<p>In this demo we will walk more quickly through the steps of solving " +
+    "this puzzle. It is recommended to go through demo 1 first. Press the " +
+    "'next' button to walk through the solving steps, or the 'back' button " +
+    "to return to the previous step. You can also use the undo button to move " +
+    "backwards individual steps, or continue playing forward if you wish.</p>" +
+    "<p>The first thing to do is to turn on the assist mode to let us know " +
+    "which rooms still need completion. Let's start with the '0' squares and " +
+    "either put a path segment where definitive, or a dot where not.</p>",
+  "Next we can fill the '1' and '2' digit freebies, and begin to place path " +
+    "corners where they are deterministic.",
+  "These path segments help us satisfy a few other number square requirements, " +
+    "and then determine more path segments, such as in the lower left and " +
+    "upper right corners.",
+  "Looking at the left side, it is unclear at the moment if the square between " +
+    "the '1&uarr;' and '0&darr;' squares is black or white since it is under " +
+    "no numerical constraints. But looking above it is evident that the incomplete " +
+    "path can only connect downwards in a snaking pattern, in order to connect " +
+    "both dots.",
+  "The incomplete segment in the upper middle must turn downwards on both ends, " +
+    "which leaves the remaining white cell in the second row isolated, meaning " +
+    "it must be set to black.",
+  "The center '1&darr;' square can be satisfied as well, forcing some bends in " +
+    "path segments. These path segments allow the final unsolved digit to be " +
+    "completed.",
+  "A few more line segments have only one option to progress, and there " +
+    "is one corner bend that can be definitely added as well in the second " +
+    "to bottom row.",
+  "The two segment ends in the lower left must join now, and there is only " +
+    "is only one way to join them while also connecting the remaining " +
+    "dots. This requires that the stranded cell must be set to black.",
+  "The remaining dotted square requires a path segment, which forces the " +
+    "connectivity with the row below.",
+  "Finally, the two remaining path ends must be connected. They can't isolate " +
+    "all 5 remaining empty squares, so there is only one solution that doesn't " +
+    "require adjoining black squares.",
+  "Congratulations! The puzzle is solved!"]];
+
+const demoMoves = [
+ [[],
+  [],
+  [".30",".31","100","150","157","106","126"],
+  ["F01","L40","F60","705","J47","767",".16",".25",".27"],
+  ["-16","|27","L70","J77","-46"],
+  ["J62","163","-72","-74","-75","L65"],
+  ["725","123",".13",".33"],
+  ["F33","114"],
+  ["F03","L12","|11"],
+  ["J31","120","-41"],
+  ["J34","L45"],
+  ["742","L53","-54"]],
+ [[],
+  ["|10","-01","-05","-25","-47",".07",".17",".67",".77",".87",".97","|60",".52",".62",".72",".82",".92"],
+  ["130",".31","193","103","123",".22","-13","109","199","702","F04","L20","F50","J92","L94","719","J98"],
+  ["181","|80","L90","|82","128","185",".86","|39","|84","-95","707","L17"],
+  ["722","F31","|41"],
+  ["|34","|36","116"],
+  ["164","774","L65",".63","176"],
+  ["745","-66","F86","787"],
+  ["F52","753","|62","|63","143"],
+  ["L77","778"],
+  ["|58","|59","L68","J69","179"]]];

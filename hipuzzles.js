@@ -41,3 +41,76 @@ const cannedPuzzles = [
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,2];
+
+const demoText = [
+ ["<p>In this demo we will walk through the steps of solving this puzzle. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>The first thing to do is to search out 'illegal' combinations of " +
+    "digits in a row or column which would violate rule #1. This can be " +
+    "done manually, or with Assist Mode 2 (if enabled). Once these are " +
+    "identified, you must figure out which of the 2 or more digits must " +
+    "be 'disabled' to satisfy the rule.</p>",
+  "Easy ones to knock out are triplets in a row, since clearly only the " +
+    "middle one can remain in that scenario in order for there not to be " +
+    "two black cells adjacent, which would violate rule #2. The middle '3' " +
+    "digit in the second row must remain enabled, and the other two must " +
+    "be disabled.",
+  "Now that these are disabled, it is clear which of the '1' digits are to " +
+    "remain in the upper left, in order to avoid rule 2's adjacent black cells.",
+  "Now we can invoke rule #3, the 'river rule' and notice that the '4' " +
+    "digit in the top row must not be disabled, else it would 'strand' the " +
+    "'1' to its left. Similarly, among the four '2' digits in the bottom left, " +
+    "only one arrangement keeps the bottom left '2' from being stranded. " +
+    "The other digits of the same number in that row or column must thus " +
+    "be disabled.",
+  "Similarly we can choose the correct arrangement of the '6' digits in the " +
+    "bottom two rows to avoid stranding the digits to the left. Ditto the '5' " +
+    "digits in the leftmost column.",
+  "Again we must choose the '4' in the second-to-rightmost column that doesn't " +
+    "strand the 6 on the bottom row.",
+  "Now looking at the '7' digits in contention, we can't disable the one in the " +
+    "middle of the rightmost column, else the southeast corner is stranded. " +
+    "The other two must be disabled.",
+  "The final step is to recognize that disabling the '6' in third leftmost " +
+    "column would strand the west side. Once the other is disabled, it is clear " +
+    "what to do with the '5' digits, and the puzzle is solved.",
+  "Congratulations! The puzzle is solved!"],
+ ["<p>In this demo we will walk more quickly through the steps of solving " +
+    "this tougher puzzle. It is recommended to go through demo 1 first. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>The first thing to do is to search out 'illegal' combinations of " +
+    "digits in a row or column. This can be done with Assist Mode 2 (if " +
+    "enabled) or by hand. Once these are identified, you must figure out " +
+    "which of the duplicate digits must be 'disabled'.</p>",
+  "A new scenario is shown on the first row, where four '4' digits are " +
+    "located. Since two are adjacent, they can't both be invalid, so one " +
+    "must stay, and the two leftmost are thus invalid. Afterwards we can " +
+    "handle the adjacent digits in the usual manner to avoid violating " +
+    "rule #2 about adjacent black cells.",
+  "In the fourth column we see a triple of '4' digits, so we can disable " +
+    "two of them, and then handle the digits that are adjacent to them in " +
+    "the typical manner.",
+  "Now we see three tiles that are blocking 'white streams' from flowing " +
+    "so they must be allowed to be valid. Disable their numeric counterparts " +
+    "in that row or column.",
+  "The remaining quad of '1' digits are now easy to complete the puzzle.",
+  "Congratulations! The puzzle is solved!"]];
+
+const demoMoves = [
+ [[],
+  [],
+  ["1,1","1,3"],
+  ["0,0"],
+  ["4,2","5,1","6,0"],
+  ["5,4","6,3","3,0"],
+  ["4,5"],
+  ["3,3","6,6"],
+  ["2,6","1,5"]],
+ [[],
+  [],
+  ["0,0","0,2","2,0","0,7"],
+  ["1,3","3,3","3,1","3,1","4,2","5,3","6,2","6,4","6,6"],
+  ["0,5","2,7","6,0","5,5"],
+  ["3,5","4,6"]]];

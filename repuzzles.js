@@ -96,3 +96,80 @@ const cannedPuzzles = [
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,2];
+
+const demoText = [
+ ["<p>In this demo we will walk through the steps of solving this puzzle. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>At the beginning of a solve, there are no errors, but there are " +
+    "many incomplete rooms (polyominos). For our first time through we can " +
+    "turn on Assist Mode 2 to see any errors that we might generate in the " +
+    "process of the solve.</p>",
+  "Easy ones to knock out single-tile rooms, where the only solution " +
+    "is to insert a '1' into the box.",
+  "Now that these are inserted, it is clear where to place some other '1' " +
+    "digits in adjacent rooms so as to not violate the second rule about " +
+    "adjacent digits within their distance.",
+  "We can now place a '2' to complete the 2-wide room above the bottom " +
+    "right room, then then complete that bottom right room given that the " +
+    "'2' forces its digit arrangement.",
+  "Now that the '3' is placed in that bottom right room, it forces the " +
+    "location of the '3' digit in the L-shaped room to its left, which " +
+    "in turn affects the placement of the '3' in the square above that, " +
+    "which is then easy to complete.",
+  "Now looking at the L shape in the rightmost column above the (2,1) room, " + 
+    "we can see that the '2's below it knock out the bottom row and the 2 " +
+    "must thus sit on top. Similarly the '3' is blocked from the bottom " +
+    "left corner and must be in the bottom right, allowing easy completion " +
+    "of the room.",
+  "Moving to the L near the middle, we can see an easy solution given the " +
+    "effects of the '3' and '2' digits to its right. Similarly the inverted " +
+    "L on the rightmost column is easy to complete given the digits below.",
+  "The '2' and '3' digits in the 5-box room in the upper middle are now easy " +
+    "to complete. Once they are placed the 3-high room in the second column " +
+    "is easy to complete, also making the NW corner room solvable.",
+  "Now observe the left-most square of the top row's 5-wide rectangle. " +
+    "Below are 4 inhibitors for digits '1'-'4', so the only other possibility " +
+    "is for it to have the '5' digit. Once the '5' is placed there is only " +
+    "one legal spot for the '4' digit, then the other 3 fall into place.",
+  "Propagating '2' digits in the bottom sector completes a few more rooms,",
+  "Now the '4' digits have their effect, and the rest of the pieces should " +
+    "fall into place.",
+  "Congratulations! The puzzle is solved!"],
+ ["<p>In this demo we will walk more quickly through the steps of solving " +
+    "this puzzle, which is actually easier. It is recommended to go through " +
+    "demo 1 first. Press the 'next' button to walk through the solving steps, " +
+    "or the 'back' button to return to the previous step. You can also use " +
+    "the undo button to move backwards individual steps, or continue playing " +
+    "forward if you wish.</p>" +
+    "<p>The first thing to do is to turn on the assist mode to let us know " +
+    "which rooms still need completion. Then we can set the '1' digits in " +
+    "the single-square rooms.</p>",
+  "With these '1' digits set, we see a lot of boxes that can immediately " +
+    "set their '1' digit and then be completed.",
+  "The '3' digits begin to propagate in the upper region and several more " +
+    "rooms can be completed.",
+  "The '3' digits continue to propagate downwards, and the '1' and '2' " +
+    "digits make the rest fall into place pretty easily.",
+  "All the pieces are on the board for the final completion",
+  "Congratulations! The puzzle is solved!"]];
+
+const demoMoves = [
+ [[],
+  [],
+  ["2,0,1","1,2,1","5,5,1"],
+  ["3,1,1","4,6,1","6,6,1"],
+  ["4,5,2","6,5,3","5,6,2"],
+  ["5,4,3","4,3,3","4,4,1","3,4,4"],
+  ["2,6,2","3,6,3","3,5,1"],
+  ["3,2,3","5,2,2","5,3,1","1,6,1","1,5,2","2,5,3"],
+  ["2,2,2","1,4,3","1,1,2","2,1,3","0,0,2","1,0,3","0,1,1"],
+  ["0,2,5","0,6,4","0,5,1","0,4,2","0,3,3"],
+  ["6,1,2","5,1,1","6,3,4","6,2,1","6,4,2"],
+  ["1,3,4","2,3,5","5,0,4","6,0,3","4,0,1","3,0,2","4,1,5"]],
+ [[],
+  ["0,2,1","0,6,1","2,6,1","3,1,1","4,5,1","6,0,1"],
+  ["0,4,1","0,5,2","1,5,1","2,4,1","2,5,3","2,2,1","4,2,1","4,1,2","5,4,1","5,5,2","7,1,1"],
+  ["0,3,3","1,4,4","1,3,1","1,2,2","3,2,3","2,1,4","2,3,2","0,1,2","1,0,1","1,7,1","2,7,4"],
+  ["3,6,3","4,6,2","3,5,4","5,3,3","6,3,1","6,4,2","2,0,3","5,0,4","6,2,4","5,1,1","5,2,2"],
+  ["7,2,3","7,3,2","7,4,4","7,5,1","5,6,4","7,6,2","6,5,3","5,7,3","6,7,2"]]];
