@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./hkpuzzles.js"></script>
+    <script type="text/javascript" src="./hashi.js"></script>
+    <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+    <title>Hashiwokakero Player</title>
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for Hashiwokakero &#x6A4B;&#x3092;&#x304B;&#x3051;&#x308B;
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>
+          There are several ways to create and remove bridges.
+          The user can start at a circle and drag the left mouse
+          towards one of the four directions to indicate the
+          creation of the bridge in that direction.  The environment
+          will extend the bridge to the next nearest circle, and
+          will not allow the user to create illegal bridges (i.e.
+          in the direction of a wall with no other circles, or into
+          another perpindicular bridge). Alternately you can use the
+          arrow keys to move around the board, and hold down the shift
+          key followed by an arrow key to create a bridge in that
+          direction. Or, you can press one of the directional
+          keys N, S, E, W to create a bridge in that direction.
+          Once a bridge has been created, the user can
+          left-click on it a second time to double-bridge it, or 
+          a third time to delete it. Or the right-mouse click can
+          remove a bridge. Pressing the directional key N, S, E or W
+          converts a single bridge in that direction to a double
+          bridge, or erases a double bridge.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete numbers is indicated.  In Assist Mode (1), the
+          number of errors and incomplete numbers is indicated, see game rules.
+          In Assist Mode (2), errors and completed rules are highlighted
+          with digit colors.  In some cases the solve difficulty will
+          greatly decrease in Assist Mode (2), so select depending upon
+          the level of challenge desired. The game border will turn
+          green if the grid is completed without error.  You can click
+          the "undo" button on the bottom of the page to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
+        </p>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        <a href="https://www.nikoli.co.jp/en/puzzles/yajilin" target="_blank">Hashiwokakero</a>
+        (&#x6A4B;&#x3092;&#x304B;&#x3051;&#x308B; or "Build Bridges!"),
+        is a classic Japanese logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
+        In Hashiwokakero, the board begins with a collection of numbers in
+        circles that must be connected. The numbers indicate how many
+        "bridges" must connect that circle to its horizontal and vertical
+        neighbor circles. Each circle can have zero, one or two bridges
+        in each of the four directions. The rules below relate to those
+        numbers and how to complete the puzzle.
+        <ol>
+          <li>
+            A digit indicates the number of bridges between this
+            circle and its neighbors to the north, south, east and
+            west directions.
+          </li>
+          <li>
+            Circles can be connected with one or two bridges in any
+            direction.
+          </li>
+          <li>
+            Bridges can not intersect other bridges.
+          </li>
+          <li>
+            All cells must, in the end, be connected into one
+            contiguous group of circles.
+          </li>
+        </ol>
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+          the width of the grid, and H the height.  The digit descriptor
+          is a list of the pre-defined digit circles, from 1-8, from
+          left to right, then top to bottom.  Blank cells are represented
+          with a '-' character. To assist in the definition of a sparse
+          board, a combination of <i>b</i> consecutive blanks can be
+          represented with a lowercase letter from 'a' to 'z',
+          corresponding to 1 to 26 consecutive blanks.  A dot '.'
+          can be used as a visual separator, for example between rows.
+          An example descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Hashiwokakero there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
+      </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <!-- some space to avoid the canvas from shrinking on demo mode -->
+    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
