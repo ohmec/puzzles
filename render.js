@@ -7,22 +7,37 @@ const CIRCLE_NONE  = 0;
 const CIRCLE_WHITE = 1;
 const CIRCLE_BLACK = 2;
 
-const PATH_NONE   = 0b0000000;
-const PATH_DOT    = 0b0010000;
-const PATH_CLEAR  = 0b0010001;
-const PATH_SINGLE = 0b0100000;
-const PATH_DOUBLE = 0b1000000;
-const PATH_N      = 0b0100001;
-const PATH_W      = 0b0100010;
-const PATH_S      = 0b0100100;
-const PATH_E      = 0b0101000;
-const PATH_NW     = PATH_N | PATH_W;
-const PATH_NE     = PATH_N | PATH_E;
-const PATH_SW     = PATH_S | PATH_W;
-const PATH_SE     = PATH_S | PATH_E;
-const PATH_NS     = PATH_N | PATH_S;
-const PATH_WE     = PATH_W | PATH_E;
-const PATH_PLUS   = PATH_NS | PATH_WE;
+// the paths can be complicated for hashiwokakero, so
+// allow for that but keep the others simplified. This
+// encoding uses the following binary notation
+// [9:8] = 00 no path
+// [9:8] = 01 line segment(s)
+// [9:8] = 10 special (eg dot)
+// then give two bits per direction to allow for single
+// and double lines, i.e. single north is 0b00000001
+// and double north is 0b00000010
+
+const PATH_NONE    = 0b0000000000;
+const PATH_LINE    = 0b0100000000;
+const PATH_SPECIAL = 0b1000000000;
+const PATH_DOT     = PATH_SPECIAL | 0b01;
+const PATH_CLEAR   = PATH_SPECIAL | 0b10;
+// these are the standard single-line versions
+const PATH_N       = PATH_LINE | 0b00000001;
+const PATH_W       = PATH_LINE | 0b00000100;
+const PATH_S       = PATH_LINE | 0b00010000;
+const PATH_E       = PATH_LINE | 0b01000000;
+const PATH_NW      = PATH_N | PATH_W;
+const PATH_NE      = PATH_N | PATH_E;
+const PATH_SW      = PATH_S | PATH_W;
+const PATH_SE      = PATH_S | PATH_E;
+const PATH_NS      = PATH_N | PATH_S;
+const PATH_WE      = PATH_W | PATH_E;
+// doubleline version
+const PATH_2N      = PATH_LINE | 0b00000010;
+const PATH_2W      = PATH_LINE | 0b00001000;
+const PATH_2S      = PATH_LINE | 0b00100000;
+const PATH_2E      = PATH_LINE | 0b10000000;
 
 const KEY_BS    = 0x08;
 const KEY_CR    = 0x0d;
@@ -42,10 +57,14 @@ const ALT_0     = 0x60; // these are the number pad versions
 const ALT_1     = 0x61;
 const ALT_9     = 0x69;
 const KEY_A     = 0x41;
+const KEY_E     = 0x45;
 const KEY_F     = 0x46;
 const KEY_I     = 0x49;
 const KEY_J     = 0x4a;
 const KEY_L     = 0x4c;
+const KEY_N     = 0x4e;
+const KEY_S     = 0x53;
+const KEY_W     = 0x57;
 const KEY_Z     = 0x5a;
 const KEY_a     = 0x61;
 const KEY_z     = 0x7a;
@@ -709,135 +728,85 @@ function drawDot(y,x) {
 }
 
 function drawLine(y,x,state,color) {
-  let segments = 0;
-  let count = 1;
-  if ((state & PATH_DOUBLE) != 0) {
-    count = 2;
-    state = (state & ~PATH_DOUBLE) | PATH_SINGLE;
-  }
-  let drawX1, drawX2, drawX3, drawX4, drawY1, drawY2, drawY3, drawY4;
-  globalContext.strokeStyle = color;
-  for (let i=0;i<count;i++) {
-    let offset = (count==1) ? 0 : (i==0) ? (-0.075*globalGridSize) : (0.075*globalGridSize);
-    switch (state) {
-      case PATH_NS:
-        segments = 1;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y    )*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+1.0)*globalGridSize);
-        break;
-      case PATH_N:
-        segments = 1;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y    )*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+0.5)*globalGridSize);
-        break;
-      case PATH_S:
-        segments = 1;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y+0.5)*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+1.0)*globalGridSize);
-        break;
-      case PATH_WE:
-        segments = 1;
-        drawX1 = Math.floor((x    )*globalGridSize);
-        drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX2 = Math.floor((x+1.0)*globalGridSize);
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-      case PATH_E:
-        segments = 1;
-        drawX1 = Math.floor((x+0.5)*globalGridSize);
-        drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX2 = Math.floor((x+1.0)*globalGridSize);
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-      case PATH_W:
-        segments = 1;
-        drawX1 = Math.floor((x    )*globalGridSize);
-        drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX2 = Math.floor((x+0.5)*globalGridSize);
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-      case PATH_SW:
-        segments = 2;
-        drawX1 = Math.floor((x    )*globalGridSize);
-        drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX3 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY3 = Math.floor((y+1.0)*globalGridSize);
-        break;
-      case PATH_SE:
-        segments = 2;
-        drawX1 = Math.floor((x+1.0)*globalGridSize);
-        drawY1 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX3 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY3 = Math.floor((y+1.0)*globalGridSize);
-        break;
-      case PATH_NE:
-        segments = 2;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y    )*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX3 = Math.floor((x+1.0)*globalGridSize);
-        drawY3 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-      case PATH_NW:
-        segments = 2;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y    )*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX3 = Math.floor((x    )*globalGridSize);
-        drawY3 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-      case PATH_PLUS:
-        segments = 3;
-        drawX1 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY1 = Math.floor((y    )*globalGridSize);
-        drawX2 = Math.floor((x+0.5)*globalGridSize)+offset;
-        drawY2 = Math.floor((y+1.0)*globalGridSize);
-        drawX3 = Math.floor((x    )*globalGridSize);
-        drawY3 = Math.floor((y+0.5)*globalGridSize)+offset;
-        drawX4 = Math.floor((x+1.0)*globalGridSize);
-        drawY4 = Math.floor((y+0.5)*globalGridSize)+offset;
-        break;
-    }
-    if (segments) {
-      globalContext.lineWidth = 1.5;
-      globalContext.beginPath();
-      globalContext.moveTo(drawX1,drawY1);
-      globalContext.lineTo(drawX2,drawY2);
-      if (segments == 1) {
-        globalContext.stroke();
-      } else if (segments == 2) {
-        globalContext.lineTo(drawX3,drawY3);
-        globalContext.stroke();
-      } else {
-        globalContext.stroke();
-        globalContext.beginPath();
-        globalContext.moveTo(drawX3,drawY3);
-        globalContext.lineTo(drawX4,drawY4);
-        globalContext.stroke();
-      }
-    }
-  }
   // special case for "line dot"
   if (state == PATH_DOT) {
     let drawX = Math.floor((x+0.5)*globalGridSize);
     let drawY = Math.floor((y+0.5)*globalGridSize);
+    globalContext.strokeStyle = color;
     globalContext.lineWidth = 1;
     globalContext.fillStyle = "black";
     globalContext.beginPath();
     globalContext.arc(drawX,drawY,0.05*globalGridSize,0,2*Math.PI);
     globalContext.fill();
+    return;
+  }
+  if (((state & PATH_LINE) == PATH_LINE) &&
+      ((state & 0b11111111) != 0)) {
+    // now walk through each of the 4 directions to check for one
+    // or two line segments
+    globalContext.strokeStyle = color;
+    globalContext.lineWidth = 1.5;
+    for (i=0;i<4;i++) { // in order: N,W,S,E
+      let drawX1, drawX2, drawX3, drawX4, drawY1, drawY2, drawY3, drawY4;
+      let drawSingle = ((state & (0b01<<(2*i))) != 0) ? true : false;
+      let drawDouble = ((state & (0b10<<(2*i))) != 0) ? true : false;
+      if (drawSingle || drawDouble) {
+        let offset = drawSingle ? 0 : (0.075*globalGridSize);
+        let centerX = Math.floor((x+0.5)*globalGridSize);
+        let centerY = Math.floor((y+0.5)*globalGridSize);
+        let halfCell = Math.floor(0.5*globalGridSize);
+        switch (i) {
+          case 0:         // N
+            globalContext.beginPath();
+            globalContext.moveTo(centerX-offset,centerY);
+            globalContext.lineTo(centerX-offset,centerY-halfCell);
+            globalContext.stroke();
+            if (drawDouble) {
+              globalContext.beginPath();
+              globalContext.moveTo(centerX+offset,centerY);
+              globalContext.lineTo(centerX+offset,centerY-halfCell);
+              globalContext.stroke();
+            }
+            break;
+          case 1:         // W
+            globalContext.beginPath();
+            globalContext.moveTo(centerX,         centerY-offset);
+            globalContext.lineTo(centerX-halfCell,centerY-offset);
+            globalContext.stroke();
+            if (drawDouble) {
+              globalContext.beginPath();
+              globalContext.moveTo(centerX,         centerY+offset);
+              globalContext.lineTo(centerX-halfCell,centerY+offset);
+              globalContext.stroke();
+            }
+            break;
+          case 2:         // S
+            globalContext.beginPath();
+            globalContext.moveTo(centerX-offset,centerY);
+            globalContext.lineTo(centerX-offset,centerY+halfCell);
+            globalContext.stroke();
+            if (drawDouble) {
+              globalContext.beginPath();
+              globalContext.moveTo(centerX+offset,centerY);
+              globalContext.lineTo(centerX+offset,centerY+halfCell);
+              globalContext.stroke();
+            }
+            break;
+          case 3:         // E
+            globalContext.beginPath();
+            globalContext.moveTo(centerX,         centerY-offset);
+            globalContext.lineTo(centerX+halfCell,centerY-offset);
+            globalContext.stroke();
+            if (drawDouble) {
+              globalContext.beginPath();
+              globalContext.moveTo(centerX,         centerY+offset);
+              globalContext.lineTo(centerX+halfCell,centerY+offset);
+              globalContext.stroke();
+            }
+            break;
+        }
+      }
+    }
   }
 }
 
@@ -996,9 +965,11 @@ function advanceLine(y,x,state,dir,clockwise) {
   return [alive,y,x,dir];
 }
 
+// this routine travels the path and searches for loops.
+// it assumes everything is single-line paths
+
 function travelLineLoop(arrayYX,y,x) {
   let lineCells = new Array();
-  let tryindex = 0;
   let isLoop = false;
   lineCells.push(y+","+x);
   // we really only need to try one direction to find out if it is
@@ -1035,6 +1006,42 @@ function travelLineLoop(arrayYX,y,x) {
     }
   }
   return [lineCells,isLoop];
+}
+
+// this routine travels the path and fans out in all directions.
+// it can travel single-line and double-line paths
+
+function travelPathNetwork(arrayYX,y,x) {
+  let networkCells = new Array();
+  let tryindex = 0;
+  networkCells.push(y+","+x);
+  while (networkCells.length > tryindex) {
+    let curCell = networkCells[tryindex].split(",");
+    let iy = parseInt(curCell[0]);
+    let ix = parseInt(curCell[1]);
+    if ((((globalLineStates[iy][ix] & PATH_N)  == PATH_N) ||
+         ((globalLineStates[iy][ix] & PATH_2N) == PATH_2N)) &&
+        (networkCells.indexOf((iy-1)+","+ix) == -1)) {
+      networkCells.push((iy-1)+","+ix);
+    }
+    if ((((globalLineStates[iy][ix] & PATH_W)  == PATH_W) ||
+         ((globalLineStates[iy][ix] & PATH_2W) == PATH_2W)) &&
+        (networkCells.indexOf(iy+","+(ix-1)) == -1)) {
+      networkCells.push(iy+","+(ix-1));
+    }
+    if ((((globalLineStates[iy][ix] & PATH_S)  == PATH_S) ||
+         ((globalLineStates[iy][ix] & PATH_2S) == PATH_2S)) &&
+        (networkCells.indexOf((iy+1)+","+ix) == -1)) {
+      networkCells.push((iy+1)+","+ix);
+    }
+    if ((((globalLineStates[iy][ix] & PATH_E)  == PATH_E) ||
+         ((globalLineStates[iy][ix] & PATH_2E) == PATH_2E)) &&
+        (networkCells.indexOf(iy+","+(ix+1)) == -1)) {
+      networkCells.push(iy+","+(ix+1));
+    }
+    tryindex++;
+  }
+  return networkCells;
 }
 
 function roomIsRectangle(roomSquares) {
@@ -1223,7 +1230,7 @@ function unmergePathLines(line1,line2) {
   } else if (line1==line2) {
     return PATH_NONE;
   // if there is no intersection, ignore
-  } else if ((line1&line2)==PATH_SINGLE) {
+  } else if ((line1&line2)==PATH_LINE) {
     return line1;
   } else {
     if (((line1==PATH_WE) && (line2==PATH_W)) ||

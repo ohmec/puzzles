@@ -75,10 +75,12 @@ const demoText = [
     "'back' button to return to the previous step.</p>" +
     "<p>At the beginning of a solve, there are no errors, but there are " +
     "many unsolved digits and un-illuminated cells which we need to satisfy " +
-    "by placing the bulbs.  For our first pass we can satisfy the easy " +
-    "ones (the 4 on this board), and mark certain no-bulb squares with " +
-    "a dot to indicate its condition, i.e. those that must be illuminated " +
-    "elsewhere.</p>",
+    "by placing the bulbs.  For our first time through we can " +
+    "turn on Assist Mode 2 to see any errors that we might generate in the " +
+    "process of the solve.</p>",
+  "For our first pass we can satisfy the easy ones (the 4 on this board), " +
+    "and mark certain no-bulb squares with a dot to indicate its condition, " +
+    "i.e. those that must be illuminated elsewhere.</p>",
   "Already with these additions, we can see more cells that are clearly " +
     "either bulbs or need to be dotted. The '1' in the upper right can " +
     "only be satisfied with a bulb below it, given that its other " +
@@ -178,6 +180,7 @@ const demoText = [
 
 const demoMoves = [
   [[],
+   [],
    ["@02","@11","@13","@22",".40",".51"],
    ["@26",".33",".24"],
    ["@65","@34"],

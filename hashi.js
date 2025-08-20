@@ -34,6 +34,7 @@ let errorCount = 0;
 let incompleteDigits = 0;
 let disjointedPaths = true;
 let assistState = 0;
+let debugMode = false;
 let curClickType = CLICK_UNKNOWN;
 
 // which keys are handled
@@ -212,7 +213,10 @@ function updateDynTextFields() {
       etext = "there are no errors nor incomplete numbers";
     }
   } else {
-    if (errorCount || incompleteDigits) {
+    if ((errorCount || incompleteDigits) && disjointedPaths) {
+      etext = "there are " + errorCount  + " errors and " +
+                        incompleteDigits + " incomplete numbers and more than one bridge path";
+    } else if (errorCount || incompleteDigits) {
       etext = "there are " + errorCount  + " errors and " +
                         incompleteDigits + " incomplete numbers";
     } else if (disjointedPaths) {
@@ -224,8 +228,8 @@ function updateDynTextFields() {
   updateDynamicHtmlEntries(etext,assistState);
 }
 
-function addHistory(y,x,prevvalue,movetype) {
-  moveHistory.push([y,x,prevvalue,movetype]);
+function addHistory(y,x,movetype) {
+  moveHistory.push([y,x,movetype]);
 }
 
 function contains(state,list) {
@@ -239,7 +243,9 @@ function contains(state,list) {
 }
 
 function addMove(moveType,y,x,noHistory=false) {
-  console.log("addMove(" + moveType + "," + y + "," + x + "," + noHistory + ")");
+  if (debugMode) {
+    console.log("addMove(" + moveType + "," + y + "," + x + "," + noHistory + ")");
+  }
   let targetX, targetY;
   let found = false;
   let isMoveType = (moveType <= MOVE_UNTOGGLE_E) ? true : false;
@@ -249,6 +255,10 @@ function addMove(moveType,y,x,noHistory=false) {
   let moveDirS = (moveType==MOVE_TOGGLE_S) || (moveType==MOVE_UNTOGGLE_S);
   let moveDirE = (moveType==MOVE_TOGGLE_E) || (moveType==MOVE_UNTOGGLE_E);
   if (isMoveType) {
+    // make sure it is on a circle, else ignore
+    if ((puzzleBoardStates[y][x] & STATE_CIRCLE) != STATE_CIRCLE) {
+      return;
+    }
     // check the legality of any move type
     let done = false;
     let yincr = 0;
@@ -453,6 +463,7 @@ function handleKey(keynum) {
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalLineStates);
+        debugMode = true;
         break;
       case KEY_UP:
         if (globalCursorY) {
@@ -667,7 +678,8 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (((puzzleBoardStates[y][x] & STATE_CIRCLE) != 0) &&
-          ((globalLineStates[y][x]  & PATH_LINE) != 0) &&
+          ((globalLineStates[y][x]  & PATH_LINE)  == PATH_LINE) &&
+          ((globalLineStates[y][x]  & 0b11111111) != 0) &&
           (checkedLineCells.indexOf(y+","+x)==-1)) {
         let pathArray = travelPathNetwork(globalLineStates,y,x);
         checkedLineCells.push.apply(checkedLineCells, pathArray);
@@ -691,12 +703,11 @@ function updateBoardStatus() {
 function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
-    if (lastMove[3] <= CELL_FIXED) {
-      addMove(lastMove[2],lastMove[0],lastMove[1],true);
-    } else if (lastMove[2] == 0) {
-      addMove(PATH_CLEAR,lastMove[0],lastMove[1],true);
+    // convert from toggle to untoggle
+    if (lastMove[2] < MOVE_UNTOGGLE_N) {
+      addMove(lastMove[2]+4,lastMove[0],lastMove[1],true);
     } else {
-      addMove(lastMove[2],lastMove[0],lastMove[1],true);
+      addMove(lastMove[2]-4,lastMove[0],lastMove[1],true);
     }
     updateBoardStatus();
     drawBoard(true);
@@ -722,12 +733,10 @@ function updateDemoRegion(demoNum) {
     // start by reseting all non-number cells to indeterminate
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
-        if (globalBoardValues[y][x] == "") {
-          puzzleBoardStates[y][x] = CELL_WHITE;
-          globalLineStates[y][x] = PATH_NONE;
-        } else {
-          puzzleBoardStates[y][x] = CELL_FIXED;
+        if ((puzzleBoardStates[y][x] & STATE_CIRCLE) == STATE_CIRCLE) {
+          puzzleBoardStates[y][x] = STATE_CIRCLE;
         }
+        globalLineStates[y][x] = PATH_NONE;
       }
     }
     // now add in all of the moves from each step including this one
@@ -735,7 +744,10 @@ function updateDemoRegion(demoNum) {
       let dsteps = dmoves[step];
       for (let i=0;i<dsteps.length;i++) {
         let steps = dsteps[i].split("");
-        let s0 = (steps[0] == '1') ? CELL_BLACK : convertPathCharToCode(steps[0]);
+        let s0 =
+          (steps[0] == 'N') ? MOVE_TOGGLE_N :
+          (steps[0] == 'W') ? MOVE_TOGGLE_W :
+          (steps[0] == 'S') ? MOVE_TOGGLE_S : MOVE_TOGGLE_E;
         addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }
     }
