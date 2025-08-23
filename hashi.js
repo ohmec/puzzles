@@ -164,7 +164,7 @@ function puzzleInit() {
 
   // click on show errors, converts to show how many errors remain
   $("#assistButton").click(function() {
-    assistState = (assistState+1)%3;
+    assistState = (assistState+1)%4;
     updateBoardStatus();
     drawBoard(true);
   });
@@ -243,9 +243,6 @@ function contains(state,list) {
 }
 
 function addMove(moveType,y,x,noHistory=false) {
-  if (debugMode) {
-    console.log("addMove(" + moveType + "," + y + "," + x + "," + noHistory + ")");
-  }
   let targetX, targetY;
   let found = false;
   let isMoveType = (moveType <= MOVE_UNTOGGLE_E) ? true : false;
@@ -549,9 +546,30 @@ function initStructures(puzzle) {
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (numParamsExp[y*globalPuzzleW+x] != '-') {
+      if (numParamsExp[y*globalPuzzleW+x].search(/[1-8]/) != -1) {
         globalCircleStates[y][x] = CIRCLE_WHITE;
         puzzleBoardStates[y][x] =  STATE_CIRCLE;
+      }
+    }
+  }
+  // look for puzzle 0's solved paths and add those as moves without history
+  // by convention these are always EW (_ or =) just to the E of the source,
+  // or NS (| or #) just S of the source
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (numParamsExp[y*globalPuzzleW+x] == '_') {
+        addMove(MOVE_TOGGLE_E,y,x-1,true);
+      }
+      if (numParamsExp[y*globalPuzzleW+x] == '=') {
+        addMove(MOVE_TOGGLE_E,y,x-1,true);
+        addMove(MOVE_TOGGLE_E,y,x-1,true);
+      }
+      if (numParamsExp[y*globalPuzzleW+x] == '|') {
+        addMove(MOVE_TOGGLE_S,y-1,x,true);
+      }
+      if (numParamsExp[y*globalPuzzleW+x] == '#') {
+        addMove(MOVE_TOGGLE_S,y-1,x,true);
+        addMove(MOVE_TOGGLE_S,y-1,x,true);
       }
     }
   }
@@ -636,6 +654,7 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       globalBoardTextColors[y][x] = stdFontColor;
+      globalBoardColors[y][x] = emptyCellColor;
     }
   }
 
@@ -656,11 +675,11 @@ function updateBoardStatus() {
         }
         if (bridgeCount > circleValue) {
           errorCount++;
-          if (assistState == 2) {
+          if (assistState >= 2) {
             globalBoardTextColors[y][x] = errorFontColor;
           }
         } else if (bridgeCount == circleValue) {
-          if (assistState == 2) {
+          if (assistState >= 2) {
             globalBoardTextColors[y][x] = correctFontColor;
           }
         } else {
@@ -670,7 +689,7 @@ function updateBoardStatus() {
     }
   }
 
-  // rule 4b: check all of the path segments. there should be only one else
+  // check all of the path segments. there should be only one else
   // there are disjointedPaths
 
   let checkedLineCells = new Array();
@@ -690,6 +709,19 @@ function updateBoardStatus() {
 
   if (paths.length > 1) {
     disjointedPaths = true;
+  }
+
+  // for fun in assistState 3 color the different segments so far
+  if (disjointedPaths && assistState==3) {
+    for (let i=0;i<paths.length;i++) {
+      let thisPath = paths[i];
+      for (let j=0;j<thisPath.length;j++) {
+        let curCell = thisPath[j].split(",");
+        let iy = curCell[0];
+        let ix = curCell[1];
+        globalBoardColors[iy][ix] = numberColor[i+1];
+      }
+    }
   }
 
   updateDynTextFields();

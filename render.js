@@ -211,7 +211,7 @@ function initYXWithValues(defvalue,avalue,array) {
 }
 
 function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
-  // first figure out if this is a completed path type, in
+  // first figure out if this is a completed path type (eg. Masyu), in
   // which case it will have [FJ7L|_] to indicate path segments.
   // if so, then we need to treat the FJL7|_ characters as line
   // and ignore in board values
@@ -220,6 +220,12 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
       (numParamText.search(/J/) != -1) && (numParamText.search(/_/) != -1) &&
       (numParamText.search(/7/) != -1) && (numParamText.search(/L/) != -1)) {
     isFullPathType = true;
+  }
+  // similar for tree path type (eg. Hashi)
+  let isTreePathType = false;
+  if ((numParamText.search(/#/) != -1) && (numParamText.search(/=/) != -1) &&
+      (numParamText.search(/|/) != -1) && (numParamText.search(/_/) != -1)) {
+    isTreePathType = true;
   }
   // special case for hasDir; 1v (2v 3v etc) indicates a south
   // arrow so we need to convert those to another character
@@ -267,6 +273,7 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
           (param == '@') ? "" :
           (param == '_') ? "" :
           (isFullPathType && (param.search(/[FJL7\|]/)!=-1)) ? "" :
+          (isTreePathType && (param.search(/[#=\|]/  )!=-1)) ? "" :
             parseInt(param,36);
       }
     }
