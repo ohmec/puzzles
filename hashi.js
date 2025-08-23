@@ -756,9 +756,9 @@ function updateDemoRegion(demoNum) {
   let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
   let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
   if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
+    if (demoStepNum==1) {
       assistState = 2;
-    } else {
+    } else if (demoStepNum==0) {
       assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);

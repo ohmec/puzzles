@@ -1319,3 +1319,102 @@ function convertPathCharToCode (pathChar) {
   }
   return PATH_NONE;
 }
+
+// shapeSort sorts first by y coordinate, then x coordinate
+function shapeSort (cellArray) {
+  let newArray = structuredClone(cellArray);
+  newArray.sort((a,b) => ((a[0]==b[0]) ? (a[1]-b[1]) : (a[0]-b[0])));
+  return newArray;
+}
+
+// take an array of cells that defines its shape, and
+// normalize it in two ways: center it to 0,0, and then
+// sort its individual members so they are in a consistent
+// order
+function normalizeShape (cellArray) {
+  let miny = 999;
+  let minx = 999;
+  for (let i=0;i<cellArray.length;i++) {
+    let c = cellArray[i];
+    if (c[0]<miny) {
+      miny = c[0];
+    }
+    if (c[1]<minx) {
+      minx = c[1];
+    }
+  }
+  let newArray = new Array(cellArray.length);
+  for (let i=0;i<cellArray.length;i++) {
+    let c = cellArray[i];
+    newArray[i] = [c[0]-miny,c[1]-minx];
+  }
+  return shapeSort(newArray);
+}
+
+function rotateShape (cellArray) {
+  let newArray = new Array(cellArray.length);
+  for (let i=0;i<cellArray.length;i++) {
+    let c = cellArray[i];
+    newArray[i] = [c[1],-c[0]];
+  }
+  return normalizeShape(newArray);
+}
+
+function reflectShape (cellArray) {
+  let newArray = new Array(cellArray.length);
+  for (let i=0;i<cellArray.length;i++) {
+    let c = cellArray[i];
+    newArray[i] = [c[1],c[0]];
+  }
+  return normalizeShape(newArray);
+}
+
+// not sure if there is a better way to sort 3d arrays, so
+// converting to a str first before string sorting
+function shape2str (cellArray) {
+  let sstr = "";
+  for (let i=0;i<cellArray.length;i++) {
+    sstr += cellArray[i][0].toString(36);
+    sstr += cellArray[i][1].toString(36);
+  }
+  return sstr;
+}
+
+function str2shape (shapestr) {
+  let cellArray = new Array();
+  let strArray = shapestr.split("");
+  for (let i=0;i<strArray.length;i+=2) {
+    cellArray.push([parseInt(strArray[i],36),parseInt(strArray[i+1],36)]);
+  }
+  return cellArray;
+}
+
+// take an array of cells that defines its shape, and find its
+// "canonical" form, which is first normalized to the 0,0
+// axis, and then the reflected and/or rotated version of itself
+// that "sorts first", an arbitrary sorting but the same each
+// time. This can then be used to compare against another 
+// canonicalized shape to see if they are the same under some
+// form of reflection or rotation
+function canonicalizeShape (cellArray) {
+  console.log(cellArray);
+  let r0 = normalizeShape(cellArray);
+  let r1 = rotateShape(r0);
+  let r2 = rotateShape(r1);
+  let r3 = rotateShape(r2);
+  let f0 = reflectShape(r0);
+  let f1 = rotateShape(f0);
+  let f2 = rotateShape(f1);
+  let f3 = rotateShape(f2);
+  let strArray = new Array();
+  strArray.push(shape2str(r0));
+  strArray.push(shape2str(r1));
+  strArray.push(shape2str(r2));
+  strArray.push(shape2str(r3));
+  strArray.push(shape2str(f0));
+  strArray.push(shape2str(f1));
+  strArray.push(shape2str(f2));
+  strArray.push(shape2str(f3));
+  strArray.sort();
+  return str2shape(strArray[0]);
+}
