@@ -298,12 +298,13 @@ function initStructures(puzzle) {
       }
     }
   }
-  globalBoardColors = initYXFromValue(emptyCellColor);
+  globalBoardColors =     initYXFromValue(emptyCellColor);
   globalBoardTextColors = initYXFromValue(stdFontColor);
-  globalLineColors = initYXFromValue("black"); // default line is black
-  globalCircleColors = initYXFromValue("black");
-  globalInitWallStates  = initWallStates(constWallLight);
-  globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalLineColors =      initYXFromValue("black"); // default line is black
+  globalCircleColors =    initYXFromValue("black");
+  globalInitWallStates =  initWallStates(constWallLight);
+  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalTextBold =        initYXFromValue(true);
   updateBoardStatus();
   drawBoard();
   updateDynTextFields();
@@ -316,8 +317,8 @@ function removeDot(strval) {
 function handleClick(evnt) {
   let tileColor;
   $("#userPuzzleField").blur();
-  let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
+  let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
   
   globalCursorY = yCell;
   globalCursorX = xCell;

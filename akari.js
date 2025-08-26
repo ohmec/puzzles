@@ -326,6 +326,7 @@ function initStructures(puzzle) {
   globalBoardTextColors = initYXFromValue(offFontColor); // all text is white
   globalLineColors =      initYXFromValue("black"); // no lines
   globalCircleColors =    initYXFromValue("black");
+  globalTextBold =        initYXFromValue(true);
 
   // add light bulbs if numParams includes solution, and use num params to
   // set board state
@@ -356,8 +357,8 @@ function removeDot(strval) {
 function handleClick(evnt) {
   curClickType = clickType(evnt);
   $("#userPuzzleField").blur();
-  let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
+  let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
   globalCursorY = yCell;
   globalCursorX = xCell;

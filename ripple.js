@@ -309,6 +309,7 @@ function initStructures(puzzle) {
   globalBoardTextColors = initYXFromValue(fillCellColor); // all text is black
   globalLineColors =      initYXFromValue("black"); // default line is black
   globalCircleColors =    initYXFromValue("black");
+  globalTextBold =        initYXFromValue(true);
 
   // initialize the wall states based upon the given parameters
   globalInitWallStates  = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
@@ -333,8 +334,8 @@ function removeDot(strval) {
 function handleClick(evnt) {
   let tileColor;
   $("#userPuzzleField").blur();
-  let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
+  let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
   
   globalCursorY = yCell;
   globalCursorX = xCell;

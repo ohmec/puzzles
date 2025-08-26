@@ -1,84 +1,154 @@
 <!DOCTYPE html>
-<!-- saved from https://www.kakuro-online.com/fillomino/ -->
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
-    <script type="text/javascript" src="./fpuzzles.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./fmpuzzles.js"></script>
     <script type="text/javascript" src="./fillomino.js"></script>
     <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
     <title>Fillomino Player</title>
   </head>
   <body>
     <div id="banner">
-      Fillomino Player
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for Fillomino &#x30D5;&#x30A3;&#x30EB;&#x30AA;&#x30DF;&#x30CE;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
         <li class="active"><a href="#tab1">Game Play   </a></li>
         <li>               <a href="#tab2">Rules       </a></li>
-        <li>               <a href="#tab3">About       </a></li>
-        <li>               <a href="#tab4">Puzzles     </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
       </ul>
     </div>
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
-        <p>To play, click on a cell and enter a digit. Once selected, arrow keys can be
-        used to move around the canvas. Use keys 1-9, or A-Z for double digit values
-        10-35. Bold digits are the initial puzzle values; digits turn red if the
-        rules of the game are violated. You can click on borders between cells to
-        make a note of expected numeric separations, though no error checking is made.
-        The canvas border will turn green if the grid is completed without error. You
-        can also click on an existing number and "drag" it to other cells to overwrite
-        their value with its value.</p>
-        <center>
-        Enter puzzle code (1-<span id='puzzlecount1'>0</span>) or descriptor
-        (see "Puzzles" tab):<br/>
-        <input type="text"                          id="userPuzzle"    size="40" />
-        <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
-        </center>
+        <p>
+          To play, click on a cell and enter a digit. Once selected, arrow
+          keys can be used to move around the canvas. Use keys 1-9, or A-Z
+          for double digit values 10-35. Bold digits are the initial puzzle
+          values.  You can also click on an existing number and "drag" it
+          to other cells to overwrite their value with its value. Similarly
+          you can press and hold the shift key, then use the arrow keys to
+          move around the board to propagate the current number to other
+          cells. To remove an entered number, you can right-click the cell,
+          or press the back space to clear. You can also drag a cleared
+          cell to clear out new cells.
+        </p>
+          For visualization of numerical boundaries, you can left-click on
+          borders between cells to make a note of expected numeric separations,
+          though no error checking is made. You can right-click to remove
+          drawn borders, but not calculated ones. Once on a boundary, you can
+          shift-move to add more borders. You can also drag left-click to
+          draw borders, or drag right-click to clear borders.
+        </p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete numbers is indicated.  In Assist Mode (1), the
+          number of errors and incomplete numbers is indicated, see game rules.
+          In Assist Mode (1) or higher, each numbered square is given a different
+          color to visually guide the solver in searching for room
+          completions.  In Assist Mode (2) errors are highlighted with red
+          digit colors.  Additionally, borders are drawn between different digit
+          cells and around rooms as they are completed.  In some cases the solve
+          difficulty will greatly decrease in Assist Mode (1) or higher, so
+          select depending upon the level of challenge desired. The game border
+          will turn green if the grid is completed without error.  You can click
+          the "undo" button on the bottom of the page to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
+        </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        The full set of rules for Fillomino can be found online. The simple description
-        includes two basic rules. 1) The grid canvas is divided into a collection of
-        number clusters, where each cluster has like-numbered numerical values (1-35)
-        grouped in horizontally- and vertically-adjacent cells, and, when completed,
-        contains the number of cells of the numerical value itself. For instance, a
-        legal collection of '4' digits has four adjacent cells of any configuration.
-        2) Collections of like-numbered digits cannot border other collections of
-        the same digit. For instance, a legal collection of 4-digits cannot border
-        another collection of 4 digits. Put another way, a collection of 5 or more
-        adjacent '4' digits is illegal. The canvas will indicate this with red-colored
-        digits once the collection is in error. Similarly a collection that has
-        no chance of growing as large as needed to make it of legal size turns
-        that collection's digits red. You can type 'space' or 'backspace' to clear
-        an entered digit, or you can click the "Undo" button on the bottom of the
-        page. On the "Game Play" tab, select puzzle 0 to see a completed
-        sample grid.
+        <a href="https://www.nikoli.co.jp/en/puzzles/fillomino" target="_blank">Fillomino</a>
+        (&#x30D5;&#x30A3;&#x30EB;&#x30AA;&#x30DF;&#x30CE;) is a classic Japanese
+        logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
+        In Fillomino, the board begins with some pre-set cells with numbers in them.
+        These numbers can not be modified, but indicate the size of a "room" or
+        polyomino (collection of squares) containing only those numbers. For
+        instance, a cell with '9' on it must be combined with eight other squares
+        of any shape - connected horizontally or vertically - all containing the
+        number 9. The full set of rules below relate to those numbers and how to
+        complete the puzzle.
+        <ol>
+          <li>
+            Pre-set number cells can not be modified, and must be part of a
+            room with that number of squares joined horizontally or vertically.
+          </li>
+          <li>
+            Collections of like-numbered digits cannot border other collections of
+            the same digit. For instance, a legal collection of '4' cells cannot
+            border another collection of '4' cells. Put another way, a collection
+            of 5 or more adjacent '4' digits is illegal. If in assist mode 2,
+            the canvas will indicate this with red-colored digits once the
+            collection is in error.  Similarly a collection that has no chance
+            of growing as large as needed to make it of legal size turns digits red.
+            It is legal to connect two rooms with the same number at a diagonal
+            point, i.e. not connected horizontally or vertically.
+          </li>
+          <li>
+            All squares must have a number before the puzzle can be solved.
+          </li>
+          <li>
+            Not all eventual rooms will have pre-set number cells within them.
+            The solver must often infer what value the cells must have in 
+            order to complete the puzzle without error.
+          </li>
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
-        This playground was written using javascript and is available open
-        source. More later.
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH:&lt;digit-descriptor&gt;", where W is a number
+          indicating the width of the grid, and H the height.
+          The digit descriptor is a list of the pre-defined
+          digit contents, from left to right, then top to bottom.
+          Blank cells are represented with a '-' character. To assist
+          in the definition of a sparse board, a combination of <i>b</i>
+          consecutive blanks can be represented with a lowercase letter
+          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
+          Digit values greater than '9' should be represented with
+          capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
+          can be used as a visual separator, for example between rows.
+          An example descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Fillomino there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
       </div>
       <div id="tab4" class="tab_content" style="display: none;">
-        Puzzles can be invoked by either a numerical entry from
-        1-<span id='puzzlecount2'>0</span>, or through a character
-        description of the puzzle itself. The numbered puzzles are
-        hand-crafted of varying difficulty, roughly easy to hard.
-        To describe a puzzle, the character string must be of the
-        form: "WxH:&lt;descriptor&gt;", where W is a number indicating
-        the width of the grid, and H the height.  The descriptor is a
-        definition of the grid contents from left to right, then top
-        to bottom. A dash '-' can indicate an empty cell. For easier
-        description of sparse puzzles, letter values from 'a' to 'z'
-        can indicate 1 to 26 empty cells, respectively. A dot '.'
-        can be used as a separator, for example between rows. Cell
-        contents for values greater than '9' should use capital 'A'
-        to 'Z' for 10 through 35. An example descriptor is as follows:
-        "6x10:--3---.b3c.12d.77a89A.f.f.b4b5.c321.Ce.CCc1".
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
       </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
     </div>
     <br />
     <div id="puzzleInterface">
@@ -93,8 +163,16 @@
       <br />
       <div id="buttonsDiv">
         <input class="button small" type="button" value="Undo"  id="undoButton"  />
-        <input class="button small" type="button" value="Clear" id="clearButton" />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
       </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
     </div>
     <!-- some space to avoid the canvas from shrinking on demo mode -->
     <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>

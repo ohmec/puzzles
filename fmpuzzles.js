@@ -132,3 +132,6 @@ let cannedPuzzles = [
 ];
 let puzzleChoice = 38;
 let puzzleCount = cannedPuzzles.length;
+const demoPuzzles = [1,2];
+const demoText = [[]];
+const demoMoves = [[]];
