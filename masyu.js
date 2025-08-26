@@ -427,6 +427,7 @@ function initStructures(puzzle) {
   globalLineColors =      initYXFromValue("black"); // default line is black
   globalCircleStates =    initYXFromValue(CIRCLE_NONE);
   globalCircleColors =    initYXFromValue("black");
+  globalTextBold =        initYXFromValue(true);
 
   let numParamsExp = expandNumParams(numParams);
   if (numParamsExp.length != (globalPuzzleH*globalPuzzleW)) {
@@ -454,8 +455,8 @@ function handleClick(evnt) {
     curClickType = clickType(evnt);
   }
   $("#userPuzzleField").blur();
-  let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
+  let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
   // dragging, but no move yet
   if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {

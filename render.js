@@ -107,10 +107,8 @@ const constWallLight     = 0b000000001;
 const constWallStandard  = 0b000000010;
 const constWallDash      = 0b000000100;
 const constWallBorder    = 0b000001000;
-const constWallStartEdge = 0b000010000;
-const constWallEnterEdge = 0b000100000;
-const constWallClickEdge = 0b001000000;
-const constWallGangEdge  = 0b010000000;
+const constWallUserEdge  = 0b000010000;
+const constWallSolveEdge = 0b000100000;
 
 const constHoriz = true;
 const constVert  = false;
@@ -130,11 +128,14 @@ let globalCircleRadius = 0.4;
 let globalCursorOn = false;
 let globalCursorY = 0;
 let globalCursorX = 0;
+let globalWallCursorOn = false;
+let globalWallCursorY = 0;
+let globalWallCursorX = 0;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
 let globalBoardValues, globalBoardColors, globalBoardTextColors;
 let globalWallStates, globalLineStates, globalLineColors;
-let globalCircleStates, globalCircleColors;
+let globalCircleStates, globalCircleColors, globalTextBold;
 
 function expandNumParams(numStr) {
   for (let cv=10;cv<36;cv++) {
@@ -601,6 +602,7 @@ function drawBoard(lineFirst = false, drawDots = false) {
       drawTile(y,x,
                globalBoardColors[y][x],
                globalBoardValues[y][x],
+               globalTextBold[y][x],
                globalCircleStates[y][x],
                globalCircleColors[y][x],
                globalLineStates[y][x],
@@ -623,6 +625,9 @@ function drawBoard(lineFirst = false, drawDots = false) {
   if (globalCursorOn) {
     drawCursor();
   }
+  if (globalWallCursorOn) {
+    drawWallCursor();
+  }
   if (drawDots) {
     for (let y=0;y<=globalPuzzleH;y++) {
       for (let x=0;x<=globalPuzzleW;x++) {
@@ -632,7 +637,7 @@ function drawBoard(lineFirst = false, drawDots = false) {
   }
 }
 
-function drawTile(y,x,color,value,circle,circlecolor,line,lineColor,lineFirst,textColor) {
+function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineFirst,textColor) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.fillStyle = color;
@@ -656,7 +661,10 @@ function drawTile(y,x,color,value,circle,circlecolor,line,lineColor,lineFirst,te
   let vstr = "";
   globalContext.textAlign = "center";
   globalContext.fillStyle = textColor;
-  globalContext.font = "bold " + (globalGridSize*globalFontSize) + "pt " + "Courier, sans-serif";
+  globalContext.font = (globalGridSize*globalFontSize) + "pt " + "Courier, sans-serif";
+  if (isbold) {
+    globalContext.font = "bold " + globalContext.font;
+  }
   if (isNaN(value) == false) {
     vstr = value;
   } else if (value.search(/^[A-Z0-9]$/) != -1) {
@@ -695,6 +703,35 @@ function drawCursor() {
   globalContext.strokeRect(drawX,drawY,globalGridSize-2,globalGridSize-2);
 }
 
+function drawWallCursor() {
+  let drawX1 = (globalWallCursorX%2) ? ((globalWallCursorX-1)*globalGridSize*0.5) : (globalWallCursorX*globalGridSize*0.5);
+  let drawX2 = (globalWallCursorX%2) ? ((globalWallCursorX+1)*globalGridSize*0.5) : (globalWallCursorX*globalGridSize*0.5);
+  let drawY1 = (globalWallCursorY%2) ? ((globalWallCursorY-1)*globalGridSize*0.5) : (globalWallCursorY*globalGridSize*0.5);
+  let drawY2 = (globalWallCursorY%2) ? ((globalWallCursorY+1)*globalGridSize*0.5) : (globalWallCursorY*globalGridSize*0.5);
+  let isDot = ((globalWallCursorX%2) || (globalWallCursorY%2)) ? false : true;
+  let isHorz = (globalWallCursorX%2);
+  if (isDot) {
+    globalContext.lineWidth = 1;
+    globalContext.fillStyle = constColorCursor;
+    globalContext.beginPath();
+    globalContext.arc(drawX1,drawY1,0.1*globalGridSize,0,2*Math.PI);
+    globalContext.fill();
+  } else {
+    globalContext.lineWidth = 4;
+    globalContext.strokeStyle = constColorCursor;
+    globalContext.fillStyle = "none";
+    if (isHorz) {
+      globalContext.strokeRect(drawX1,drawY1-4,globalGridSize-2,8);
+    } else {
+      globalContext.strokeRect(drawX1-4,drawY1,8,globalGridSize-2);
+    }
+//  globalContext.beginPath();
+//  globalContext.moveTo(drawX1,drawY1);
+//  globalContext.lineTo(drawX2,drawY2);
+//  globalContext.stroke();
+  }
+}
+
 function drawWall(horv,y,x,wallState) {
   let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : x*globalGridSize*0.5;
   let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : x*globalGridSize*0.5;
@@ -706,7 +743,7 @@ function drawWall(horv,y,x,wallState) {
       globalContext.setLineDash([2,2]);
       globalContext.lineWidth = 1;
     } else {
-      if (wallState == constWallBorder) {
+      if ((wallState & (constWallBorder | constWallUserEdge | constWallSolveEdge)) != 0) {
         globalContext.lineWidth = 3;
       } else if (wallState == constWallLight) {
         globalContext.lineWidth = 0.5;
@@ -818,6 +855,9 @@ function drawLine(y,x,state,color) {
 }
 
 // convert click coordinates to tile and edge click info
+//
+// returns [vcell, hcell, isCorner, isEdge, vedge, hedge ]
+
 function getClickCellInfo(evnt, canvas) {
   let canvasElement = document.getElementById(canvas);
   let yCoord = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"));
@@ -828,16 +868,28 @@ function getClickCellInfo(evnt, canvas) {
   let horzDistFromEdgeR = Math.abs((horzCell+1)*globalGridSize - xCoord);
   let vertDistFromEdgeU = Math.abs((vertCell  )*globalGridSize - yCoord);
   let vertDistFromEdgeD = Math.abs((vertCell+1)*globalGridSize - yCoord);
-  if (horzDistFromEdgeL < (globalGridSize*0.1)) {
-    return [ vertCell, horzCell, true, 2*vertCell+1, 2*horzCell ];
-  } else if (horzDistFromEdgeR < (globalGridSize*0.1)) {
-    return [ vertCell, horzCell, true, 2*vertCell+1, 2*horzCell+2 ];
-  } else if (vertDistFromEdgeU < (globalGridSize*0.1)) {
-    return [ vertCell, horzCell, true, 2*vertCell+0, 2*horzCell+1 ];
-  } else if (vertDistFromEdgeD < (globalGridSize*0.1)) {
-    return [ vertCell, horzCell, true, 2*vertCell+2, 2*horzCell+1 ];
+  let isCloseL = (horzDistFromEdgeL < (globalGridSize*0.1));
+  let isCloseR = (horzDistFromEdgeR < (globalGridSize*0.1));
+  let isCloseU = (vertDistFromEdgeU < (globalGridSize*0.1));
+  let isCloseD = (vertDistFromEdgeD < (globalGridSize*0.1));
+  if (isCloseU && isCloseL) {
+    return [ vertCell, horzCell, true, false, 2*vertCell,   2*horzCell ];
+  } else if (isCloseD && isCloseL) {
+    return [ vertCell, horzCell, true, false, 2*vertCell+2, 2*horzCell ];
+  } else if (isCloseU && isCloseR) {
+    return [ vertCell, horzCell, true, false, 2*vertCell,   2*horzCell+2 ];
+  } else if (isCloseD && isCloseR) {
+    return [ vertCell, horzCell, true, false, 2*vertCell+2, 2*horzCell+2 ];
+  } else if (isCloseL) {
+    return [ vertCell, horzCell, false, true, 2*vertCell+1, 2*horzCell ];
+  } else if (isCloseR) {
+    return [ vertCell, horzCell, false, true, 2*vertCell+1, 2*horzCell+2 ];
+  } else if (isCloseU) {
+    return [ vertCell, horzCell, false, true, 2*vertCell,   2*horzCell+1 ];
+  } else if (isCloseD) {
+    return [ vertCell, horzCell, false, true, 2*vertCell+2, 2*horzCell+1 ];
   } else {
-    return [ vertCell, horzCell, false, vertCell*2+1, horzCell*2+1 ];
+    return [ vertCell, horzCell, false, false, vertCell*2+1, horzCell*2+1 ];
   }
 }
 
@@ -882,6 +934,51 @@ function travelRiver(arrayYX,y,x,isEqual,testValue) {
     tryindex++;
   }
   return riverCells;
+}
+
+// similar to travelRiver, but looks for numbers, and reports
+// back if there are spaces to grow into
+function findDigitRoom(arrayYX,y,x,value) {
+  let roomCells = new Array();
+  let hasBlanks = false;
+  let tryindex = 0;
+  let debug = (y==14 && x==12) ? true : false;
+  roomCells.push(y+","+x);
+  while (roomCells.length > tryindex) {
+    let curCell = roomCells[tryindex].split(",");
+    let iy = parseInt(curCell[0]);
+    let ix = parseInt(curCell[1]);
+    if ((iy != (globalPuzzleH-1)) && (roomCells.indexOf((iy+1)+","+ix) == -1)) {
+      if (arrayYX[iy+1][ix]==value) {
+        roomCells.push((iy+1)+","+ix);
+      } else if (arrayYX[iy+1][ix]=="") {
+        hasBlanks = true;
+      }
+    }
+    if ((iy != 0) && (roomCells.indexOf((iy-1)+","+ix) == -1)) {
+      if (arrayYX[iy-1][ix]==value) {
+        roomCells.push((iy-1)+","+ix);
+      } else if (arrayYX[iy-1][ix]=="") {
+        hasBlanks = true;
+      }
+    }
+    if ((ix != (globalPuzzleW-1)) && (roomCells.indexOf(iy+","+(ix+1)) == -1)) {
+      if (arrayYX[iy][ix+1]==value) {
+        roomCells.push(iy+","+(ix+1));
+      } else if (arrayYX[iy][ix+1]=="") {
+        hasBlanks = true;
+      }
+    }
+    if ((ix != 0) && (roomCells.indexOf(iy+","+(ix-1)) == -1)) {
+      if (arrayYX[iy][ix-1]==value) {
+        roomCells.push(iy+","+(ix-1));
+      } else if (arrayYX[iy][ix-1]=="") {
+        hasBlanks = true;
+      }
+    }
+    tryindex++;
+  }
+  return [roomCells, hasBlanks];
 }
 
 function advanceLine(y,x,state,dir,clockwise) {

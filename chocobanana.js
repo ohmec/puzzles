@@ -307,6 +307,7 @@ function initStructures(puzzle) {
   globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
   globalLineColors =      initYXFromValue("black"); // default line is black
   globalCircleColors =    initYXFromValue("black");
+  globalTextBold =        initYXFromValue(true);
 
   // override board colors if the hexParams are included, just for 0th
   // entry of the puzzles (example completed puzzle). this uses hex values
@@ -335,8 +336,8 @@ function handleClick(evnt) {
     curClickType = clickType(evnt);
   }
   $("#userPuzzleField").blur();
-  let yCell, xCell, isEdge, yEdge, xEdge;
-  [ yCell, xCell, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
+  let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
+  [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
   // dragging, but no move yet 
   if (dragging && ((yCell == globalCursorY) && (xCell == globalCursorX))) {
