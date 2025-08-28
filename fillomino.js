@@ -16,8 +16,10 @@ const constMoveToggleWall = 53;
 let clicking = false;
 let dragging = false;
 let shifting = false;
+let ctrling = false;
 let errorCount = 0;
 let incompleteCount = 0;
+let incompleteBoard = true;
 let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
 let curClickIsWall = false;
@@ -59,7 +61,9 @@ function puzzleInit() {
     if (evnt.which == KEY_SHIFT) {
       shifting = true;
       curShiftNumber = globalBoardValues[globalCursorY][globalCursorX];
-    } else if (handledKeys.find(element => element == evnt.which)) {
+    } else if ((evnt.which == KEY_CTLL) || (evnt.which == KEY_CTLR)) {
+      ctrling = true;
+    } else if (!ctrling && (handledKeys.find(element => element == evnt.which))) {
       handleKey(evnt.which);
     }
   });
@@ -67,6 +71,8 @@ function puzzleInit() {
   $(document).keyup(function(evnt) {
     if (evnt.which == KEY_SHIFT) {
       shifting = false;
+    } else if ((evnt.which == KEY_CTLL) || (evnt.which == KEY_CTLR)) {
+      ctrling = false;
     }
   });
 
@@ -204,15 +210,19 @@ function updateDynTextFields() {
       etext = "there are errors";
     } else if (incompleteCount) {
       etext = "there are incomplete numbers";
+    } else if (incompleteBoard) {
+      etext = "there are pending white cells";
     } else {
-      etext = "there are no errors nor incomplete numbers";
+      etext = "the puzzle is complete!!";
     }
   } else {
     if (errorCount || incompleteCount) {
       etext = "there are " + errorCount + " errors and " +
                         incompleteCount + " incomplete numbers";
+    } else if (incompleteBoard) {
+      etext = "there are pending white cells";
     } else {
-      etext = "there are no errors nor incomplete numbers";
+      etext = "the puzzle is complete!!";
     }
   }
   updateDynamicHtmlEntries(etext,assistState);
@@ -304,7 +314,7 @@ function handleKey(keynum) {
             }
           // we can only move the wall cursor up if we're already on a vert wall
           // or corner
-          } else if ((globalWallCursorX%2)==0) {
+          } else if (globalWallCursorOn && ((globalWallCursorX%2)==0)) {
             if (globalWallCursorY) {
               globalWallCursorY--;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
@@ -327,8 +337,8 @@ function handleKey(keynum) {
             }
           // we can only move the wall cursor down if we're already on a vert wall
           // or corner
-          } else if ((globalWallCursorX%2)==0) {
-            if (globalWallCursorY<=(2*globalPuzzleH)) {
+          } else if (globalWallCursorOn && ((globalWallCursorX%2)==0)) {
+            if (globalWallCursorOn && (globalWallCursorY<=(2*globalPuzzleH))) {
               globalWallCursorY++;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
                 addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
@@ -350,7 +360,7 @@ function handleKey(keynum) {
             }
           // we can only move the wall cursor left if we're already on a horz wall
           // or corner
-          } else if ((globalWallCursorY%2)==0) {
+          } else if (globalWallCursorOn && ((globalWallCursorY%2)==0)) {
             if (globalWallCursorX) {
               globalWallCursorX--;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
@@ -373,7 +383,7 @@ function handleKey(keynum) {
             }
           // we can only move the wall cursor right if we're already on a horz wall
           // or corner
-          } else if ((globalWallCursorY%2)==0) {
+          } else if (globalWallCursorOn && ((globalWallCursorY%2)==0)) {
             if (globalWallCursorX<=(2*globalPuzzleW)) {
               globalWallCursorX++;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
@@ -532,6 +542,7 @@ function updateBoardStatus() {
 
   // also count how many numbers haven't been completed yet
   incompleteCount = 0;
+  incompleteBoard = false;
 
   // start by reseting all cell colors to "standard",
   // and all wall borders should remove the SolveEdge
@@ -569,8 +580,11 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       let cellValue = globalBoardValues[y][x];
+      // look for a white cells
+      if (cellValue == "") {
+        incompleteBoard = true;
       // look for a numerical value
-      if (cellValue != "") {
+      } else if (cellValue != "") {
         // skip if already in the allDigitCell list, since it is covered already
         if (allDigitCells.indexOf(y+","+x) == -1) {
           let roomArray, hasGrowth;
@@ -625,7 +639,7 @@ function updateBoardStatus() {
   }
 
   updateDynTextFields();
-  if ((errorCount == 0) && (incompleteCount == 0)) {
+  if ((errorCount == 0) && (incompleteCount == 0) && !incompleteBoard) {
     $("#canvasDiv").css("border-color", constColorSuccess);
   } else {
     $("#canvasDiv").css("border-color", "black");
@@ -654,6 +668,7 @@ function resetBoard() {
 function updateDemoRegion(demoNum) {
   let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
   let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
+  globalCursorOn = false;
   if (demoStepNum < dtext.length) {
     if (demoStepNum) {
       assistState = 2;
@@ -661,12 +676,18 @@ function updateDemoRegion(demoNum) {
       assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);
-    // start by reseting all non-number cells to indeterminate
+    // start by reseting all non-number cells to empty
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
-        if (globalBoardValues[y][x] == "") {
-          puzzleBoardStates[y][x] = STATE_INDET;
+        if (globalInitBoardValues[y][x] == "") {
+          globalBoardValues[y][x] = "";
         }
+      }
+    }
+    // and all walls to no user edge
+    for (let y=0;y<(globalPuzzleH*2+1);y++) {
+      for (let x=0;x<(globalPuzzleW*2+1);x++) {
+        globalWallStates[y][x] &= ~constWallUserEdge;
       }
     }
     // now add in all of the moves from each step including this one
@@ -674,8 +695,13 @@ function updateDemoRegion(demoNum) {
       let dsteps = dmoves[step];
       for (let i=0;i<dsteps.length;i++) {
         let steps = dsteps[i].split("");
-        let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
-        addMove(s0,steps[1],steps[2]);
+        if (steps[0]=="_") {          // south wall
+          addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall);
+        } else if (steps[0]=="|") {   // east wall
+          addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveAddWall);
+        } else {                      // digit entry
+          addMove(parseInt(steps[1],36),parseInt(steps[2],36),parseInt(steps[0],36));
+        }
       }
     }
     updateBoardStatus();

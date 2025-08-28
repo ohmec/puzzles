@@ -210,7 +210,7 @@ function updateDynTextFields() {
     } else if (disjointedPaths) {
       etext = "there is more than one bridge path";
     } else {
-      etext = "there are no errors nor incomplete numbers";
+      etext = "the puzzle is complete!!";
     }
   } else {
     if ((errorCount || incompleteDigits) && disjointedPaths) {
