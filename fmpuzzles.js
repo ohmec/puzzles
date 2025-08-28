@@ -39,6 +39,11 @@ let cannedPuzzles = [
   "10x18:d82d87b37b1873f83ja37ga43b37a84e36a73b33f7a76e34e61a7f62b24a64e67a32b24ag62aj62f2654b43b64d46d",
   // puzzle 35
   "10x18:23456e.j.e43664.3456f.j.f4434.436g.j.g632.634g.j.g336.4654f.j.f4646.64655e.j.e56246",
+  // 2018 9-12
+  "10x10:6a5b5d.3b34c56.i1.a2a1d2a.3a3a2e.e5a5a1.a3d2a5a.6i.54c27b7.d5b2a4",
+  "10x10:3a3a45a6a6.a4b34b1a.3a6d3a6.j.32b66b12.15b55b23.j.8a1d1a3.a4b25b3a.8a3a35a4a2",
+  "10x10:462f2.e6c5.b4a3a6b5.a1a1c3b.8c6a6a3a.a2a2a6c5.b4c1a1a.2b8a1a5b.2c6e.8f865",
+  "10x10:a35e4a.d4a1a5a.533a3a5a1a.d1e.d3a2562.5551a1d.e5d.a1a5a4a321.a5a4a6d.a3e32a",
   // puzzle 44-47
   "10x18:5225666655.5h7.7h7.7h5.7h2.3h5.7a721765a3.j.6a6d7a7.3a5d9a9.j.5a695956a6.6h6.6h5.6h4.1h2.4h1.4664953322",
   "14x24:f63f.766c55c334.343c54c125.n.d25b44d.d46b55d.33b32b77b42" +
@@ -130,8 +135,173 @@ let cannedPuzzles = [
   "30x30:234a6b323a2c2c666b33a2d3c6d1c23b6a614c7441b6a6a1a69b665541b5b1877a3c6a2c63a6b5b232c8b79a21a1b4a6a331b31b5b18a8e33c3c2b5a4d5a4a89a9a4b521a545c552a446a14b51a9a2a5a42b4413b54e7128b9c2f4a37b3447735g3a1a31c7a337a3a2377255b2a866a44a3a7466b2a7g5d8a64a2a55c6a344c55b443e1c65a4a21a3b5545a36a4534b5a926a6b6d1b5b44d5a4d2a6a2a6b7a52b884a6a5a3b157c33b2a7a2c38a31a72a412a1a71a3a51b3a4354a88b7c5a53d2c5a4a6a4b4a4c7a35a4a5b24b55a45b6b6234477a66a4435b3a244a2a5b26c23a24a66c254a364a31c326d1d252l823d2b255a12a5b4a45b6e54a2a354g5b12a443a1288b53a45b4a3a2a6a3a8a3b7a24a8a5b3b8a442346a1a2c99c7b1a1b1d1e64a1a2991c1g1a887c4a8b2a39b232a2a347a6628c13b8a2d9e512b1c5522a4a18e91a3a21c132a16c1c2b1552",
   "35x35:b1a23b2a342a3343g27b3b3a11344b4a2c1b3b552a99d2c212d4a4a4b55886a5c9a3b23334a1e7a5e5h2e4d2a3a28446c77a533b237b328h56a8a4a2c4a5b7d77b6a4a1b12a3a4e1b3e2a1b8836644c3a3c8a125a4a4322d4b7c6c34a5c26321c1e31a7e4b1a6d46e34c5a2a2b842214b7b6b521a3a2a6d366b5b8a6c55a25j55a342b6a355899e5a6b443a243a45d7466a12b9a5a3a3a8b3a4a588c2c4d7a91b552a1a4823b2c8d5a4b48a74d5a1e1b13c28a4b6k3b335b3b3b2b2b2c6428873f16b2d3b2b1b2b1b7b4a9a521a2b4a13a4d546b46b1b77b93b7a7g52a5a2b3a2b9c7c12a3a3a4a223b7a67a1b66c9122a9c2a86a6a55b23b6a17a511a6b2c9a1e624a5a32a56d8a7a3a5g23d3a4c4d23h6b6e14832b1a684a5b3d5a55a6a3a8a3b32b46d1a17b9a228c2a25d6a4a2a3b49c47a7h3a6a1a7b6a4a1a55b61b34a6a12a6a3a5a5a8a3b2246a1b5a6c5a6a4a3c93f241a54b822a9b9a5a2344a8a121a6a3554a4d3a5b4a2a5f3b5c4a65b9b151c53a31b7b3f13d6a7996b8a8a5e22a6b423b2b44a37b3c8a2b3c3b88a4g3c8b743b8a2a38d43a8a64c3c28b87c128b1d1a3b866a4423a5",
 ];
-let puzzleChoice = 38;
+let puzzleChoice = 15;
 let puzzleCount = cannedPuzzles.length;
-const demoPuzzles = [1,2];
-const demoText = [[]];
-const demoMoves = [[]];
+const demoPuzzles = [1,31];
+const demoText = [
+ ["<p>In this demo we will walk through the steps of solving this puzzle. " +
+    "Press the 'next' button to walk through the solving steps, or the " +
+    "'back' button to return to the previous step.</p>" +
+    "<p>At the beginning of a solve, there are no errors, but there are " +
+    "many incomplete numbers which we need to join with others to complete " +
+    "their room. For our first time through we can turn on Assist " +
+    "Mode 2 to see any errors that we might generate in the process of " +
+    "the solve, and to visualize the groups better.</p>",
+  "Just by turning on assist mode 2 we see that one of the digit rooms is " +
+    "satisfied already. At this stage we can also see that both of the " +
+    "other twos are easy to solve as well, as there is only one direction " +
+    "they can go at this point.",
+  "Now we can see that the '4' on the right column can only go upwards, " +
+    "and is constrained long enough to complete its shape. The '5' on the " +
+    "bottom row is constrained too, but only for the first 4 cells, after " +
+    "that it is still undetermined.",
+  "Now the lower '3' is constrained until its completion, which then " +
+    "constrains the '5' below it until it is done. The '3' near the top " +
+    "must go one to the left, but it isn't yet clear if it continues west " +
+    "or completes northward.",
+  "Now it is clear that there are only three spaces left to complete the " +
+    "unfinished '4', so they must all be included in its room. This " +
+    "finalizes the '3' above as well.",
+  "Congratulations! The puzzle is solved!"],
+ ["<p>In this demo we will walk more quickly through the steps of solving " +
+    "a tougher puzzle, using some of the more advanced techniques that were " +
+    "not needed in the first one. It is recommended to go through demo 1 " +
+    "first. Press the 'next' button to walk through the solving steps, or " +
+    "the 'back' button to return to the previous step. You can also use the " +
+    "undo button to move backwards individual steps, or continue playing " +
+    "forward if you wish.</p>" +
+    "<p>The first thing to do is to turn on the assist mode to let us know " +
+    "which rooms still need completion. Looking at this tougher board it " +
+    "appears that there is not any cell that can definitively be completed. " +
+    "However, we can take advantage of the ability to paint borders to " +
+    "begin to designate some required separation. For instance, looking at " +
+    "the three sets of '3' digits in the upper left, we can see that none " +
+    "of those not already connected can be allowed to connect, else they " +
+    "will create a room too large for the digit. Similarly the two '2' " +
+    "digits in the lower right of the puzzle.</p>",
+  "These wall additions allow the upper left '3' to be completed, as well " +
+    "as the two '2' cells in the lower right. In addition, the '3' in the " +
+    "upper center can progress one step to the right.",
+  "Now a key form of observation required for more challenging puzzles is " +
+    "visible in the lower right of the puzzle. Seemingly, it is not " +
+    "knowable at this time what value can occupy the white cell in the " +
+    "second to bottom row, right column. However, the critical observation " +
+    "is that it can <b>not</b> be any of '1', '2', or '3'. If it were a '1', " +
+    "it would illegally combine with '1' above it. Similarly with the '2's. " +
+    "And a '3' would require two more to its left which would illegally " +
+    "combine with the nearby '3' cells. Thus we can deduce that it must be " +
+    "at least a '4'. For now we can at least use this information to draw " +
+    "a border on those '3' cells to give space for this larger room to exist. " +
+    "Unrelated, we can move the upper '5' on the left column downward by one " +
+    "cell.",
+  "With these restrictions, we can complete the right '3' on the bottom row, " +
+    "and make another key observation with the upper '5' on the left column. " +
+    "Again, we can see that if the '5' grows any more to the south, it will " +
+    "combine with the other '5' cells below it to make too large of a room. " +
+    "Thus it must complete its shape all to the right. Meanwhile, the '5's " +
+    "below it must be restricted from growing upwards.",
+  "More work can be done in the upper left corner. The '3' room can only be " +
+    "completed by adding one on the second row; this forces the '5' above " +
+    "it to move towards the right at least one cell.",
+  "Now we must infer that the single empty cell in the upper left can only " +
+    "be filled with a '1'. In addition, we can infer one more cell in the  " +
+    "growing '5' on the top row. It could only gain two more cells by moving " +
+    "southward (which is still possible), but it needs three more to complete " +
+    "its shape. Therefore at least one of them must come to the right. This " +
+    "blocks the '4' from moving straight upward, and then the same form of " +
+    "logic can be used to say the '4' must also move at least one to the " +
+    "right. This in turn defines the direction that nearby '3' room must " +
+    "grow to complete its shape. Everything else in that area is still " +
+    "pending at this time.",
+  "Now it is more obvious that the '5's growing on the top row can only gain " +
+    "one more if it were to move southward. Two more would make it connect " +
+    "to the other '5's below. Thus at least one more '5' must come from " +
+    "the right. Doing so blocks the '4', which means that it must indeed " +
+    "take those two remaining isolated white cells, and the '5' must move " +
+    "its last cell to the right.",
+  "Now we can progress on two '2' cells. If you note the isolated white " +
+    "cell in the middle can not have a '1' in it, the only other choice " +
+    "could be a '2'. Meanwhile, in the middle of the right column, we " +
+    "have another situation where the process of elimination can help us " +
+    "make progress. The white space below that '2' can not contain a '1', " +
+    "or a '2', else it would force two '1' cells next to each other. Thus " +
+    "we can deduce that the '2' must connect upwards.",
+  "Now we have a curious 'fight' going on for space in the upper right. " +
+    "Both the '4' and the '5' need room to expand into the remaining white " +
+    "spaces. If the '5' were to grow to the right, it wouldn't fit and " +
+    "would need to also add one to the left. This would block the '4' from " +
+    "having enough space to grow. Thus it must grow to the left and join " +
+    "the other '5' nearby. It can't take that one cell on the top row else " +
+    "it would connect with the neighboring '5'. Meanwhile the '4' must " +
+    "finish all the way down to the right towards the '1' else we risk a " +
+    "double '1' room there. This means that the white cell on the top row " +
+    "must be a '1' and there is only one place left for the final '5' to go.",
+  "Looking at the board in its current state, we can solve the '6' in the " +
+    "right side of the board. The '5' next to it is restricted to go down, " +
+    "so that hems in the '6' to the remaining white squares around it.",
+  "Now we see that the '5' next to that '6' room has no choice but to " +
+    "connect to the other '5' to its left and down. But which direction? " +
+    "It can only take one of the two white cells, left or down. But it " +
+    "can be seen that if it left the one to its left white, then only " +
+    "a '1' cell would satisfy it, but that would violate the rule of " +
+    "the '1' room being of size two.",
+  "Now with that complete we can see that there is only one option for " +
+    "the pending '3' in the lower right, it must go up one and left one " +
+    "to avoid colliding with the other '3' cells below it. This begins " +
+    "to constrain the '6' in the bottom area. It <b>could</b> take all " +
+    "four of the white squares to its right (though we can't assume it " +
+    "yet, those could be satisfied with a set of '4' cells). But even " +
+    "so that is not enough, so we know it must have at least one '6' " +
+    "in the west direction, which begins to constrain the '4's next to " +
+    "it, where we can make a little more progress.",
+  "We can see trouble brewing between the remaining unsolved '5' cells " +
+    "in the lower left region. The upper collection of three '5's " +
+    "cannot reach either of the '5's below it without making too big " +
+    "of a room, and there just isn't enough room for three independent " +
+    "rooms of '5's. This means that the two lower '5's must connect up.",
+  "This move immediately solves the solo '4' on the second to bottom " +
+    "row, and then our '6's in the lower right. This in turn allows us " +
+    "to complete the '3' in the lower left corner.",
+  "Almost there. We can complete the lower of the pending '5' rooms, " +
+    "there is only one square it can go. This forces the completion " +
+    "of the '4' next to it, upwards. Which then in turn forces the " +
+    "'3' above that to the left.",
+  "<p>Now it would seem we have a few options for the remaining white " +
+    "cells since they are unconstrained. But starting with the two in " +
+    "the left center, to the left of the '3's, they must be a '2' since " +
+    "the only other solution would be two '1's which would violate the " +
+    "primary rule. Now looking at the '5's below that, they need two " +
+    "more cells, which could come from any of the four white cells " +
+    "except the right-most, which is connected to the other nearby " +
+    "'5' room. But that '1' among the white cells indicates that no " +
+    "other '1' can be nearby. The only solution for this is to have " +
+    "the '5's along the left wall, and place two '2's in the empty " +
+    "space.</p><p>In this back-and-forth manner, searching out areas " +
+    "of available constraints, we can slowly work our way to a more " +
+    "complicated solve.",
+  "Congratulations! The puzzle is solved!"]];
+
+const demoMoves = [
+ [[],
+  [],
+  ["244","222"],
+  ["414","404","403","543","542","541"],
+  ["331","330","540","312"],
+  ["410","411","420","421","302"]],
+ [[],
+  ["_01","_11","|22","|23","_78","_88"],
+  ["300","310","268","299","325"],
+  ["_77","_87","530"],
+  ["396","395","531","532","533","_40","_41","_42"],
+  ["312","503"],
+  ["111","504","415","335","|44"],
+  ["505","413","423","506"],
+  ["245","239"],
+  ["409","419","429","517","527","536","107","_37"],
+  ["637","638","658","659","669","557"],
+  ["566","556"],
+  ["367","376","684","474","464"],
+  ["572","582","_52","_62"],
+  ["492","493","494","686","687","688","689","390","380"],
+  ["563","454","343","342"],
+  ["240","241","560","570","261","262"]]];
