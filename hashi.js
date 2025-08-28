@@ -234,8 +234,8 @@ function addHistory(y,x,movetype) {
 
 function contains(state,list) {
   let hit = false;
-  for (let i=0;i<list.length;i++) {
-    if (state==list[i]) {
+  for (let lmem of list) {
+    if (state==lmem) {
       hit = true;
     }
   }
@@ -716,8 +716,8 @@ function updateBoardStatus() {
   if (disjointedPaths && assistState==3) {
     for (let i=0;i<paths.length;i++) {
       let thisPath = paths[i];
-      for (let j=0;j<thisPath.length;j++) {
-        let curCell = thisPath[j].split(",");
+      for (let cc of thisPath) {
+        let curCell = cc.split(",");
         let iy = curCell[0];
         let ix = curCell[1];
         globalBoardColors[iy][ix] = numberColor[i+1];
@@ -774,9 +774,8 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 =
           (steps[0] == 'N') ? MOVE_TOGGLE_N :
           (steps[0] == 'W') ? MOVE_TOGGLE_W :

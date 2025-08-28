@@ -18,7 +18,7 @@ const MOVE_RESET  = 3;
 
 const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1, ALT_0, ALT_1 ];
 
-let initPuzzle, puzzle, moveHistory, boardStates, demoStepNum;
+let initPuzzle, puzzle, moveHistory, puzzleBoardStates, demoStepNum;
 
 function puzzleInit() {
   // any key anywhere as long as canvas is in focus
@@ -180,15 +180,15 @@ function addHistory(setOrReset,y,x) {
 function addMove(move,y,x) {
   switch (move) {
     case MOVE_TOGGLE:
-      boardStates[y][x] = boardStates[y][x] ? false : true;
-      addHistory(boardStates[y][x],y,x);
+      puzzleBoardStates[y][x] = puzzleBoardStates[y][x] ? false : true;
+      addHistory(puzzleBoardStates[y][x],y,x);
       break;
     case MOVE_SET:
-      boardStates[y][x] = true;
+      puzzleBoardStates[y][x] = true;
       addHistory(true,y,x);
       break;
     case MOVE_RESET:
-      boardStates[y][x] = false;
+      puzzleBoardStates[y][x] = false;
       addHistory(false,y,x);
       break;
   }
@@ -288,13 +288,13 @@ function initStructures(puzzle) {
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues = initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  boardStates = initYXFromValue(false); // states are true/false for "black"
+  puzzleBoardStates = initYXFromValue(false); // states are true/false for "black"
   // look for pre-black ones (denoted with *)
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (numParamsExp[y*globalPuzzleW+x] == '*') {
-        boardStates[y][x] = true;
+        puzzleBoardStates[y][x] = true;
       }
     }
   }
@@ -315,7 +315,6 @@ function removeDot(strval) {
 }
 
 function handleClick(evnt) {
-  let tileColor;
   $("#userPuzzleField").blur();
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
@@ -337,8 +336,8 @@ function updateBoardStatus() {
   // set all cells to black or white before figuring out error conditions
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      globalBoardColors[y][x]     = boardStates[y][x] ? fillCellColor : emptyCellColor;
-      globalBoardTextColors[y][x] = boardStates[y][x] ?  offFontColor :   stdFontColor;
+      globalBoardColors[y][x]     = puzzleBoardStates[y][x] ? fillCellColor : emptyCellColor;
+      globalBoardTextColors[y][x] = puzzleBoardStates[y][x] ?  offFontColor :   stdFontColor;
     }
   }
 
@@ -352,7 +351,7 @@ function updateBoardStatus() {
       count[c] = 0;
     }
     for (let x=0;x<globalPuzzleW;x++) {
-      if (!boardStates[y][x]) {
+      if (!puzzleBoardStates[y][x]) {
         count[globalBoardValues[y][x]]++;
       }
     }
@@ -362,7 +361,7 @@ function updateBoardStatus() {
         // if in assistState==2 then color these light red
         if (assistState==2) {
           for (let x=0;x<globalPuzzleW;x++) {
-            if (!boardStates[y][x] && globalBoardValues[y][x]==c) {
+            if (!puzzleBoardStates[y][x] && globalBoardValues[y][x]==c) {
               globalBoardColors[y][x] = duplicateStateColor;
             }
           }
@@ -376,7 +375,7 @@ function updateBoardStatus() {
       count[c] = 0;
     }
     for (let y=0;y<globalPuzzleH;y++) {
-      if (!boardStates[y][x]) {
+      if (!puzzleBoardStates[y][x]) {
         count[globalBoardValues[y][x]]++;
       }
     }
@@ -386,7 +385,7 @@ function updateBoardStatus() {
         // if in assistState==2 then color these light red
         if (assistState==2) {
           for (let y=0;y<globalPuzzleH;y++) {
-            if (!boardStates[y][x] && globalBoardValues[y][x]==c) {
+            if (!puzzleBoardStates[y][x] && globalBoardValues[y][x]==c) {
               globalBoardColors[y][x] = duplicateStateColor;
             }
           }
@@ -400,14 +399,14 @@ function updateBoardStatus() {
   let filledCells = new Array();
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (boardStates[y][x] && (filledCells.indexOf(y+","+x) == -1)) {
-        let visitedCells = travelRiver(boardStates,y,x,true,true);
+      if (puzzleBoardStates[y][x] && (filledCells.indexOf(y+","+x) == -1)) {
+        let visitedCells = travelRiver(puzzleBoardStates,y,x,true,true);
         if (visitedCells.length != 1) {
           errorCount++;
           // color them if in assistState==2
           if (assistState==2) {
-            for (let i=0;i<visitedCells.length;i++) {
-              let curCell = visitedCells[i].split(",");
+            for (let cc of visitedCells) {
+              let curCell = cc.split(",");
               let iy = curCell[0];
               let ix = curCell[1];
               globalBoardColors[iy][ix] = incorrectCellColor;
@@ -424,15 +423,15 @@ function updateBoardStatus() {
   let riverCount = 0;
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (!boardStates[y][x] && (whiteCells.indexOf(y+","+x) == -1)) {
-        let visitedCells = travelRiver(boardStates,y,x,true,false);
+      if (!puzzleBoardStates[y][x] && (whiteCells.indexOf(y+","+x) == -1)) {
+        let visitedCells = travelRiver(puzzleBoardStates,y,x,true,false);
         if (riverCount) {
           errorCount++;
           // if in assistState==2 then color these second river
           // cells differently
           if (assistState==2) {
-            for (let i=0;i<visitedCells.length;i++) {
-              let curCell = visitedCells[i].split(",");
+            for (let cc of visitedCells) {
+              let curCell = cc.split(",");
               let iy = curCell[0];
               let ix = curCell[1];
               globalBoardColors[iy][ix] = incorrectRiverColor;
@@ -456,7 +455,7 @@ function updateBoardStatus() {
 function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
-    boardStates[lastMove[1]][lastMove[2]] = lastMove[0] ? false : true;
+    puzzleBoardStates[lastMove[1]][lastMove[2]] = lastMove[0] ? false : true;
     updateBoardStatus();
     drawBoard();
   }
@@ -478,12 +477,11 @@ function updateDemoRegion(demoNum) {
       assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);
-    boardStates = initYXFromValue(false);
+    puzzleBoardStates = initYXFromValue(false);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let curCell = dsteps[i].split(",");
+      for (let dsteps of dmoves[step]) {
+        let curCell = dsteps.split(",");
         let iy = curCell[0];
         let ix = curCell[1];
         addMove(MOVE_SET,iy,ix);

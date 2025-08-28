@@ -38,6 +38,7 @@ const PATH_2N      = PATH_LINE | 0b00000010;
 const PATH_2W      = PATH_LINE | 0b00001000;
 const PATH_2S      = PATH_LINE | 0b00100000;
 const PATH_2E      = PATH_LINE | 0b10000000;
+const PATH_ALL     = 0b11111111;
 
 const KEY_BS    = 0x08;
 const KEY_CR    = 0x0d;
@@ -84,25 +85,6 @@ const numberColor = [
   //  U-30       V-31       W-32       X-33       Y-34       Z-35
   "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0",
 ];
-
-const PUZZLE_DOUBLECHOCO = 1;
-const PUZZLE_NURIKABE = 2;
-const PUZZLE_MASYU = 3;
-const PUZZLE_FILLOMINO = 4;
-const PUZZLE_HEYAWAKE = 5;
-const PUZZLE_YAJILIN = 6;
-const PUZZLE_SLITHERLINK = 7;
-const PUZZLE_CHOCOBANANA = 8;
-const PUZZLE_AKARI = 9;
-const PUZZLE_HASHIWOKAKERO = 10;
-const PUZZLE_HITORI = 11;
-const PUZZLE_RIPPLEEFFECT = 12;
-const PUZZLE_SHIKAKU = 13;
-const PUZZLE_LITS = 14;
-
-let puzzleName = [ "undefined", "Double Choco", "Nurikabe",
-  "Masyu", "Fillomino", "Heyawake", "Yajilin", "Slitherlink", "Choco Banana",
-  "Akari", "Hashiwokakero", "Hitori", "Ripple Effect", "Shikaku", "LITS"];
 
 const constWallNone      = 0b000000000;
 const constWallLight     = 0b000000001;
@@ -174,17 +156,6 @@ function initYXFromArray(ymax,xmax,array) {
   return yxArray;
 }
 
-function initBobFromValue(value) {
-  let yxArray = new Array(globalPuzzleH);
-  for (let y=0;y<globalPuzzleH;y++) {
-    yxArray[y] = new Array(globalPuzzleW);
-    for (let x=0;x<globalPuzzleW;x++) {
-      yxArray[y][x] = 63;
-    }
-  }
-  return yxArray;
-}
-
 function initYXFromValue(value) {
   let yxArray = new Array(globalPuzzleH);
   for (let y=0;y<globalPuzzleH;y++) {
@@ -192,23 +163,6 @@ function initYXFromValue(value) {
     for (let x=0;x<globalPuzzleW;x++) {
       yxArray[y][x] = value;
     }
-  }
-  return yxArray;
-}
-
-function initYXWithValues(defvalue,avalue,array) {
-  let yxArray = new Array(globalPuzzleH);
-  for (let y=0;y<globalPuzzleH;y++) {
-    yxArray[y] = new Array(globalPuzzleW);
-    for (let x=0;x<globalPuzzleW;x++) {
-      yxArray[y][x] = defvalue;
-    }
-  }
-  for (let m=0;m<array.length;m++) {
-    let curCell = array[m].split(",");
-    let iy = curCell[0];
-    let ix = curCell[1];
-    yxArray[iy][ix] = avalue;
   }
   return yxArray;
 }
@@ -241,10 +195,10 @@ function initBoardValuesFromParams(numParamText,hasDir=false,charForNum=false) {
     for (let i=0;i<numParams.length;i++) {
       let val = numParams[i];
       if (val.search(/[A-J]/) != -1) {
-        numParams[i] = parseInt(numParams[i],36) - 10;
+        numParams[i] = parseInt(val,36) - 10;
       }
       if (val.search(/[K-T]/) != -1) {
-        numParams[i] = parseInt(numParams[i],36) - 20;
+        numParams[i] = parseInt(val,36) - 20;
       }
     }
   }
@@ -727,10 +681,6 @@ function drawWallCursor() {
     } else {
       globalContext.strokeRect(drawX1-4,drawY1,8,globalGridSize-2);
     }
-//  globalContext.beginPath();
-//  globalContext.moveTo(drawX1,drawY1);
-//  globalContext.lineTo(drawX2,drawY2);
-//  globalContext.stroke();
   }
 }
 
@@ -787,7 +737,7 @@ function drawLine(y,x,state,color) {
     return;
   }
   if (((state & PATH_LINE) == PATH_LINE) &&
-      ((state & 0b11111111) != 0)) {
+      ((state & PATH_ALL)  != 0)) {
     // now walk through each of the 4 directions to check for one
     // or two line segments
     globalContext.strokeStyle = color;
@@ -1155,8 +1105,8 @@ function roomIsRectangle(roomSquares) {
   let ymin = 999;
   let xmax = 0;
   let ymax = 0;
-  for (let i=0;i<roomSquares.length;i++) {
-    let square = roomSquares[i].split(",");
+  for (let sq of roomSquares) {
+    let square = sq.split(",");
     ymin = (square[0] < ymin) ? square[0] : ymin;
     xmin = (square[1] < xmin) ? square[1] : xmin;
     ymax = (square[0] > ymax) ? square[0] : ymax;
@@ -1433,8 +1383,7 @@ function shapeSort (cellArray) {
 function normalizeShape (cellArray) {
   let miny = 999;
   let minx = 999;
-  for (let i=0;i<cellArray.length;i++) {
-    let c = cellArray[i];
+  for (let c of cellArray) {
     if (c[0]<miny) {
       miny = c[0];
     }
@@ -1442,28 +1391,25 @@ function normalizeShape (cellArray) {
       minx = c[1];
     }
   }
-  let newArray = new Array(cellArray.length);
-  for (let i=0;i<cellArray.length;i++) {
-    let c = cellArray[i];
-    newArray[i] = [c[0]-miny,c[1]-minx];
+  let newArray = new Array();
+  for (let c of cellArray) {
+    newArray.push([c[0]-miny,c[1]-minx]);
   }
   return shapeSort(newArray);
 }
 
 function rotateShape (cellArray) {
-  let newArray = new Array(cellArray.length);
-  for (let i=0;i<cellArray.length;i++) {
-    let c = cellArray[i];
-    newArray[i] = [c[1],-c[0]];
+  let newArray = new Array();
+  for (let c of cellArray) {
+    newArray.push([c[1],-c[0]]);
   }
   return normalizeShape(newArray);
 }
 
 function reflectShape (cellArray) {
-  let newArray = new Array(cellArray.length);
-  for (let i=0;i<cellArray.length;i++) {
-    let c = cellArray[i];
-    newArray[i] = [c[1],c[0]];
+  let newArray = new Array();
+  for (let c of cellArray) {
+    newArray.push([c[1],c[0]]);
   }
   return normalizeShape(newArray);
 }
@@ -1472,9 +1418,9 @@ function reflectShape (cellArray) {
 // converting to a str first before string sorting
 function shape2str (cellArray) {
   let sstr = "";
-  for (let i=0;i<cellArray.length;i++) {
-    sstr += cellArray[i][0].toString(36);
-    sstr += cellArray[i][1].toString(36);
+  for (let c of cellArray) {
+    sstr += c[0].toString(36);
+    sstr += c[1].toString(36);
   }
   return sstr;
 }

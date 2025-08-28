@@ -587,9 +587,8 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let demosteps = dmoves[step];
-      for (let i=0;i<demosteps.length;i++) {
-        let steps = demosteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 = (steps[0] == '@') ? CELL_BULB : CELL_DOT;
         addMove(s0,parseInt(steps[1],36),parseInt(steps[2],36));
       }

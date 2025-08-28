@@ -56,7 +56,7 @@ let cannedPuzzles = [
         "a1b2a21a1211c2a21a1c2e.1u11f2.b2a211a1a2a2a2k11c.i1g1c1c1a1b2." +
         "b2a1a11e1a1a1e11f.h2b11b11a112a2a21a11b.a2d1c1a1h1i.b1a2i2b2i11b",     // 128 254 2024 #27
 ];
-let puzzleChoice = 17;
+let puzzleChoice = 11;
 let puzzleCount = cannedPuzzles.length;
 const demoPuzzles = [1,3];
 

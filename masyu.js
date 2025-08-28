@@ -206,8 +206,8 @@ function addHistory(y,x,prevvalue) {
 
 function contains(state,list) {
   let hit = false;
-  for (let i=0;i<list.length;i++) {
-    if (state==list[i]) {
+  for (let lmem of list) {
+    if (state==lmem) {
       hit = true;
     }
   }
@@ -691,11 +691,10 @@ function updateBoardStatus() {
   if ((loops.length > 1) || (loops.length==1 && nonloops.length)) {
     errorCount += loops.length;
     if (assistState == 2) {
-      for (let l=0;l<loops.length;l++) {
-        let loop = loops[l];
-        for (let i=0;i<loop.length;i++) {
+      for (let loop of loops) {
+        for (let lmem of loop) {
           let y,x;
-          [y,x] = loop[i].split(",");
+          [y,x] = lmem.split(",");
           globalLineColors[y][x] = "red";
         }
       }
@@ -750,9 +749,8 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 = convertPathCharToCode(steps[0]);
         addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
       }

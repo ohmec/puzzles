@@ -335,10 +335,6 @@ function savePuzzle() {
 }
 
 function refreshPuzzle(ignoreOff = true) {
-  let drawX = 0;
-  let drawY = 0;
-  let number, tileColor;
-
   // clear the whole canvas
   context.fillStyle = cellColor;
   context.fillRect(0,0,puzzleW*gridSize+2*lineWidthFat,puzzleH*gridSize+2*lineWidthFat);
@@ -590,7 +586,6 @@ function getActiveNumber(evnt) {
 }
 
 function handleClick(evnt) {
-  let tileColor;
   $("#userPuzzleField").blur();
   let coords = findPosition(evnt, "puzzleCanvas");
   coords = coords.split("-");
