@@ -455,8 +455,8 @@ function updateBoardStatus() {
           // if there is a digit somewhere within the room then don't double-count
           // the error, it was counted above
           let hasDigit = 0;
-          for (let i=0;i<roomArray.length;i++) {
-            let rcell = roomArray[i].split(",");
+          for (let rc of roomArray) {
+            let rcell = rc.split(",");
             let ry = rcell[0];
             let rx = rcell[1];
             if (globalBoardValues[ry][rx] != '') {
@@ -512,9 +512,8 @@ function updateDemoRegion(demoNum) {
     globalBoardColors = initYXFromValue(indetCellColor);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let demosteps = dmoves[step];
-      for (let i=0;i<demosteps.length;i++) {
-        let steps = demosteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
         addMove(s0,steps[1],steps[2]);
       }

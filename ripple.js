@@ -332,7 +332,6 @@ function removeDot(strval) {
 }
 
 function handleClick(evnt) {
-  let tileColor;
   $("#userPuzzleField").blur();
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
@@ -360,8 +359,8 @@ function updateBoardStatus() {
     for (let i=1;i<=room.length;i++) {
       vcounts[i] = 0;
     }
-    for (let i=0;i<room.length;i++) {
-      let pcell = room[i].split(",");
+    for (let r of room) {
+      let pcell = r.split(",");
       let py = pcell[0];
       let px = pcell[1];
       let pv = globalBoardValues[py][px];
@@ -373,13 +372,13 @@ function updateBoardStatus() {
     for (let c=1;c<=room.length;c++) {
       // if more than one, mark all in the room with that number in error
       if (vcounts[c] > 1) {
-        for (let i=0;i<room.length;i++) {
-          let pcell = room[i].split(",");
+        for (let r of room) {
+          let pcell = r.split(",");
           let py = pcell[0];
           let px = pcell[1];
           let pv = globalBoardValues[py][px];
           if ((pv == c) && (errorCells.indexOf(pcell) == -1)) {
-            errorCells.push(room[i]);
+            errorCells.push(r);
           }
         }
       // if zero, then this is an incomplete room
@@ -485,9 +484,8 @@ function updateDemoRegion(demoNum) {
     globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split(",");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split(",");
         addMove(steps[0],steps[1],steps[2]);
       }
     }

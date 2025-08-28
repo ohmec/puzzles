@@ -692,9 +692,8 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         if (steps[0]=="_") {          // south wall
           addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall);
         } else if (steps[0]=="|") {   // east wall

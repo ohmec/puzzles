@@ -397,8 +397,7 @@ function updateBoardStatus() {
 
   // look for incomplete rooms, and rule 1 accounting of digits
   // within rooms
-  for (let p=0;p<puzzleRoomList.length;p++) {
-    let roomInfo = puzzleRoomList[p];
+  for (let roomInfo of puzzleRoomList) {
     let roomCount = roomInfo[4];
     let bcount = 0;
     let isIncomplete = 0;
@@ -558,8 +557,8 @@ function updateBoardStatus() {
           // if in assistState==2 then color these second river
           // cells differently
           if (assistState==2) {
-            for (let i=0;i<visitedCells.length;i++) {
-              let curCell = visitedCells[i].split(",");
+            for (let cc of visitedCells) {
+              let curCell = cc.split(",");
               let iy = curCell[0];
               let ix = curCell[1];
               globalBoardColors[iy][ix] = incorrectRiverColor;
@@ -609,9 +608,8 @@ function updateDemoRegion(demoNum) {
     globalBoardColors = initYXFromValue(indetCellColor);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
         addMove(s0,steps[1],steps[2]);
       }

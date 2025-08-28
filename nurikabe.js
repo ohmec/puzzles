@@ -452,15 +452,15 @@ function updateBoardStatus() {
             }
             // just make sure there aren't two digits in the room
             let digitCount = 0;
-            for (let r=0;r<roomArrayWhite.length;r++) {
-              let cell = roomArrayWhite[r].split(",");
+            for (let rw of roomArrayWhite) {
+              let cell = rw.split(",");
               if (globalBoardValues[cell[0]][cell[1]] != "") {
                 digitCount++;
               }
             }
             if (digitCount != 1) {
-              for (let r=0;r<roomArrayWhite.length;r++) {
-                let cell = roomArrayWhite[r].split(",");
+              for (let rw of roomArrayWhite) {
+                let cell = rw.split(",");
                 if (globalBoardValues[cell[0]][cell[1]] != "") {
                   errorCount++;
                   if (assistState == 2) {
@@ -498,8 +498,8 @@ function updateBoardStatus() {
           // if in assistState==2 then color these second river
           // cells differently
           if (assistState==2) {
-            for (let i=0;i<visitedCells.length;i++) {
-              let curCell = visitedCells[i].split(",");
+            for (let cc of visitedCells) {
+              let curCell = cc.split(",");
               let iy = curCell[0];
               let ix = curCell[1];
               globalBoardColors[iy][ix] = incorrectRiverColor;
@@ -573,9 +573,8 @@ function updateDemoRegion(demoNum) {
     }
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
-      let dsteps = dmoves[step];
-      for (let i=0;i<dsteps.length;i++) {
-        let steps = dsteps[i].split("");
+      for (let dsteps of dmoves[step]) {
+        let steps = dsteps.split("");
         let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
         addMove(s0,steps[1],steps[2]);
       }
