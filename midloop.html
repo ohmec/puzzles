@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./mlpuzzles.js"></script>
+    <script type="text/javascript" src="./midloop.js"></script>
+    <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+    <title>Mid-loop Player</title>
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for Mid-loop &#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>
+          To draw a path, left click on the center of a cell to
+          begin. From there, drag the mouse in the direction to create
+          the path. The path will draw as the dragging continues. Alternately,
+          once on the board, you can press the shift key and hold while
+          moving around the board with the arrow keys. In addition, you
+          can enter a key to indicate the type of path desired for that
+          cell (and into its neighbors). These keys are as follows, and
+          will extend the line into the center of the adjoining cells:
+          <ul>
+            <li>'-' key to draw a full horizontal line through the cell</li>
+            <li>'|' or 'I' key to draw a full vertical line through the cell</li>
+            <li>'L','J','7', or 'F' key to draw a correspondingly shaped turn in the cell</li>
+          </ul>
+          Once created, a path can be removed by pressing the backspace
+          key within a white cell. This deletes it just for this cell,
+          but deletes the "arms" into the adjoining cells. You can also
+          attempt to redraw with the left-click dragging method.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete numbers is indicated.  In Assist Mode (1), the
+          number of errors and incomplete numbers is indicated, see game rules.
+          In Assist Mode (2), errors and completed rules are highlighted
+          with digit colors.  In some cases the solve difficulty will
+          greatly decrease in Assist Mode (2), so select depending upon
+          the level of challenge desired. The game border will turn
+          green if the grid is completed without error.  You can click
+          the "undo" button on the bottom of the page to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). Puzzle 0 shows an example of a completed
+          puzzle. The following puzzle codes have demos, which will walk
+          you through a solve to help you on the path to mastery:
+          <span id='demolist1'>[]</span>).
+        </p>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        <a href="https://www.nikoli.co.jp/en/puzzles/mid_loop" target="_blank">Mid-loop</a>
+        (&#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;), is a less known
+        Japanese logic puzzle published by
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>,
+        similar to its more complex sister <a href="./masyu.html">Masyu</a>.
+        In Mid-loop, the board begins with a collection of black circles,
+        either in the center of white squares, or in the border between
+        two squares. These circles have rules about a path that must be drawn
+        through them. The final path drawn must go through all circles,
+        and must form a continuous loop.  The rules below relate to those 
+        circles and how to complete the puzzle.
+        <ol>
+          <li>
+            Lines must be drawn through all circles to make a continuous
+            loop.
+          </li>
+          <li>
+            The loop may go through the circles horizontally or
+            vertically. The loop may not cross itself, branch off,
+            or go through the same cell twice.
+          </li>
+          <li>
+            All circles must be completed with the path, with the
+            black circle as the midpoint of a straight line segment
+            passing through the circle.
+          </li>
+          <li>
+            Not all squares without circles require the path to go
+            through them.
+          </li>
+        </ol>
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH:&lt;circle-descriptor&gt;", where W is a
+          number indicating the width of the grid, and H the height.
+          The circle descriptor is a list of the pre-defined circle
+          contents plus the spaces in between them, from left to right,
+          then top to bottom.  For the circles, the character * is used
+          to indicate a black circle in the center of a cell, or a
+          directional character "^", "V", "&lt;", or "&gt;" indicating
+          a black circle in the wall to the north, south, west or east
+          of the cell, respectively. Blank cells are represented with
+          a '-' character. To assist in the definition of a sparse board,
+          a combination of <i>b</i> consecutive blanks can be represented
+          with a lowercase letter from 'a' to 'z', corresponding to
+          1 to 26 consecutive blanks.  A dot '.' can be used as a
+          visual separator, for example between rows.  An example
+          descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Mid-loop there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
+      </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <!-- some space to avoid the canvas from shrinking on demo mode -->
+    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
