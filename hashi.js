@@ -523,26 +523,14 @@ function initStructures(puzzle) {
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
-  let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  globalPuzzleW = parseInt(wxh[0]);
-  globalPuzzleH = parseInt(wxh[1]);
-  setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
+
+  basicInitStructures(size,emptyCellColor,constWallNone,stdFontColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalCircleStates =    initYXFromValue(CIRCLE_NONE);     // circles added below
   globalLineStates   =    initLineValuesFromParams(numParams,true);
-  globalBoardColors =     initYXFromValue(emptyCellColor);
   puzzleBoardStates =     initYXFromValue(STATE_BLANK);
-  globalInitWallStates  = initWallStates(constWallNone);
-  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-  globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
-  globalLineColors =      initYXFromValue("black"); // default line is black
-  globalCircleColors =    initYXFromValue("black");
-  globalTextBold =        initYXFromValue(true);
 
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {

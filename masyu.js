@@ -185,7 +185,7 @@ function updateDynTextFields() {
     } else if (incompleteLoop) {
       etext = "the loop isn't complete yet";
     } else {
-      etext = "there are no errors nor incomplete circles";
+      etext = "the puzzle is solved!";
     }
   } else {
     if (errorCount || incompleteCircles) {
@@ -194,7 +194,7 @@ function updateDynTextFields() {
     } else if (incompleteLoop) {
       etext = "the loop isn't complete yet";
     } else {
-      etext = "there are no errors nor incomplete circles";
+      etext = "the puzzle is solved!";
     }
   }
   updateDynamicHtmlEntries(etext,assistState);
@@ -408,26 +408,11 @@ function initStructures(puzzle) {
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
-  let wxh = size.split("x");
   let numParams = puzzleSplit[1];
   let pathParams = puzzleSplit[2];
-  globalPuzzleW = parseInt(wxh[0]);
-  globalPuzzleH = parseInt(wxh[1]);
-  setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
 
-  globalInitBoardValues = initYXFromValue("");
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalLineStates   =    initLineValuesFromParams(pathParams);
-  globalBoardColors =     initYXFromValue(emptyCellColor);
-  globalInitWallStates  = initWallStates(constWallDash);
-  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-  globalBoardTextColors = initYXFromValue(stdFontColor); // no text
-  globalLineColors =      initYXFromValue("black"); // default line is black
-  globalCircleStates =    initYXFromValue(CIRCLE_NONE);
-  globalCircleColors =    initYXFromValue("black");
-  globalTextBold =        initYXFromValue(true);
+  basicInitStructures(size,emptyCellColor,constWallDash,stdFontColor);
+  globalLineStates = initLineValuesFromParams(pathParams);
 
   let numParamsExp = expandNumParams(numParams);
   if (numParamsExp.length != (globalPuzzleH*globalPuzzleW)) {
@@ -498,9 +483,8 @@ function updateBoardStatus() {
   //  4) black circles that don't have a straight segment on both adjoining cells
   errorCount = 0;
 
-  // also count how many numbers haven't been completed yet, how
+  // also count how many circles haven't been completed yet, how
   // many white cells don't have a path, and if there is a complete loop
-  incompleteDigits = 0;
   incompleteCircles = 0;
   incompleteLoop = true;
 
@@ -705,7 +689,7 @@ function updateBoardStatus() {
   }
 
   updateDynTextFields();
-  if ((errorCount==0) && (incompleteDigits==0) && (incompleteCircles==0) && (incompleteLoop==false)) {
+  if ((errorCount==0) && (incompleteCircles==0) && (incompleteLoop==false)) {
     $("#canvasDiv").css("border-color", constColorSuccess);
   } else {
     $("#canvasDiv").css("border-color", "black");

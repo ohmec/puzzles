@@ -426,26 +426,14 @@ function initStructures(puzzle) {
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
-  let wxh = size.split("x");
   let numParams = puzzleSplit[1];
   let hexParams = puzzleSplit[2];
-  globalPuzzleW = parseInt(wxh[0]);
-  globalPuzzleH = parseInt(wxh[1]);
-  setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
+
+  basicInitStructures(size,emptyCellColor,constWallLight,stdFontColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalCircleStates =    initYXFromValue(0);     // no circles, lines needed in this puzzle
-  globalLineStates   =    initYXFromValue(0);
-  globalBoardColors =     initYXFromValue(emptyCellColor);
   puzzleBoardStates =     initYXFromValue(0);
-  globalInitWallStates  = initWallStates(constWallLight);
-  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-  globalBoardTextColors = initYXFromValue(stdFontColor); // all text is black
-  globalLineColors =      initYXFromValue("black"); // default line is black
-  globalCircleColors =    initYXFromValue("black");
   globalTextBold =        initYXFromValue(false);
 
   // bold the cells with fixed digits

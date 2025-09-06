@@ -291,25 +291,14 @@ function initStructures(puzzle) {
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
-  let wxh = size.split("x");
   let numParams = puzzleSplit[1];
   let rwallParams = puzzleSplit[2];
   let cwallParams = puzzleSplit[3];
-  globalPuzzleW = parseInt(wxh[0]);
-  globalPuzzleH = parseInt(wxh[1]);
-  setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
+
+  basicInitStructures(size,emptyCellColor,constWallLight,fillCellColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalCircleStates =    initYXFromValue(0);     // no circles, lines needed in this puzzle
-  globalLineStates   =    initYXFromValue(0);
-  globalBoardColors =     initYXFromValue(emptyCellColor);
-  globalBoardTextColors = initYXFromValue(fillCellColor); // all text is black
-  globalLineColors =      initYXFromValue("black"); // default line is black
-  globalCircleColors =    initYXFromValue("black");
-  globalTextBold =        initYXFromValue(true);
 
   // initialize the wall states based upon the given parameters
   globalInitWallStates  = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
