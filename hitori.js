@@ -275,20 +275,14 @@ function initStructures(puzzle) {
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
-  let wxh = size.split("x");
   let numParams = puzzleSplit[1];
-  globalPuzzleW = parseInt(wxh[0]);
-  globalPuzzleH = parseInt(wxh[1]);
-  setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
 
-  globalCircleStates = initYXFromValue(0);
-  globalLineStates   = initYXFromValue(0);
+  basicInitStructures(size,emptyCellColor,constWallLight,stdFontColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues = initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
   puzzleBoardStates = initYXFromValue(false); // states are true/false for "black"
+
   // look for pre-black ones (denoted with *)
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {
@@ -298,13 +292,6 @@ function initStructures(puzzle) {
       }
     }
   }
-  globalBoardColors =     initYXFromValue(emptyCellColor);
-  globalBoardTextColors = initYXFromValue(stdFontColor);
-  globalLineColors =      initYXFromValue("black"); // default line is black
-  globalCircleColors =    initYXFromValue("black");
-  globalInitWallStates =  initWallStates(constWallLight);
-  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-  globalTextBold =        initYXFromValue(true);
   updateBoardStatus();
   drawBoard();
   updateDynTextFields();

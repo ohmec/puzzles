@@ -6,6 +6,7 @@ const CLICK_UNKNOWN = 9;
 const CIRCLE_NONE  = 0;
 const CIRCLE_WHITE = 1;
 const CIRCLE_BLACK = 2;
+const CIRCLE_DOT   = 3;
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
@@ -93,6 +94,7 @@ const constWallDash      = 0b000000100;
 const constWallBorder    = 0b000001000;
 const constWallUserEdge  = 0b000010000;
 const constWallSolveEdge = 0b000100000;
+const constWallDot       = 0b001000000;
 
 const constHoriz = true;
 const constVert  = false;
@@ -118,8 +120,29 @@ let globalWallCursorX = 0;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
 let globalBoardValues, globalBoardColors, globalBoardTextColors;
-let globalWallStates, globalLineStates, globalLineColors;
+let globalWallStates, globalLineStates, globalLineColors, globalDotColors;
 let globalCircleStates, globalCircleColors, globalTextBold;
+
+function basicInitStructures(size,cellColor,wallState,textColor) {
+  let wxh = size.split("x");
+  globalPuzzleW = parseInt(wxh[0]);
+  globalPuzzleH = parseInt(wxh[1]);
+  setGridSize(globalPuzzleW);
+  canvas.height = globalPuzzleH*globalGridSize;
+  canvas.width  = globalPuzzleW*globalGridSize;
+  globalInitBoardValues = initYXFromValue("");
+  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalLineStates   =    initYXFromValue(PATH_NONE);
+  globalBoardColors =     initYXFromValue(cellColor);
+  globalInitWallStates  = initWallStates(wallState);
+  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalBoardTextColors = initYXFromValue(textColor);
+  globalLineColors =      initYXFromValue("black");
+  globalCircleStates =    initYXFromValue(CIRCLE_NONE);
+  globalCircleColors =    initYXFromValue("black");
+  globalDotColors =       initYX2FromValue("black");
+  globalTextBold =        initYXFromValue(true);
+}
 
 function expandNumParams(numStr) {
   for (let cv=10;cv<36;cv++) {
@@ -161,6 +184,17 @@ function initYXFromValue(value) {
   for (let y=0;y<globalPuzzleH;y++) {
     yxArray[y] = new Array(globalPuzzleW);
     for (let x=0;x<globalPuzzleW;x++) {
+      yxArray[y][x] = value;
+    }
+  }
+  return yxArray;
+}
+
+function initYX2FromValue(value) {
+  let yxArray = new Array(globalPuzzleH*2+1);
+  for (let y=0;y<=2*globalPuzzleH;y++) {
+    yxArray[y] = new Array(globalPuzzleW*2+1);
+    for (let x=0;x<=2*globalPuzzleW;x++) {
       yxArray[y][x] = value;
     }
   }
@@ -249,8 +283,7 @@ function initLineValuesFromParams(numParamText,hasDir=false) {
   // to treat the FJL7|_ characters as line segments
   let lineValues;
   if (numParamText &&
-      (numParamText.search(/F/)!=-1) && (numParamText.search(/|/)!=-1) &&
-      (numParamText.search(/J/)!=-1) && (numParamText.search(/_/)!=-1) &&
+      (numParamText.search(/F/)!=-1) && (numParamText.search(/J/)!=-1) && 
       (numParamText.search(/7/)!=-1) && (numParamText.search(/L/)!=-1)) {
     // special case for hasDir; 1v (2v 3v etc) indicates a south
     // arrow so we need to convert those to another character
@@ -570,12 +603,12 @@ function drawBoard(lineFirst = false, drawDots = false) {
   // draw horizontal walls
   for (let y=2;y<=2*globalPuzzleH;y+=2) {
     for (let x=1;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constHoriz,y,x,globalWallStates[y][x]);
+      drawWall(constHoriz,y,x,globalWallStates[y][x],globalDotColors[y][x]);
     }
   }
   for (let y=1;y<=2*globalPuzzleH;y+=2) {
     for (let x=2;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constVert,y,x,globalWallStates[y][x]);
+      drawWall(constVert,y,x,globalWallStates[y][x],globalDotColors[y][x]);
     }
   }
   if (globalCursorOn) {
@@ -603,13 +636,15 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
   }
   // draw circle next if it exists
   if (circle) {
+    let radius = (circle==CIRCLE_DOT) ? globalCircleRadius*globalGridSize*0.35 :
+                                        globalCircleRadius*globalGridSize;
     globalContext.lineWidth = 4.0;
     globalContext.strokeStyle = circlecolor;
-    globalContext.fillStyle = (circle==2) ? circlecolor : "white";
+    globalContext.fillStyle = (circle>=CIRCLE_BLACK) ? circlecolor : "white";
     globalContext.beginPath();
     globalContext.arc(drawX+globalGridSize/2,
                 drawY+globalGridSize/2,
-                globalCircleRadius*globalGridSize,0,2*Math.PI);
+                radius,0,2*Math.PI);
     globalContext.stroke();
     globalContext.fill();
   }
@@ -684,14 +719,16 @@ function drawWallCursor() {
   }
 }
 
-function drawWall(horv,y,x,wallState) {
-  let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : x*globalGridSize*0.5;
-  let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : x*globalGridSize*0.5;
-  let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : y*globalGridSize*0.5;
-  let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : y*globalGridSize*0.5;
+function drawWall(horv,y,x,wallState,dotColor) {
+  let drawXM = x*globalGridSize*0.5;
+  let drawYM = y*globalGridSize*0.5;
+  let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : drawXM;
+  let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : drawXM;
+  let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : drawYM;
+  let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : drawYM;
   globalContext.strokeStyle = "black";
   if (wallState != constWallNone) {
-    if (wallState == constWallDash) {
+    if (wallState & constWallDash) {
       globalContext.setLineDash([2,2]);
       globalContext.lineWidth = 1;
     } else {
@@ -708,9 +745,20 @@ function drawWall(horv,y,x,wallState) {
     globalContext.lineTo(drawX2,drawY2);
     globalContext.stroke();
   }
-  // reset
-  globalContext.lineWidth = 1;
+  // reset dash
   globalContext.setLineDash([]);
+  if (wallState & constWallDot) {
+    let radius = globalCircleRadius*globalGridSize*0.35;
+    globalContext.lineWidth = 4.0;
+    globalContext.strokeStyle = dotColor;
+    globalContext.fillStyle = dotColor;
+    globalContext.beginPath();
+    globalContext.arc(drawXM,drawYM,radius,0,2*Math.PI);
+    globalContext.stroke();
+    globalContext.fill();
+  }
+  // reset lineWidth
+  globalContext.lineWidth = 1;
 }
 
 function drawDot(y,x) {
@@ -1361,6 +1409,10 @@ function convertPathCharToCode (pathChar) {
     case '_': return PATH_WE;
     case '-': return PATH_WE;
     case '|': return PATH_NS;
+    case 'N': return PATH_N;
+    case 'S': return PATH_S;
+    case 'E': return PATH_E;
+    case 'W': return PATH_W;
     case 'F': return PATH_SE;
     case '7': return PATH_SW;
     case 'J': return PATH_NW;

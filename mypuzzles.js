@@ -2,7 +2,7 @@
 // where W is puzzle width, H is height, and entries define
 // the circles (1 for empty, or 2 for filled); a-z define from 1-26 spaces
 // in between circles. The first one has some solution path information
-// after a second color. The path information defines the solution,
+// after a second colon. The path information defines the solution,
 // FJL7 for turns, and _| for straight edges
 let cannedPuzzles = [
   // example completed one
@@ -103,7 +103,7 @@ const demoText = [
      "path that turns and then continues for two cells. This can only be " +
      "satisfied with a turn to the north and the east. If it turned to the " +
      "south, then its segment would be isolated with nowhere to go.",
-  "There are some tempting connections that coule be made, but we must make " +
+  "There are some tempting connections that could be made, but we must make " +
     "sure they are the only options. The only segments that are forced in a " +
     "particular location are the ones in the 3rd row 4th column (extending " +
     "to the right), the one in the last column (to avoid making a mini-loop, " +
