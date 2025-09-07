@@ -997,7 +997,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='E')
         { x--; dir = 'E'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     case PATH_NS:
       if ((clockwise && dir==0) || dir=='N')
@@ -1005,7 +1005,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='S')
         { y--; dir = 'S'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     case PATH_N:
       if (dir!=0 && dir!='N')
@@ -1033,7 +1033,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='E')
         { y++; dir = 'N'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     case PATH_NW:
       if ((clockwise && dir==0) || dir=='N')
@@ -1041,7 +1041,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='W')
         { y--; dir = 'S'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     case PATH_NE:
       if ((clockwise && dir==0) || dir=='N')
@@ -1049,7 +1049,7 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='E')
         { y--; dir = 'S'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     case PATH_SW:
       if ((clockwise && dir==0) || dir=='S')
@@ -1057,14 +1057,14 @@ function advanceLine(y,x,state,dir,clockwise) {
       else if ((!clockwise && dir==0) || dir=='W')
         { y++; dir = 'N'; }
       else
-        { inerror = true; }
+        { inerror = true; alive = false; }
       break;
     default:
       alive = false;
       break;
     }
   if (inerror) {
-    throw "FATAL: makes no sense, coming from " + y + "," + x + " with dir " + dir + " and found " + state;
+    console.log("ERROR: broken path, coming from " + y + "," + x + " with dir " + dir + " and found " + state);
   }
   return [alive,y,x,dir];
 }
