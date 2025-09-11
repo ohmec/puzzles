@@ -1,6 +1,11 @@
 html,body {
   background: #EEEEEE;
 }
+@font-face {
+  font-family: 'Open Sans';
+  src: url("https://fonts.googleapis.com/css?family=Open+Sans");
+  font-weight: 100 900;
+}
 #banner {
   font-family: 'Open Sans', sans-serif;
   width: 100%;
@@ -8,6 +13,12 @@ html,body {
   font-size: 24pt;
   letter-spacing: 0px;
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+}
+#ttd {
+  font-family: 'Open Sans', sans-serif;
+  text-align: center;
+  font-weight: 700;
+  padding: 10px;
 }
 #content {
   font-family: 'Open Sans', sans-serif;
