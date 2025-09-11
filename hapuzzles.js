@@ -163,19 +163,20 @@ const demoText = [
     "many incomplete rooms. For our first time through we can " +
     "turn on Assist Mode 2 to see any errors that we might generate in the " +
     "process of the solve.</p>",
-  "In Heyawake, it is always easiest to solve two types of rooms: those " +
-    "where there is only solution (e.g. single-square rooms with a '1' " +
-    "digit within, or a 3-wide or 3-tall room with a '2' digit within.) " +
-    "There are two of the 2-digit variety on this board. We can also " +
-    "go ahead and clear out all rooms with a zero digit inside.",
-  "Always in Heyawake the next step after setting any cell black is " +
+  "In Heyawake, it is always easiest to complete two types of rooms. The first " +
+    "is a room with a digit greater than zero where there is only possible " +
+    "solution (two examples are single-cell rooms with a '1' digit within, " +
+    "or a 1x3 or 3x1 room with a '2' digit within). There are two of the " +
+    "'2'-digit variety on this board. Secondly, we can clear out all rooms " +
+    "with a '0' digit inside, since they can not have any black cells.",
+  "Always in Heyawake the next step after setting any cell black is to " +
     "set all neighboring cells white so as to not violate rule 2 of the " +
     "puzzle involving adjoining black cells. We will do that now and for " +
     "all subsequent black cells.",
   "<p>Now let's look at two interesting edge cases that are similar to the " +
-    "minimum-sized room attack. First, the '2' digit room in the upper " +
-    "right of the puzzle: there are only two legal arrangements of the " +
-    "two black squares required, effectively a diagonal in one of two " +
+    "minimum-sized room approach. First, the '2' digit room in the upper " +
+    "right of the puzzle: there are only two legal arrangements of " +
+    "two black squares in a 2x2 room, effectively a diagonal in one of two " +
     "directions. Considering rule 4 about not isolating the 'river of " +
     "white cells', you can quickly determine that only the diagonal " +
     "pointing into the center of the puzzle board is legal.</p><p>" +
@@ -187,10 +188,10 @@ const demoText = [
     "otherwise be potentially violating rule 4 about the continuous river " +
     "of white cells. Several cells that are currently white on the edges " +
     "of the board would be isolated if their neighbors were painted black. " +
-    "One example is the cell below the upper left square. If that square " +
-    "were painted black, the one below would be isolated, and thus the " +
-    "upper left must be set to white. Similarly there are 7 more cells " +
-    "that must be white to avoid isolation of their neighbors. We must " +
+    "One example is the '3' cell below the upper left gray square. If the " +
+    "upper left square were painted black, the one below would be isolated, " +
+    "and thus the upper left must be set to white. Similarly there are 7 more " +
+    "cells that must be white to avoid isolation of their neighbors. We must " +
     "be careful to not make any false assumptions in this process, rivers " +
     "can flow in multiple directions, so do not clear too many squares.",
   "Once these cells are determined, the '2' digit room in the upper " +
@@ -198,8 +199,8 @@ const demoText = [
     "is only one arrangement of black squares to complete it.",
   "Now we can begin to see some potential trouble with rule 3, the one that " + 
     "requires that no string of white cells can pass through three consecutive " +
-    "rooms. Looking at the right-most columns, we can see that the black " +
-    "cell in the 5th row, must be set to black, else it will violate the " +
+    "rooms. Looking at the right-most column, we can see that the blank " +
+    "cell in the 5th row must be set to black, else it will violate the " +
     "border rule. Once that is set (and its adjacent cells cleared) it is " +
     "clear that the cell near the bottom right corner must also be set to " +
     "avoid another rule 3 violation.",
@@ -209,10 +210,10 @@ const demoText = [
     "remaining for its 2 black squares. Clearly one of them would isolate " +
     "a white cell and thus violate rule 4. The other two can be set.",
   "There is a large 'river' of white squares potentially blocked above a " +
-    "black square in the 6th row 4th column. It must be set to white.",
+    "blank square in the 6th row 4th column. It must be set to white.",
   "Now there are two black cells that must be set to keep from violating " +
     "the three-room rule. Once those two are set, and their neighbors cleared, " +
-    "it is complete.",
+    "the puzzle is complete.",
   "Congratulations! The puzzle is solved!"],
  ["<p>In this demo we will walk more quickly through the steps of solving " +
     "this puzzle. It is recommended to go through demo 1 first. Press the " +

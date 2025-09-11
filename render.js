@@ -7,6 +7,7 @@ const CIRCLE_NONE  = 0;
 const CIRCLE_WHITE = 1;
 const CIRCLE_BLACK = 2;
 const CIRCLE_DOT   = 3;
+const CIRCLE_MOON  = 4;
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
@@ -103,6 +104,7 @@ const constColorLightGray = "#c0c0c0";
 const constColorMedGray   = "#a0a0a0";
 const constColorSuccess   = "#1be032";
 const constColorCursor    = "#ff80ff";
+const constLineColor      = "black";
 
 const EMPTYCELL = -1;
 
@@ -137,10 +139,10 @@ function basicInitStructures(size,cellColor,wallState,textColor) {
   globalInitWallStates  = initWallStates(wallState);
   globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   globalBoardTextColors = initYXFromValue(textColor);
-  globalLineColors =      initYXFromValue("black");
+  globalLineColors =      initYXFromValue(constLineColor);
   globalCircleStates =    initYXFromValue(CIRCLE_NONE);
-  globalCircleColors =    initYXFromValue("black");
-  globalDotColors =       initYX2FromValue("black");
+  globalCircleColors =    initYXFromValue(constLineColor);
+  globalDotColors =       initYX2FromValue(constLineColor);
   globalTextBold =        initYXFromValue(true);
 }
 
@@ -453,10 +455,10 @@ function initWallStates(state) {
   return wallStates;
 }
 
-function initWallStatesFromBoxes(boxParams,defState) {
+function initWallStatesFromBoxes(boxParams,defState,hasNum=true) {
   let boxParamArray = boxParams.replace(/\./gi, "").split("");
   let wallStates  = new Array(globalPuzzleH*2+1);
-  // "true" wall states are all dashes at first
+  // "true" wall states are all defState at first
   for (let y=0;y<=2*globalPuzzleH;y++) {
     wallStates[y] = new Array(2*globalPuzzleW+1);
     for (let x=0;x<2*globalPuzzleW;x++) {
@@ -469,11 +471,56 @@ function initWallStatesFromBoxes(boxParams,defState) {
       }
     }
   }
-  for (let b=0;b<boxParamArray.length;b+=5) {
+  // hasNum is true for Heyawake and puzzles that initialize with a
+  // number inside them, false for Shikaku and puzzles that don't
+  let incr = hasNum ? 5 : 4;
+  for (let b=0;b<boxParamArray.length;b+=incr) {
     let by = parseBase62(boxParamArray[b+0]);
     let bx = parseBase62(boxParamArray[b+1]);
     let bh = parseBase62(boxParamArray[b+2]);
     let bw = parseBase62(boxParamArray[b+3]);
+
+    // top wall
+    for (let i=0;i<bw;i++) {
+      wallStates[by*2][(bx+i)*2+1] = constWallBorder;
+    }
+    // bottom wall
+    for (let i=0;i<bw;i++) {
+      wallStates[(by+bh)*2][(bx+i)*2+1] = constWallBorder;
+    }
+    // west wall
+    for (let i=0;i<bh;i++) {
+      wallStates[(by+i)*2+1][bx*2] = constWallBorder;
+    }
+    // east wall
+    for (let i=0;i<bh;i++) {
+      wallStates[(by+i)*2+1][(bx+bw)*2] = constWallBorder;
+    }
+  }
+  return wallStates;
+}
+
+function initWallStatesFromRooms(rooms,defState) {
+  let wallStates  = new Array(globalPuzzleH*2+1);
+  // "true" wall states are all defState at first
+  for (let y=0;y<=2*globalPuzzleH;y++) {
+    wallStates[y] = new Array(2*globalPuzzleW+1);
+    for (let x=0;x<2*globalPuzzleW;x++) {
+      if (y==0 || y==(2*globalPuzzleH) || x==0 || x==(2*globalPuzzleW)) {
+        wallStates[y][x] = constWallBorder;
+      } else if(y%2 && x%2) {
+        wallStates[y][x] = constWallNone;
+      } else {
+        wallStates[y][x] = defState;
+      }
+    }
+  }
+  for (let room of rooms) {
+    let by = room[0];
+    let bx = room[1];
+    let bh = room[2];
+    let bw = room[3];
+
     // top wall
     for (let i=0;i<bw;i++) {
       wallStates[by*2][(bx+i)*2+1] = constWallBorder;
@@ -603,12 +650,13 @@ function drawBoard(lineFirst = false, drawDots = false) {
   // draw horizontal walls
   for (let y=2;y<=2*globalPuzzleH;y+=2) {
     for (let x=1;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constHoriz,y,x,globalWallStates[y][x],globalDotColors[y][x]);
+      drawWall(constHoriz,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
     }
   }
+  // draw vertical walls
   for (let y=1;y<=2*globalPuzzleH;y+=2) {
     for (let x=2;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constVert,y,x,globalWallStates[y][x],globalDotColors[y][x]);
+      drawWall(constVert,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
     }
   }
   if (globalCursorOn) {
@@ -647,6 +695,17 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
                 radius,0,2*Math.PI);
     globalContext.stroke();
     globalContext.fill();
+    // if CIRCLE_MOON draw another white one to eclipse the original one
+    if (circle==CIRCLE_MOON) {
+      globalContext.strokeStyle = "white";
+      globalContext.fillStyle = "white";
+      globalContext.beginPath();
+      globalContext.arc(drawX+globalGridSize*0.42,
+                  drawY+globalGridSize*0.42,
+                  radius*0.84,0,2*Math.PI);
+      globalContext.stroke();
+      globalContext.fill();
+    }
   }
   // now text of value
   let vstr = "";
@@ -719,14 +778,14 @@ function drawWallCursor() {
   }
 }
 
-function drawWall(horv,y,x,wallState,dotColor) {
+function drawWall(horv,y,x,wallState,lineColor,dotColor) {
   let drawXM = x*globalGridSize*0.5;
   let drawYM = y*globalGridSize*0.5;
   let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : drawXM;
   let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : drawXM;
   let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : drawYM;
   let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : drawYM;
-  globalContext.strokeStyle = "black";
+  globalContext.strokeStyle = lineColor;
   if (wallState != constWallNone) {
     if (wallState & constWallDash) {
       globalContext.setLineDash([2,2]);

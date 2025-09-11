@@ -71,7 +71,7 @@ const demoText = [
     "<p>At the beginning of a solve, there are no errors, but there are " +
     "many incomplete digits. For our first time through we can " +
     "turn on Assist Mode 2 to see any errors that we might generate in the " +
-    "process of the solve, and to see the digits as they are completed..</p>",
+    "process of the solve, and to see the digits as they are completed.</p>",
   "<p>To start in Hashiwokakero, we want to look for circles that are " +
     "constrained right off the bat. These are typically high digit " +
     "numbers and circles on the edges. First let's look at one that " +
