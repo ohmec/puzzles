@@ -11,7 +11,6 @@ let incompleteCircles = 0;
 let incompleteLoop = true;
 let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
-let debugMode = false;
 
 // which keys are handled
 let handledKeys =
@@ -340,7 +339,6 @@ function handleKey(keynum) {
         console.log(globalBoardValues);
         console.log(globalLineStates);
         console.log(globalWallStates);
-        debugMode = true;
         break;
       case KEY_UP:
         if (globalCursorY) {

@@ -6,16 +6,16 @@
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
-    <script type="text/javascript" src="./fmpuzzles.js"></script>
-    <script type="text/javascript" src="./fillomino.js"></script>
+    <script type="text/javascript" src="./skpuzzles.js"></script>
+    <script type="text/javascript" src="./shikaku.js"></script>
     <script src="./jquery.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
-    <title>Fillomino Player</title>
+    <title>Shikaku Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Fillomino &#x30D5;&#x30A3;&#x30EB;&#x30AA;&#x30DF;&#x30CE;
+      Player for Shikaku &#x56DB;&#x89D2;&#x306B;&#x5207;&#x308C;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -28,38 +28,40 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell and enter a digit. Once selected, arrow
-          keys can be used to move around the canvas. Use keys 1-9, or A-Z
-          for double digit values 10-35. Bold digits are the initial puzzle
-          values.  You can also click on an existing number and "drag" it
-          to other cells to overwrite their value with its value. Similarly
-          you can press and hold the shift key, then use the arrow keys to
-          move around the board to propagate the current number to other
-          cells. To remove an entered number, you can right-click the cell,
-          or press the back space to clear. You can also drag a cleared
-          cell to clear out new cells.
+          To play, use the mouse or arrow keys to draw rectangular rooms
+          around the different numbered cells. You can begin a rectangle
+          from any cell. Click and hold the left mouse to begin the rectangle,
+          then drag the mouse in the shape desired. For instance, if you want
+          a 2-high 3-wide rectangle over a cell with a '6' in it, click on the
+          cell describing the upper left of the rectangle, then move the
+          mouse two cells to the right and down 1 to make the 2x3 rectangle.
+          While the mouse is down you can change the shape as desired.
+          A right-click within the room removes the previous rectangle
+          and starts anew. The drawer will not allow you to create a room
+          that conflicts with an existing room. In alternate to the mouse
+          drag, you can do the same by moving around the board with the
+          arrow keys, then pressing the shift button to start a rectangle
+          shape. Pressing the backspace on a cell within a defined room
+          clears its existing rectangle. It may not always be obvious that
+          a room has been cleared if other rooms' borders coincide with
+          the borders of the deleted room. (Assist mode below can help
+          visualize drawn rooms.)
         </p>
-        <p>
-          For visualization of numerical boundaries, you can left-click on
-          borders between cells to make a note of expected numeric separations,
-          though no error checking is made. You can right-click to remove
-          drawn borders, but not calculated ones. Once on a boundary, you can
-          shift-move to add more borders. You can also drag left-click to
-          draw borders, or drag right-click to clear borders.
         </p>
-        <p>
           In Assist Mode (0), the default, only the existance of errors
           or incomplete numbers is indicated.  In Assist Mode (1), the
-          number of errors and incomplete numbers is indicated, see game rules.
-          In Assist Mode (1) or higher, each numbered square is given a different
-          color to visually guide the solver in searching for room
-          completions.  In Assist Mode (2) errors are highlighted with red
-          digit colors.  Additionally, borders are drawn between different digit
-          cells and around rooms as they are completed.  In some cases the solve
-          difficulty will greatly decrease in Assist Mode (1) or higher, so
-          select depending upon the level of challenge desired. The game border
-          will turn green if the grid is completed without error.  You can click
-          the "undo" button on the bottom of the page to undo previous moves.
+          number of errors and incomplete numbers is indicated, see game
+          rules.  In Assist Mode (2) completed rooms are colored green
+          if they are of the correct size compared to the enclosed 
+          number. Rooms with errors are colored red, for instance if they
+          contain two numbers, no numbers, or are of the wrong size for
+          the enclosed number. Note a green room is not by definition the
+          correct final solution, only that it is created with the correct
+          constraints.  In some cases the solve difficulty will greatly
+          decrease in Assist Mode (1) or higher, so select depending upon
+          the level of challenge desired.  The game border will turn green
+          if the grid is completed without error.  You can click the "undo"
+          button on the bottom of the page to undo previous moves.
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
@@ -70,40 +72,21 @@
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://www.nikoli.co.jp/en/puzzles/fillomino" target="_blank">Fillomino</a>
-        (&#x30D5;&#x30A3;&#x30EB;&#x30AA;&#x30DF;&#x30CE;) is a classic Japanese
-        logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en/puzzles/shikaku" target="_blank">Shikaku</a>
+        (&#x56DB;&#x89D2;&#x306B;&#x5207;&#x308C; <i>Shikaku ni Kire</i>; or
+        "Divide By Box") is a logic puzzle published by 
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
-        In Fillomino, the board begins with some pre-set cells with numbers in them.
-        These numbers can not be modified, but indicate the size of a "room" or
-        polyomino (collection of squares) containing only those numbers. For
-        instance, a cell with '9' on it must be combined with eight other squares
-        of any shape - connected horizontally or vertically - all containing the
-        number 9. The full set of rules below relate to those numbers and how to
-        complete the puzzle.
+        In Shikaku, the board begins with many cells containing numbers in
+        black circles. These numbers indicate the size of a rectangular "room"
+        that must be drawn around it.  The full set of rules below relate
+        to those numbers and how to complete the puzzle.
         <ol>
           <li>
-            Pre-set number cells can not be modified, and must be part of a
-            room with that number of squares joined horizontally or vertically.
+            All numbered cells must be contained within a drawn rectangular
+            room containing the same number of cells as the number.
           </li>
           <li>
-            Collections of like-numbered digits cannot border other collections of
-            the same digit. For instance, a legal collection of '4' cells cannot
-            border another collection of '4' cells. Put another way, a collection
-            of 5 or more adjacent '4' digits is illegal. If in assist mode 2,
-            the canvas will indicate this with red-colored digits once the
-            collection is in error.  Similarly a collection that has no chance
-            of growing as large as needed to make it of legal size turns digits red.
-            It is legal to connect two rooms with the same number at a diagonal
-            point, i.e. not connected horizontally or vertically.
-          </li>
-          <li>
-            All squares must have a number before the puzzle can be solved.
-          </li>
-          <li>
-            Not all eventual rooms will have pre-set number cells within them.
-            The solver must often infer what value the cells must have in 
-            order to complete the puzzle without error.
+            No room can contain two numbers, nor no numbers.
           </li>
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
@@ -120,19 +103,19 @@
           form: "WxH:&lt;digit-descriptor&gt;", where W is a number
           indicating the width of the grid, and H the height.
           The digit descriptor is a list of the pre-defined
-          digit contents, from left to right, then top to bottom.
+          numbered cells, from left to right, then top to bottom.
           Blank cells are represented with a '-' character. To assist
           in the definition of a sparse board, a combination of <i>b</i>
           consecutive blanks can be represented with a lowercase letter
           from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
-          Digit values greater than '9' should be represented with
+          Number values greater than '9' should be represented with
           capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
           can be used as a visual separator, for example between rows.
           An example descriptor is as follows for entry 1:
           '<span id="descr1">descr</span>'.
         </p>
         <p>
-          For Fillomino there are <span id='democount'>1</span> demo
+          For Shikaku there are <span id='democount'>1</span> demo
           puzzles that can be helpful to walk through solving methods.
           They are puzzle codes <span id='demolist2'>[]</span>.
           Enter them in the Game Play tab with the code number and there

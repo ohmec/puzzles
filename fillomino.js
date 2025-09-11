@@ -1,12 +1,6 @@
 const emptyCellColor = "white";         // not-filled
-const fillCellColor  = "#000040";       // filled, slightly dark blue to contrast with black walls
-const incorrectRiverColor = "#802020";  // dark reddish
-const incorrectPoolColor = "#202080";   // dark bluish
-
 const stdFontColor = "black";
-const offFontColor = "white";
 const errorFontColor = "red";
-const correctFontColor = "green";
 
 const constMoveEraseCell =  50;
 const constMoveEraseWall =  51;
@@ -31,7 +25,7 @@ let debugMode = false;
 let handledKeys =
   [ KEY_BS, KEY_SP, KEY_CR, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList, puzzleBoardStates;
+let initPuzzle, puzzle, moveHistory, demoStepNum;
 
 function puzzleInit() {
   globalCursorOn = true;
@@ -427,20 +421,18 @@ function initStructures(puzzle) {
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
-  let hexParams = puzzleSplit[2];
 
   basicInitStructures(size,emptyCellColor,constWallLight,stdFontColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  puzzleBoardStates =     initYXFromValue(0);
   globalTextBold =        initYXFromValue(false);
 
   // bold the cells with fixed digits
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (globalBoardValues[y][x] != "") {
-        globalTextBold[y][x]    = true;
+        globalTextBold[y][x] = true;
       }
     }
   }
