@@ -105,7 +105,7 @@ const demoText = [
     "many incomplete rooms (polyominos). For our first time through we can " +
     "turn on Assist Mode 2 to see any errors that we might generate in the " +
     "process of the solve.</p>",
-  "Easy ones to knock out single-tile rooms, where the only solution " +
+  "Easy ones to knock out are single-tile rooms, where the only solution " +
     "is to insert a '1' into the box.",
   "Now that these are inserted, it is clear where to place some other '1' " +
     "digits in adjacent rooms so as to not violate the second rule about " +
