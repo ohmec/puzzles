@@ -1553,7 +1553,6 @@ function str2shape (shapestr) {
 // canonicalized shape to see if they are the same under some
 // form of reflection or rotation
 function canonicalizeShape (cellArray) {
-  console.log(cellArray);
   let r0 = normalizeShape(cellArray);
   let r1 = rotateShape(r0);
   let r2 = rotateShape(r1);
@@ -1573,4 +1572,30 @@ function canonicalizeShape (cellArray) {
   strArray.push(shape2str(f3));
   strArray.sort();
   return str2shape(strArray[0]);
+}
+
+function compareRooms(room1, room2) {
+  // Check if lengths of outer arrays are equal
+  if (room1.length !== room2.length) {
+    return false;
+  }
+
+  // Iterate through outer arrays
+  for (let i = 0; i < room1.length; i++) {
+    const cell1 = room1[i];
+    const cell2 = room2[i];
+
+    // Check if lengths of inner arrays are equal
+    if (cell1.length !== cell2.length) {
+      return false;
+    }
+
+    // Iterate through inner arrays and compare elements
+    for (let j = 0; j < cell1.length; j++) {
+      if (cell1[j] !== cell2[j]) {
+        return false;
+      }
+    }
+  }
+  return true;
 }

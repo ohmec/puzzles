@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./lits.js"></script>
+    <script type="text/javascript" src="./lipuzzles.js"></script>
+    <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
+    <title>LITS Player</title>
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for LITS
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>
+          To play, click on a cell to switch between light, dark, and the
+          default indeterminate state.  A left-click turns it dark, a
+          right-click turns to white, and a middle-click returns to
+          indeterminate. Once the mouse is pressed down, you can drag
+          the mouse to set multiple squares in one sequence.
+          Alternately, you can use the arrow keys to move
+          around the board, and press the space bar to toggle between
+          the states, or the '1' key to turn black, the '0' key to turn
+          white, or the backspace key to set back to indeterminate.
+          Once on a cell, you can drag its color by holding the shift
+          key and moving the arrow keys up down left or right.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete rooms is indicated.  In Assist Mode (1), the
+          number of errors and incomplete rooms is indicated, see game rules.
+          In Assist Mode (2), errors are highlighted with different colors
+          (red for violating the 2x2 rule (see Rules Tab), yellow for
+          an incorrect shape), and completed LITS shapes are highlighted
+          with green colors. In some cases the solve difficulty will
+          greatly decrease in Assist Mode (2), so select depending upon
+          the level of challenge desired. The canvas border will turn
+          green if the grid is completed without error.  You can press
+          the "undo" button on the bottom of the page to undo previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
+        </p>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        <a href="https://nicoli.co.jp/en/lits" target="_blank">LITS</a>
+        is a Japanese logic puzzle published by
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
+        In LITS, the puzzle board begins with a collection of "polyominos",
+        or collections of blank cells forming a room of various sizes and
+        shapes.  The player must set some of the cells dark, and the rest
+        white, forming only the four-cell shapes 'L', 'I', 'T', or 'S', in any
+        orientation. The rules relate these shapes and their arrangement
+        on the solution board.
+        <ol>
+          <li>
+            A room can only have four cells within it turned dark,
+            and the remainder must be white.
+          </li>
+          <li>
+            The arrangement of the dark squares must resemble the letters
+            'L', 'I', 'T' or 'S'. See the completed solution using puzzle
+            entry number 0 for an example.
+          </li>
+          <li>
+            Identical shapes (two 'L' shapes, for instance) can not touch
+            vertically or horizontally, no matter their orientation.
+            Diagonally touching is acceptable.
+          </li>
+          <li>
+            No 2x2 square of cells can be entirely shaded dark.
+          </li>
+          <li>
+            The dark cells must all form one contiguous "river"
+            of cells, connected to each other in the vertical or
+            horizontal direction. A river is not considered connected
+            if it only flows through diagonally adjacent dark cells.
+          </li>
+        </ol>
+        Below select puzzle 0 to see a completed sample grid.
+        See the Game Play or Puzzles tab for how to invoke a demo.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH::&lt;wall-descriptor-rows:&lt;wall-descriptor-columns&gt;",
+          where W is a number indicating the width of the grid, and H
+          the height.  The wall descriptors are a description of the
+          true/false nature of the walls for each row, and then each
+          column. These are denoted in hexadecimal value, which is
+          a value from 0 to 15 denoted as 0-9,a-f for each collection
+          of 4 walls, ignoring the sides. As an example, if a grid is
+          8 columns wide, then 7 wall values are needed to define the
+          walls between column 0 and 1, then 1 and 2, etc. These 7
+          values are described in two-character hex values from 00 to
+          fe. Extra unused bits for the end of a row or column are
+          ignored, and each new row or column begins with a new hex
+          pair or triplet. So if the top row has a wall between columns
+          0 and 1, and between columns 5 and 6, that would be binary
+          value of 1000010, which is represented as the hex pair of
+          84.  An example descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For LITS there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo" id="undoButton"  />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
+        </pr>
+      </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <!-- some space to avoid the canvas from shrinking on demo mode -->
+    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>

@@ -20,6 +20,12 @@ html,body {
   font-weight: 700;
   padding: 10px;
 }
+#ttd img {
+  box-shadow: 2px  2px 4px 4px #88c088;
+}
+#ttd img:hover {
+  box-shadow: 2px  2px 4px 4px #8888c0;
+}
 #content {
   font-family: 'Open Sans', sans-serif;
   text-align: left;
