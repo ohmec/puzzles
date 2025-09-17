@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <script type="application/javascript" src="./fastclick.js"></script>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./shpuzzles.js"></script>
+    <script type="text/javascript" src="./shakashaka.js"></script>
+    <script src="./jquery.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+    <title>Shakashaka Player</title>
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html">Ohmec Puzzles</a><br/>
+      Player for Shakashaka &#x30B7;&#x30E3;&#x30AB;&#x30B7;&#x30E3;&#x30AB;
+    </div>
+    <div id="tabContainer">
+      <ul id="tabs">
+        <li class="active"><a href="#tab1">Game Play   </a></li>
+        <li>               <a href="#tab2">Rules       </a></li>
+        <li>               <a href="#tab3">Puzzles     </a></li>
+        <li>               <a href="#tab4">About       </a></li>
+      </ul>
+    </div>
+    <div id="tabsContent">
+      <div id="tab1" class="tab_content" style="display: block;">
+        <p>
+          A left-click on a while cell toggles through all potential
+          settings for the cell, starting with a black triangle in
+          the NE corner, then rotating SE, SW, NW, then back to white.
+          That is &#x25e5; &rarr; &#x25e2; &rarr; &#x25e3; &rarr; &#x25e4;
+          &rarr; white.  Alternately you can use arrow keys to move around
+          the board, and press the space bar to toggle through the options,
+          or press '1' - '4' to set a triangle in the corresponding corner
+          (starting with '1' for NE &#x25e5; and moving clockwise to '4'
+          for &#x25e4;), or '0' or the backspace key to return to white.
+          You can right-click or press the '.' button to put a dot
+          place-holder for a cell that, by your determination, must stay
+          white.
+        </p>
+        <p>
+          In Assist Mode (0), the default, only the existance of errors
+          or incomplete numbered cells is indicated.  In Assist Mode
+          (1), the number of errors and incomplete cells is indicated,
+          see game rules.  In Assist Mode (2), errors and completed
+          number are highlighted with colors.  In some cases the solve
+          difficulty will greatly decrease in Assist Mode (2), so select
+          depending upon the level of challenge desired. The game border
+          will turn green if the grid is completed without error.  You
+          can click the "undo" button on the bottom of the page to undo
+          previous moves.
+        </p>
+        <p>
+          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          for one of a list of pre-defined puzzles, or a puzzle descriptor
+          (see "Puzzles" tab). The following puzzle codes have demos,
+          which will walk you through a solve to help you on the path to
+          mastery: <span id='demolist1'>[]</span>).
+        </p>
+      </div>
+      <div id="tab2" class="tab_content" style="display: none;">
+        <a href="https://www.nikoli.co.jp/en/puzzles/shakashaka/" target="_blank">Shakashaka</a>
+        (&#x30B7;&#x30E3;&#x30AB;&#x30B7;&#x30E3;&#x30AB;)
+        is a unique Japanese logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
+        In Shakashaka, the board begins with a number of black squares, some
+        with numbers, and some without.  The goal is to paint some of the
+        white cells with triangles in one of the four corners of the
+        cell, that is &#x25e5; &#x25e2; &#x25e3; or &#x25e4;. A cell
+        can't be set to be completely black, but can be left white.
+        The rules below apply to these numbered cells and the triangular
+        cells.
+        <ol>
+          <li>
+            A black square with a number indicates how many triangles
+            must be horizontally or vertically adjacent to it.
+          </li>
+          <li>
+            A black square with no number has an unconstrained number
+            of triangles adjacent to it.
+          </li>
+          <li>
+            To complete the board, all white spaces must be creating
+            a rectangular shape. That is, a rectangular combination
+            of white squares, or a combination of white squares and
+            white portions of triangular cells that forms a rectangle
+            of any size.
+          </li>
+        </ol>
+        Enter puzzle #0 in the tab below to see a completed puzzle.
+      </div>
+      <div id="tab3" class="tab_content" style="display: none;">
+        <p>
+          Puzzles can be invoked by either a numerical entry from
+          0-<span id='puzzlecount2'>0</span>, or through a character
+          description of the puzzle itself, entered into the Display
+          form on the 'Game Play' tab. The numbered puzzles are
+          hand-crafted of varying difficulty, roughly easy to hard.
+          Puzzle 0 shows a completed correct puzzle.
+        </p>
+        <p>
+          To describe a puzzle, the character string must be of the
+          form: "WxH:&lt;descriptor&gt;", where W is a number indicating
+          the width of the grid, and H the height.  The descriptor is
+          a list of the black squares with numbers 0-4, or a '*' for
+          a black square without a digit, from left to right, then
+          top to bottom.  To assist in the definition of a sparse board,
+          a combination of <i>b</i> consecutive white squares can be
+          represented with a lowercase letter from 'a' to 'z',
+          corresponding to 1 to 26 consecutive squares.  A dot '.'
+          can be used as a visual separator, for example between rows.
+          An example descriptor is as follows for entry 1:
+          '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Shakashaka there are <span id='democount'>1</span> demo
+          puzzles that can be helpful to walk through solving methods.
+          They are puzzle codes <span id='demolist2'>[]</span>.
+          Enter them in the Game Play tab with the code number and there
+          will be added a demo panel to help with the solve.
+        </p>
+      </div>
+      <div id="tab4" class="tab_content" style="display: none;">
+        This playground was written using javascript and is available open
+        source. All code is checked into the github repo at
+        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
+        Feel free to file bugs there!
+      </div>
+    </div>
+    <div id="puzzleEntry">
+      <center>
+      <input type="text"                          id="userPuzzle"    size="40" />
+      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
+      </center>
+    </div>
+    <br />
+    <div id="puzzleInterface">
+      <div id="canvasDiv" style="border-color: black;">
+        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+      </div>    
+      <br />
+      <script type="text/javascript">
+        let canvas = document.querySelector(".fastclick");
+        new FastClick(canvas);
+      </script>
+      <br />
+      <div id="buttonsDiv">
+        <input class="button small" type="button" value="Undo"  id="undoButton"  />
+        <input class="button small" type="button" value="Reset" id="resetButton" />
+        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <p><span id='puzzledescr'></span></p>
+        <p><span id='errortext'></span></p>
+      </div>
+    </div>
+    <div id="demotab">
+      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
+      <input class="button small" type="button" value="next" id="nextDemoButton" />
+      <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <!-- some space to avoid the canvas from shrinking on demo mode -->
+    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript">
+      $(document).ready(function(){ puzzleInit(); });
+    </script>
+  </body>
+</html>
+
