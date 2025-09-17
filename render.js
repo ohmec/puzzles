@@ -3,11 +3,15 @@ const CLICK_MIDDLE  = 1;
 const CLICK_RIGHT   = 2;
 const CLICK_UNKNOWN = 9;
 
-const CIRCLE_NONE  = 0;
-const CIRCLE_WHITE = 1;
-const CIRCLE_BLACK = 2;
-const CIRCLE_DOT   = 3;
-const CIRCLE_MOON  = 4;
+const CIRCLE_NONE   = 0;
+const CIRCLE_WHITE  = 1;
+const CIRCLE_BLACK  = 2;
+const CIRCLE_DOT    = 3;
+const CIRCLE_MOON   = 4;
+const CIRCLE_TRI_NE = 5;
+const CIRCLE_TRI_SE = 6;
+const CIRCLE_TRI_SW = 7;
+const CIRCLE_TRI_NW = 8;
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
@@ -54,10 +58,15 @@ const KEY_DOWN  = 0x28;
 const KEY_0     = 0x30;
 const KEY_1     = 0x31;
 const KEY_2     = 0x32;
+const KEY_3     = 0x33;
+const KEY_4     = 0x34;
 const KEY_7     = 0x37;
 const KEY_9     = 0x39;
 const ALT_0     = 0x60; // these are the number pad versions
 const ALT_1     = 0x61;
+const ALT_2     = 0x62;
+const ALT_3     = 0x63;
+const ALT_4     = 0x64;
 const ALT_9     = 0x69;
 const KEY_A     = 0x41;
 const KEY_E     = 0x45;
@@ -684,27 +693,46 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
   }
   // draw circle next if it exists
   if (circle) {
-    let radius = (circle==CIRCLE_DOT) ? globalCircleRadius*globalGridSize*0.35 :
-                                        globalCircleRadius*globalGridSize;
-    globalContext.lineWidth = 4.0;
-    globalContext.strokeStyle = circlecolor;
-    globalContext.fillStyle = (circle>=CIRCLE_BLACK) ? circlecolor : "white";
-    globalContext.beginPath();
-    globalContext.arc(drawX+globalGridSize/2,
-                drawY+globalGridSize/2,
-                radius,0,2*Math.PI);
-    globalContext.stroke();
-    globalContext.fill();
-    // if CIRCLE_MOON draw another white one to eclipse the original one
-    if (circle==CIRCLE_MOON) {
-      globalContext.strokeStyle = "white";
-      globalContext.fillStyle = "white";
+    // "circle" might be a triangle for Shakashaka
+    if (circle >= CIRCLE_TRI_NE) {
+      let cornersY = [drawY,drawY,drawY+globalGridSize,drawY+globalGridSize];
+      let cornersX = [drawX,drawX+globalGridSize,drawX+globalGridSize,drawX];
+      let drawY1 = cornersY[(circle-CIRCLE_TRI_NE)%4];
+      let drawX1 = cornersX[(circle-CIRCLE_TRI_NE)%4];
+      let drawY2 = cornersY[(circle-CIRCLE_TRI_NE+1)%4];
+      let drawX2 = cornersX[(circle-CIRCLE_TRI_NE+1)%4];
+      let drawY3 = cornersY[(circle-CIRCLE_TRI_NE+2)%4];
+      let drawX3 = cornersX[(circle-CIRCLE_TRI_NE+2)%4];
+      globalContext.fillStyle = circlecolor;
       globalContext.beginPath();
-      globalContext.arc(drawX+globalGridSize*0.42,
-                  drawY+globalGridSize*0.42,
-                  radius*0.84,0,2*Math.PI);
+      globalContext.moveTo(drawX1,drawY1);
+      globalContext.lineTo(drawX2,drawY2);
+      globalContext.lineTo(drawX3,drawY3);
+      globalContext.closePath();
+      globalContext.fill();
+    } else {
+      let radius = (circle==CIRCLE_DOT) ? globalCircleRadius*globalGridSize*0.35 :
+                                          globalCircleRadius*globalGridSize;
+      globalContext.lineWidth = 4.0;
+      globalContext.strokeStyle = circlecolor;
+      globalContext.fillStyle = (circle>=CIRCLE_BLACK) ? circlecolor : "white";
+      globalContext.beginPath();
+      globalContext.arc(drawX+globalGridSize/2,
+                  drawY+globalGridSize/2,
+                  radius,0,2*Math.PI);
       globalContext.stroke();
       globalContext.fill();
+      // if CIRCLE_MOON draw another white one to eclipse the original one
+      if (circle==CIRCLE_MOON) {
+        globalContext.strokeStyle = "white";
+        globalContext.fillStyle = "white";
+        globalContext.beginPath();
+        globalContext.arc(drawX+globalGridSize*0.42,
+                    drawY+globalGridSize*0.42,
+                    radius*0.84,0,2*Math.PI);
+        globalContext.stroke();
+        globalContext.fill();
+      }
     }
   }
   // now text of value
@@ -1298,6 +1326,9 @@ function updateHtmlDescr(pdescr) {
 
 function updateStaticHtmlEntries(pdescr,edescr,pcnt,dpuzz,dpuzzlen) {
   updateHtmlDescr(pdescr);
+  // edescr might have <contents> for some (like Yajilin), convert those to counterparts
+  edescr = edescr.replaceAll('<', '&lt;');
+  edescr = edescr.replaceAll('>', '&gt;');
   updateHtmlText('descr1',       edescr);
   updateHtmlText('puzzlecount1', pcnt-1);
   updateHtmlText('puzzlecount2', pcnt-1);

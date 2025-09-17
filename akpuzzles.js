@@ -80,7 +80,7 @@ const demoText = [
     "process of the solve.</p>",
   "For our first pass we can satisfy the easy ones (the 4 on this board), " +
     "and mark certain no-bulb squares with a dot to indicate its condition, " +
-    "i.e. those that must be illuminated elsewhere.</p>",
+    "i.e. those that must be illuminated elsewhere.",
   "Already with these additions, we can see more cells that are clearly " +
     "either bulbs or need to be dotted. The '1' in the upper right can " +
     "only be satisfied with a bulb below it, given that its other " +
