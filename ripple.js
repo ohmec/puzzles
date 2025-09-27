@@ -3,11 +3,12 @@ const emptyCellColor = "white";         // default
 const fillCellColor = "black";          // default
 const completeFillColor = "#e0ffe0";    // light green
 const errorFontColor = "red";
-const clicking = false;
-const dragging = false;
-const errorCount = 0;
-const incompleteCount = 0;
-const assistState = 0;
+
+let clicking = false;
+let dragging = false;
+let errorCount = 0;
+let incompleteCount = 0;
+let assistState = 0;
 
 const MOVE_CLEAR  = 1;
 const MOVE_SET    = 2;

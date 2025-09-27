@@ -54,6 +54,11 @@ let cannedPuzzles = [
   "17x17:b*1b1b1d1b.e2g0c.1c*b0b0a*c*.a3f1g*.b2b*c*a*b*b.d*g1b1a.b1c22b*e0.1c1e1c1b." +
         "c1d*d1c.b1c*e0c*.1e1b1*c*b.a1b*g*d.b*b1a1c*b2b.1g2f1a.1c*a*b1b*c0.c1g2e." +
         "b1d*b3b*0b",                                                                       // 25 44 2020 20
+  "17x17:c1a2e**a**a.b1c4j.j**c**.a*e*i.a*b1b*b1*c3*.q.b*c*d**a*1a.c1a1c*g.h1h." +
+        "g2c1a2c.a11a**d1c1b.q.**c**b1b0b*a.i*e3a.**c21j.j*c*b.a*1a*1e*a1c",                // 35 26 box2014 9
+  "17x17:a2*g01e.g*2g*.c**a0b2b10b2.b*c*g*b.b*f11c*b.*d2b1b*e.*c2b*e21b.b2a1b1a*" +
+        "*d*a.a1c*e*c*a.a*d12a1b1a2b.b1*e*b2c*.e*b*b2d*.b2c*1f*b.b0g1c1b.*b**b2b*a*1c." +
+        "1g*2g.e**g*0a",                                                                    // 38 38 box2014 10
   "31x45:a1d*c0f2c1d3d.e0b1b1j1b4e.d1c1c1f0d2d1*.b1e1f12b*k.a2l1d2a1e1b1.1k1k1c2b." +
         "a1d2d2f1d2a2e.b2b1a2d2d*a1b1c1d.d1c1g1c1g*b.b2f2e2f*c1b1a.a1h2c1h1a1d1." +
         "1d*1f1g2b2f.d1b2d2d1b2g1b.c2d2b3d1b1k.1i3l0c2b*.c1d1i0g2d.d1b1g*i1e." +
