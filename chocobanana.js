@@ -27,6 +27,7 @@ let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList, puzzleBoardSta
 
 function puzzleInit() {
   globalCursorOn = true;
+  globalTextOutline = true; // outline style text
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {

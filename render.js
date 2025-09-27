@@ -109,7 +109,6 @@ const constWallDot       = 0b001000000;
 const constHoriz = true;
 const constVert  = false;
 
-const constColorLightGray = "#c0c0c0";
 const constColorMedGray   = "#a0a0a0";
 const constColorSuccess   = "#1be032";
 const constColorCursor    = "#ff80ff";
@@ -128,9 +127,10 @@ let globalCursorX = 0;
 let globalWallCursorOn = false;
 let globalWallCursorY = 0;
 let globalWallCursorX = 0;
+let globalTextOutline = false;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
-let globalBoardValues, globalBoardColors, globalBoardTextColors;
+let globalBoardValues, globalBoardColors, globalBoardTextColors, globalBoardTextOppColors;
 let globalWallStates, globalLineStates, globalLineColors, globalDotColors;
 let globalCircleStates, globalCircleColors, globalTextBold;
 
@@ -141,18 +141,19 @@ function basicInitStructures(size,cellColor,wallState,textColor) {
   setGridSize(globalPuzzleW);
   canvas.height = globalPuzzleH*globalGridSize;
   canvas.width  = globalPuzzleW*globalGridSize;
-  globalInitBoardValues = initYXFromValue("");
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalLineStates   =    initYXFromValue(PATH_NONE);
-  globalBoardColors =     initYXFromValue(cellColor);
-  globalInitWallStates  = initWallStates(wallState);
-  globalWallStates =      initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
-  globalBoardTextColors = initYXFromValue(textColor);
-  globalLineColors =      initYXFromValue(constLineColor);
-  globalCircleStates =    initYXFromValue(CIRCLE_NONE);
-  globalCircleColors =    initYXFromValue(constLineColor);
-  globalDotColors =       initYX2FromValue(constLineColor);
-  globalTextBold =        initYXFromValue(true);
+  globalInitBoardValues =    initYXFromValue("");
+  globalBoardValues =        initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalLineStates   =       initYXFromValue(PATH_NONE);
+  globalBoardColors =        initYXFromValue(cellColor);
+  globalInitWallStates  =    initWallStates(wallState);
+  globalWallStates =         initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalBoardTextColors =    initYXFromValue(textColor);
+  globalBoardTextOppColors = initYXFromValue("white");
+  globalLineColors =         initYXFromValue(constLineColor);
+  globalCircleStates =       initYXFromValue(CIRCLE_NONE);
+  globalCircleColors =       initYXFromValue(constLineColor);
+  globalDotColors =          initYX2FromValue(constLineColor);
+  globalTextBold =           initYXFromValue(true);
 }
 
 function expandNumParams(numStr) {
@@ -432,7 +433,20 @@ function initBoardColorsBlackWhite(numParamText) {
   return boardColors;
 }
 
-function initBoardColorsFromHexes(shadeParams) {
+function initBoolenBoardFromHexes(hexParams) {
+  let hexArray = hexParams.split("");
+  let binArray = new Array(globalPuzzleH);
+  for (let y=0;y<globalPuzzleH;y++) {
+    binArray[y] = new Array(globalPuzzleW);
+    for (let x=0;x<globalPuzzleW;x++) {
+      let hexVal = hexArray[y*Math.ceil(globalPuzzleW/4)+Math.floor(x/4)];
+      binArray[y][x] = (parseInt(hexVal,16) & (1<<(3-(x%4)))) ? true : false;
+    }
+  }
+  return binArray;
+}
+
+function initBoardColorsFromHexes(shadeParams,setColor) {
   let shadeHexes = shadeParams.split("");
   let boardColors = new Array(globalPuzzleH);
   for (let y=0;y<globalPuzzleH;y++) {
@@ -440,7 +454,7 @@ function initBoardColorsFromHexes(shadeParams) {
     for (let x=0;x<globalPuzzleW;x++) {
       let shadeHex = shadeHexes[y*Math.ceil(globalPuzzleW/4)+Math.floor(x/4)];
       let shadeTrue = (parseInt(shadeHex,16) & (1<<(3-(x%4)))) ? 1 : 0;
-      boardColors[y][x] = shadeTrue ? constColorMedGray : "white";
+      boardColors[y][x] = shadeTrue ? setColor : "white";
     }
   }
   return boardColors;
@@ -653,7 +667,8 @@ function drawBoard(lineFirst = false, drawDots = false) {
                globalLineStates[y][x],
                globalLineColors[y][x],
                lineFirst,
-               globalBoardTextColors[y][x]);
+               globalBoardTextColors[y][x],
+               globalBoardTextOppColors[y][x]);
     }
   }
   // draw horizontal walls
@@ -683,7 +698,7 @@ function drawBoard(lineFirst = false, drawDots = false) {
   }
 }
 
-function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineFirst,textColor) {
+function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineFirst,textColor,oppTextColor) {
   let drawX = Math.floor(x*globalGridSize);
   let drawY = Math.floor(y*globalGridSize);
   globalContext.fillStyle = color;
@@ -718,8 +733,8 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
       globalContext.fillStyle = (circle>=CIRCLE_BLACK) ? circlecolor : "white";
       globalContext.beginPath();
       globalContext.arc(drawX+globalGridSize/2,
-                  drawY+globalGridSize/2,
-                  radius,0,2*Math.PI);
+                        drawY+globalGridSize/2,
+                        radius,0,2*Math.PI);
       globalContext.stroke();
       globalContext.fill();
       // if CIRCLE_MOON draw another white one to eclipse the original one
@@ -728,8 +743,8 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
         globalContext.fillStyle = "white";
         globalContext.beginPath();
         globalContext.arc(drawX+globalGridSize*0.42,
-                    drawY+globalGridSize*0.42,
-                    radius*0.84,0,2*Math.PI);
+                          drawY+globalGridSize*0.42,
+                          radius*0.84,0,2*Math.PI);
         globalContext.stroke();
         globalContext.fill();
       }
@@ -766,7 +781,16 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
       }
     }
   }
-  globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.5+globalFontSize*0.5)));
+  if (globalTextOutline) {
+    globalContext.strokeStyle = textColor;
+    globalContext.lineWidth = 4;
+    globalContext.strokeText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.46+globalFontSize*0.5)));
+    globalContext.fillStyle = oppTextColor;
+    globalContext.fillText  (vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.46+globalFontSize*0.5)));
+  } else {
+    globalContext.fillText(vstr, drawX+(globalGridSize*0.5), drawY+(globalGridSize*(0.46+globalFontSize*0.5)));
+  }
+
 
   if (!lineFirst) {
     drawLine(y,x,line,lineColor);
@@ -815,11 +839,13 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
   let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : drawYM;
   globalContext.strokeStyle = lineColor;
   if (wallState != constWallNone) {
-    if (wallState & constWallDash) {
+    // check for dashed, but not overridden with "harder" border
+    let hardEdge = constWallBorder | constWallUserEdge | constWallSolveEdge;
+    if ((wallState & (constWallDash | hardEdge)) == constWallDash) {
       globalContext.setLineDash([2,2]);
       globalContext.lineWidth = 1;
     } else {
-      if ((wallState & (constWallBorder | constWallUserEdge | constWallSolveEdge)) != 0) {
+      if ((wallState & hardEdge) != 0) {
         globalContext.lineWidth = 3;
       } else if (wallState == constWallLight) {
         globalContext.lineWidth = 0.5;
@@ -955,10 +981,10 @@ function getClickCellInfo(evnt, canvas) {
   let horzDistFromEdgeR = Math.abs((horzCell+1)*globalGridSize - xCoord);
   let vertDistFromEdgeU = Math.abs((vertCell  )*globalGridSize - yCoord);
   let vertDistFromEdgeD = Math.abs((vertCell+1)*globalGridSize - yCoord);
-  let isCloseL = (horzDistFromEdgeL < (globalGridSize*0.1));
-  let isCloseR = (horzDistFromEdgeR < (globalGridSize*0.1));
-  let isCloseU = (vertDistFromEdgeU < (globalGridSize*0.1));
-  let isCloseD = (vertDistFromEdgeD < (globalGridSize*0.1));
+  let isCloseL = (horzDistFromEdgeL < (globalGridSize*0.15));
+  let isCloseR = (horzDistFromEdgeR < (globalGridSize*0.15));
+  let isCloseU = (vertDistFromEdgeU < (globalGridSize*0.15));
+  let isCloseD = (vertDistFromEdgeD < (globalGridSize*0.15));
   if (isCloseU && isCloseL) {
     return [ vertCell, horzCell, true, false, 2*vertCell,   2*horzCell ];
   } else if (isCloseD && isCloseL) {
@@ -990,7 +1016,7 @@ function eqCompare(testValue,isEqual,compValue) {
   }
 }
 
-function travelRiver(arrayYX,y,x,isEqual,testValue) {
+function travelRiver(arrayYX,y,x,isEqual,testValue,checkRoom=false,roomArray=null) {
   let riverCells = new Array();
   let tryindex = 0;
   riverCells.push(y+","+x);
@@ -1000,22 +1026,26 @@ function travelRiver(arrayYX,y,x,isEqual,testValue) {
     let ix = parseInt(curCell[1]);
     if ((iy != (globalPuzzleH-1)) &&
         (riverCells.indexOf((iy+1)+","+ix) == -1) &&
-        eqCompare(arrayYX[iy+1][ix],isEqual,testValue)) {
+        eqCompare(arrayYX[iy+1][ix],isEqual,testValue) &&
+        (!checkRoom || (roomArray.indexOf((iy+1)+","+ix)!=-1))) {
       riverCells.push((iy+1)+","+ix);
     }
     if ((iy != 0) &&
         (riverCells.indexOf((iy-1)+","+ix) == -1) &&
-        eqCompare(arrayYX[iy-1][ix],isEqual,testValue)) {
+        eqCompare(arrayYX[iy-1][ix],isEqual,testValue) &&
+        (!checkRoom || (roomArray.indexOf((iy-1)+","+ix)!=-1))) {
       riverCells.push((iy-1)+","+ix);
     }
     if ((ix != (globalPuzzleW-1)) &&
         (riverCells.indexOf(iy+","+(ix+1)) == -1) &&
-        eqCompare(arrayYX[iy][ix+1],isEqual,testValue)) {
+        eqCompare(arrayYX[iy][ix+1],isEqual,testValue) &&
+        (!checkRoom || (roomArray.indexOf(iy+","+(ix+1))!=-1))) {
       riverCells.push(iy+","+(ix+1));
     }
     if ((ix != 0) &&
         (riverCells.indexOf(iy+","+(ix-1)) == -1) &&
-        eqCompare(arrayYX[iy][ix-1],isEqual,testValue)) {
+        eqCompare(arrayYX[iy][ix-1],isEqual,testValue) &&
+        (!checkRoom || (roomArray.indexOf(iy+","+(ix-1))!=-1))) {
       riverCells.push(iy+","+(ix-1));
     }
     tryindex++;
@@ -1270,6 +1300,7 @@ function travelRoom(y,x) {
   let room = new Array;
   let tryindex = 0;
   room.push(y+","+x);
+  let mask = constWallBorder | constWallUserEdge | constWallSolveEdge;
   while (room.length > tryindex) {
     let curCell = room[tryindex].split(",");
     let iy = parseInt(curCell[0]);
@@ -1278,22 +1309,22 @@ function travelRoom(y,x) {
     let wx = ix*2+1;
     if ((iy != (globalPuzzleH-1)) &&
         (room.indexOf((iy+1)+","+ix) == -1) &&
-        (globalWallStates[wy+1][wx] != constWallBorder)) {
+        ((globalWallStates[wy+1][wx] & mask)==0)) {
       room.push((iy+1)+","+ix);
     }
     if ((iy != 0) &&
         (room.indexOf((iy-1)+","+ix) == -1) &&
-        (globalWallStates[wy-1][wx] != constWallBorder)) {
+        ((globalWallStates[wy-1][wx] & mask)==0)) {
       room.push((iy-1)+","+ix);
     }
     if ((ix != (globalPuzzleW-1)) &&
         (room.indexOf(iy+","+(ix+1)) == -1) &&
-        (globalWallStates[wy][wx+1] != constWallBorder)) {
+        ((globalWallStates[wy][wx+1] & mask)==0)) {
       room.push(iy+","+(ix+1));
     }
     if ((ix != 0) &&
         (room.indexOf(iy+","+(ix-1)) == -1) &&
-        (globalWallStates[wy][wx-1] != constWallBorder)) {
+        ((globalWallStates[wy][wx-1] & mask)==0)) {
       room.push(iy+","+(ix-1));
     }
     tryindex++;

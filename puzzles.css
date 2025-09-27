@@ -3,7 +3,7 @@ html,body {
 }
 @font-face {
   font-family: 'Open Sans';
-  src: url("https://fonts.googleapis.com/css?family=Open+Sans");
+  src: url("https://fonts.googleapis.com/css?family=Open+Sans:Bold,400");
   font-weight: 100 900;
 }
 #banner {

@@ -3,19 +3,19 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400"/>
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
-    <script type="text/javascript" src="./akpuzzles.js"></script>
-    <script type="text/javascript" src="./akari.js"></script>
+    <script type="text/javascript" src="./dcpuzzles.js"></script>
+    <script type="text/javascript" src="./doublechoco.js"></script>
     <script src="./jquery.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
-    <title>Akari Player</title>
+    <title>Double Choco Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Akari &#x660E;&#x304B;&#x308A;
+      Player for Double Choco &#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -28,25 +28,29 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          A left-click on the board adds a light bulb to a white
-          square, or removes one that is already there. Alternately
-          you can use arrow keys to move around the board, and press
-          the space bar to toggle light bulbs, or the '1' key to add
-          a bulb, or '0' key or backspace to remove. You can right-click
-          or press the '.' button to put a dot place-holder for a cell
-          that, by your determination, can not contain a light bulb
-          (for instance next to a '0' black cell).
+          To play, left-click on a border between cells to create a wall
+          between cells, or right-click to remove a wall. You can drag
+          around to continue to draw the wall, or erase the wall. Alternately,
+          once on a boundary, you can shift-move to add more borders in the
+          direction of arrow keys. Additionally, if the cursor is on a wall,
+          you can press the space bar to toggle the wall state, or press
+          '1' to set, or '0' or backspace to clear.
         </p>
         <p>
           In Assist Mode (0), the default, only the existance of errors
-          or un-illuminated white cells  is indicated.  In Assist Mode
-          (1), the number of errors and incomplete cells is indicated,
-          see game rules.  In Assist Mode (2), errors and illuminated rooms
-          are highlighted with colors.  In some cases the solve difficulty will
-          greatly decrease in Assist Mode (2), so select depending upon
-          the level of challenge desired. The game border will turn
-          green if the grid is completed without error.  You can click
-          the "undo" button on the bottom of the page to undo previous moves.
+          or incomplete numbers is indicated.  In Assist Mode (1), the
+          number of errors and incomplete numbers is indicated, see game rules.
+          In Assist Mode (1) or higher, each numbered square is given a different
+          color to visually guide the solver in searching for room
+          completions.  In Assist Mode (2) errors are highlighted with cell
+          colors, and correct completed rooms are indicated as well. Note 
+          this does not ensure that they are correct in the final solution,
+          just that they are correct with respect to the rules. In some cases
+          the solve difficulty will greatly decrease in Assist Mode (1) or
+          higher, so select depending upon the level of challenge desired.
+          The game border will turn green if the grid is completed without
+          error.  You can click the "undo" button on the bottom of the page
+          to undo previous moves.
         </p>
         <p>
           Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
@@ -58,37 +62,35 @@
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://www.nikoli.co.jp/en/puzzles/akari" target="_blank">Akari</a>
-        (&#x660E;&#x304B;&#x308A; or "Light"),
-        is a Japanese logic puzzle published by 
+        <a href="https://www.nikoli.co.jp/en/puzzles/double_choco" target="_blank">Double Choco</a>
+        (&#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;) is a newer Japanese
+        logic puzzle published by 
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
-        In Akari, the board begins with a collection of black squares,
-        some with numbers, and some without, and white "hallways".
-        The goal is to make sure there is a source of "light" for every
-        hallway, created by the placing of light bulbs. The rules
-        below relate to the numbers, the light bulbs, and how to
-        complete the puzzle.
+        In Double Choco, the board begins with half of the cells grayed out, and
+        half white. Some cells have numbers. The contents of the cells can not
+        be modified. Instead, the user must draw borders between cells in order
+        to satisfy the set of rules below.
         <ol>
           <li>
-            A black square with a number indicates how many light bulbs
-            are adjacent to it, from zero to four.
+            Draw borders around collections of cells containing an equal number
+            of white cells and gray cells.
           </li>
           <li>
-            Light bulbs in white squares illuminate all other white
-            squares horizontally and vertically in all directions
-            until the light is blocked by a black square or the edge
-            of the board.
+            Cells with numbers in them indicate the number of white cells <b>and</b>
+            gray cells that must be in the room that contains them. For instance,
+            a cell with a '5' digit within it must eventually be in a room with
+            10 total cells: 5 white and 5 black.
           </li>
           <li>
-            To complete the puzzle, all white squares must be illuminated.
+            A room can have more than one of the same number within, or no numbers.
           </li>
           <li>
-            No light bulb can be illuminated by another light bulb.
+            Within a completed room, the two halves (white and gray) must be
+            of the same shape; rotations and mirror images are OK. For instance,
+            a '4' room could have one white 'L' shape "on its back" (&#x23D7;)
+            and a gray one flipped and reversed (&#x393;). They must be touching
+            horizontally or vertically.
           </li>
-          <li>
-            Light bulbs do not need to be next to a numbered square.
-          </li>
-        </ol>
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
@@ -101,20 +103,22 @@
         </p>
         <p>
           To describe a puzzle, the character string must be of the
-          form: "WxH:&lt;descriptor&gt;", where W is a number indicating
-          the width of the grid, and H the height.  The descriptor is
-          a list of the black squares with numbers 0-4, or a '*' for
-          a black square without a digit, from left to right, then
-          top to bottom.  To assist in the definition of a sparse board,
-          a combination of <i>b</i> consecutive white squares can be
-          represented with a lowercase letter from 'a' to 'z',
-          corresponding to 1 to 26 consecutive squares.  A dot '.'
+          form: "WxH:&lt;digit-descriptor&gt;", where W is a number
+          indicating the width of the grid, and H the height.
+          The digit descriptor is a list of the pre-defined
+          digit contents, from left to right, then top to bottom.
+          Blank cells are represented with a '-' character. To assist
+          in the definition of a sparse board, a combination of <i>b</i>
+          consecutive blanks can be represented with a lowercase letter
+          from 'a' to 'z', corresponding to 1 to 26 consecutive blanks.
+          Digit values greater than '9' should be represented with
+          capital letters 'A' to 'Z' representing 10 to 35.  A dot '.'
           can be used as a visual separator, for example between rows.
           An example descriptor is as follows for entry 1:
           '<span id="descr1">descr</span>'.
         </p>
         <p>
-          For Akari there are <span id='democount'>1</span> demo
+          For Double Choco there are <span id='democount'>1</span> demo
           puzzles that can be helpful to walk through solving methods.
           They are puzzle codes <span id='demolist2'>[]</span>.
           Enter them in the Game Play tab with the code number and there
@@ -153,7 +157,7 @@
         <p><span id='errortext'></span></p>
       </div>
     </div>
-    <div id="demotab">
+    <div id="demotab" style="display: none;">
       <input class="button small" type="button" value="prev" id="prevDemoButton"  />
       <input class="button small" type="button" value="next" id="nextDemoButton" />
       <p id='demop'><span id='demotext'></span></p>
