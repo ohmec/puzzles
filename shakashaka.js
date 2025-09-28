@@ -326,7 +326,7 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
 
-  basicInitStructures(size,"white",constWallLight,offFontColor);
+  basicInitStructures(size,"white",constWallLight,constWallBorder,offFontColor);
   puzzleBoardStates = initYXFromValue(CELL_WHITE);
 
   // add triangles if numParams includes solution, and
@@ -707,9 +707,9 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount==0) && (incompleteDigits==0)) {
-    $("#canvasDiv").css("border-color", constColorSuccess);
+    canvasSuccess();
   } else {
-    $("#canvasDiv").css("border-color", "black");
+    canvasIncomplete();
   }
 }
 
