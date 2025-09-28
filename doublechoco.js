@@ -372,7 +372,7 @@ function initStructures(puzzle) {
   let rwallParams = puzzleSplit[3];
   let cwallParams = puzzleSplit[4];
 
-  basicInitStructures(size,emptyCellColor,constWallDash,stdFontColor);
+  basicInitStructures(size,emptyCellColor,constWallDash,constWallBorder,stdFontColor);
 
   globalInitBoardValues = initBoardValuesFromParams(numParams);
   globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
@@ -604,9 +604,9 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0) && !incompleteBoard) {
-    $("#canvasDiv").css("border-color", constColorSuccess);
+    canvasSuccess();
   } else {
-    $("#canvasDiv").css("border-color", "black");
+    canvasIncomplete();
   }
 }
 

@@ -346,7 +346,7 @@ function initStructures(puzzle) {
   let cwallParams = puzzleSplit[2];
   let hexParams = puzzleSplit[3];
 
-  basicInitStructures(size,indetCellColor,constWallLight,stdFontColor);
+  basicInitStructures(size,indetCellColor,constWallLight,constWallBorder,stdFontColor);
 
   // initialize the wall states based upon the given parameters
   globalInitWallStates  = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
@@ -598,9 +598,9 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0) && !brokenRiver) {
-    $("#canvasDiv").css("border-color", constColorSuccess);
+    canvasSuccess();
   } else {
-    $("#canvasDiv").css("border-color", "black");
+    canvasIncomplete();
   }
 }
 

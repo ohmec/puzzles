@@ -128,24 +128,25 @@ let globalWallCursorOn = false;
 let globalWallCursorY = 0;
 let globalWallCursorX = 0;
 let globalTextOutline = false;
+let globalBorderMargin = 4;
 
 let globalContext, globalInitBoardValues, globalInitWallStates;
 let globalBoardValues, globalBoardColors, globalBoardTextColors, globalBoardTextOppColors;
 let globalWallStates, globalLineStates, globalLineColors, globalDotColors;
 let globalCircleStates, globalCircleColors, globalTextBold;
 
-function basicInitStructures(size,cellColor,wallState,textColor) {
+function basicInitStructures(size,cellColor,wallState,borderState,textColor) {
   let wxh = size.split("x");
   globalPuzzleW = parseInt(wxh[0]);
   globalPuzzleH = parseInt(wxh[1]);
   setGridSize(globalPuzzleW);
-  canvas.height = globalPuzzleH*globalGridSize;
-  canvas.width  = globalPuzzleW*globalGridSize;
+  canvas.height = globalPuzzleH*globalGridSize+2*globalBorderMargin;
+  canvas.width  = globalPuzzleW*globalGridSize+2*globalBorderMargin;
   globalInitBoardValues =    initYXFromValue("");
   globalBoardValues =        initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
   globalLineStates   =       initYXFromValue(PATH_NONE);
   globalBoardColors =        initYXFromValue(cellColor);
-  globalInitWallStates  =    initWallStates(wallState);
+  globalInitWallStates  =    initWallStates(wallState,borderState);
   globalWallStates =         initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
   globalBoardTextColors =    initYXFromValue(textColor);
   globalBoardTextOppColors = initYXFromValue("white");
@@ -460,18 +461,18 @@ function initBoardColorsFromHexes(shadeParams,setColor) {
   return boardColors;
 }
 
-function initWallStates(state) {
+function initWallStates(wallState,borderState) {
   let wallStates  = new Array(globalPuzzleH*2+1);
   // "true" wall states are all dashes at first
   for (let y=0;y<=2*globalPuzzleH;y++) {
     wallStates[y] = new Array(2*globalPuzzleW+1);
-    for (let x=0;x<2*globalPuzzleW;x++) {
+    for (let x=0;x<=2*globalPuzzleW;x++) {
       if (y==0 || y==(2*globalPuzzleH) || x==0 || x==(2*globalPuzzleW)) {
-        wallStates[y][x] = constWallBorder;
+        wallStates[y][x] = borderState;
       } else if(y%2 && x%2) {
         wallStates[y][x] = constWallNone;
       } else {
-        wallStates[y][x] = state;
+        wallStates[y][x] = wallState;
       }
     }
   }
@@ -672,14 +673,14 @@ function drawBoard(lineFirst = false, drawDots = false) {
     }
   }
   // draw horizontal walls
-  for (let y=2;y<=2*globalPuzzleH;y+=2) {
+  for (let y=0;y<=2*globalPuzzleH;y+=2) {
     for (let x=1;x<=2*globalPuzzleW;x+=2) {
       drawWall(constHoriz,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
     }
   }
   // draw vertical walls
   for (let y=1;y<=2*globalPuzzleH;y+=2) {
-    for (let x=2;x<=2*globalPuzzleW;x+=2) {
+    for (let x=0;x<=2*globalPuzzleW;x+=2) {
       drawWall(constVert,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
     }
   }
@@ -699,8 +700,8 @@ function drawBoard(lineFirst = false, drawDots = false) {
 }
 
 function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineFirst,textColor,oppTextColor) {
-  let drawX = Math.floor(x*globalGridSize);
-  let drawY = Math.floor(y*globalGridSize);
+  let drawX = Math.floor(x*globalGridSize)+globalBorderMargin;
+  let drawY = Math.floor(y*globalGridSize)+globalBorderMargin;
   globalContext.fillStyle = color;
   globalContext.fillRect(drawX,drawY,globalGridSize,globalGridSize);
   if (lineFirst) {
@@ -798,18 +799,18 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
 }
 
 function drawCursor() {
-  let drawX = Math.floor(globalCursorX*globalGridSize)+1;
-  let drawY = Math.floor(globalCursorY*globalGridSize)+1;
+  let drawX = Math.floor(globalCursorX*globalGridSize)+globalBorderMargin+1;
+  let drawY = Math.floor(globalCursorY*globalGridSize)+globalBorderMargin+1;
   globalContext.lineWidth = 4;
   globalContext.strokeStyle = constColorCursor;
   globalContext.strokeRect(drawX,drawY,globalGridSize-2,globalGridSize-2);
 }
 
 function drawWallCursor() {
-  let drawX1 = (globalWallCursorX%2) ? ((globalWallCursorX-1)*globalGridSize*0.5) : (globalWallCursorX*globalGridSize*0.5);
-  let drawX2 = (globalWallCursorX%2) ? ((globalWallCursorX+1)*globalGridSize*0.5) : (globalWallCursorX*globalGridSize*0.5);
-  let drawY1 = (globalWallCursorY%2) ? ((globalWallCursorY-1)*globalGridSize*0.5) : (globalWallCursorY*globalGridSize*0.5);
-  let drawY2 = (globalWallCursorY%2) ? ((globalWallCursorY+1)*globalGridSize*0.5) : (globalWallCursorY*globalGridSize*0.5);
+  let drawX1 = (globalWallCursorX%2) ? ((globalWallCursorX-1)*globalGridSize*0.5+globalBorderMargin) : (globalWallCursorX*globalGridSize*0.5+globalBorderMargin);
+  let drawX2 = (globalWallCursorX%2) ? ((globalWallCursorX+1)*globalGridSize*0.5+globalBorderMargin) : (globalWallCursorX*globalGridSize*0.5+globalBorderMargin);
+  let drawY1 = (globalWallCursorY%2) ? ((globalWallCursorY-1)*globalGridSize*0.5+globalBorderMargin) : (globalWallCursorY*globalGridSize*0.5+globalBorderMargin);
+  let drawY2 = (globalWallCursorY%2) ? ((globalWallCursorY+1)*globalGridSize*0.5+globalBorderMargin) : (globalWallCursorY*globalGridSize*0.5+globalBorderMargin);
   let isDot = ((globalWallCursorX%2) || (globalWallCursorY%2)) ? false : true;
   let isHorz = (globalWallCursorX%2);
   if (isDot) {
@@ -831,12 +832,12 @@ function drawWallCursor() {
 }
 
 function drawWall(horv,y,x,wallState,lineColor,dotColor) {
-  let drawXM = x*globalGridSize*0.5;
-  let drawYM = y*globalGridSize*0.5;
-  let drawX1 = (horv == constHoriz) ? (x-1)*globalGridSize*0.5 : drawXM;
-  let drawX2 = (horv == constHoriz) ? (x+1)*globalGridSize*0.5 : drawXM;
-  let drawY1 = (horv == constVert)  ? (y-1)*globalGridSize*0.5 : drawYM;
-  let drawY2 = (horv == constVert)  ? (y+1)*globalGridSize*0.5 : drawYM;
+  let drawXM = x*globalGridSize*0.5+globalBorderMargin;
+  let drawYM = y*globalGridSize*0.5+globalBorderMargin;
+  let drawX1 = (horv == constHoriz) ? (drawXM-globalGridSize*0.5) : drawXM;
+  let drawX2 = (horv == constHoriz) ? (drawXM+globalGridSize*0.5) : drawXM;
+  let drawY1 = (horv == constVert)  ? (drawYM-globalGridSize*0.5) : drawYM;
+  let drawY2 = (horv == constVert)  ? (drawYM+globalGridSize*0.5) : drawYM;
   globalContext.strokeStyle = lineColor;
   if (wallState != constWallNone) {
     // check for dashed, but not overridden with "harder" border
@@ -875,8 +876,8 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
 }
 
 function drawDot(y,x) {
-  let drawX = Math.floor(x*globalGridSize);
-  let drawY = Math.floor(y*globalGridSize);
+  let drawX = Math.floor(x*globalGridSize)+globalBorderMargin;
+  let drawY = Math.floor(y*globalGridSize)+globalBorderMargin;
   globalContext.lineWidth = 1;
   globalContext.fillStyle = "black";
   globalContext.beginPath();
@@ -887,8 +888,8 @@ function drawDot(y,x) {
 function drawLine(y,x,state,color) {
   // special case for "line dot"
   if (state == PATH_DOT) {
-    let drawX = Math.floor((x+0.5)*globalGridSize);
-    let drawY = Math.floor((y+0.5)*globalGridSize);
+    let drawX = Math.floor((x+0.5)*globalGridSize)+globalBorderMargin;
+    let drawY = Math.floor((y+0.5)*globalGridSize)+globalBorderMargin;
     globalContext.strokeStyle = color;
     globalContext.lineWidth = 1;
     globalContext.fillStyle = "black";
@@ -909,8 +910,8 @@ function drawLine(y,x,state,color) {
       let drawDouble = ((state & (0b10<<(2*i))) != 0) ? true : false;
       if (drawSingle || drawDouble) {
         let offset = drawSingle ? 0 : (0.075*globalGridSize);
-        let centerX = Math.floor((x+0.5)*globalGridSize);
-        let centerY = Math.floor((y+0.5)*globalGridSize);
+        let centerX = Math.floor((x+0.5)*globalGridSize)+globalBorderMargin;
+        let centerY = Math.floor((y+0.5)*globalGridSize)+globalBorderMargin;
         let halfCell = Math.floor(0.5*globalGridSize);
         switch (i) {
           case 0:         // N
@@ -973,8 +974,8 @@ function drawLine(y,x,state,color) {
 
 function getClickCellInfo(evnt, canvas) {
   let canvasElement = document.getElementById(canvas);
-  let yCoord = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"));
-  let xCoord = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"));
+  let yCoord = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"))-globalBorderMargin;
+  let xCoord = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"))-globalBorderMargin;
   let vertCell = Math.floor(yCoord/globalGridSize);
   let horzCell = Math.floor(xCoord/globalGridSize);
   let horzDistFromEdgeL = Math.abs((horzCell  )*globalGridSize - xCoord);
@@ -1371,6 +1372,16 @@ function updateStaticHtmlEntries(pdescr,edescr,pcnt,dpuzz,dpuzzlen) {
 function updateDynamicHtmlEntries(etext,astate) {
   updateHtmlText('errortext', etext);
   updateHtmlText('assistButton', 'Current Assist Mode (' + astate + ')', true);
+}
+
+function canvasSuccess() {
+  $("#canvasDiv").css("border-color", constColorSuccess);
+  $("#canvasDiv").css("background", constColorSuccess);
+}
+
+function canvasIncomplete() {
+  $("#canvasDiv").css("border-color", "black");
+  $("#canvasDiv").css("background", "white");
 }
 
 function clickType(evnt) {
