@@ -16,7 +16,7 @@ const MOVE_SET    = 2;
 // the digits and letters are added below
 const handledKeys = [ KEY_BS, KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
 
-let initPuzzle, puzzle, moveHistory;
+let initPuzzle, puzzle, moveHistory, puzzleInitBoardValues;
 let boardStates, demoStepNum, puzzleRoomList, largestPolyo;
 
 function puzzleInit() {
@@ -258,14 +258,14 @@ function handleKey(keynum) {
       case KEY_BS:
       case KEY_SP: // clear the board contents unless default
         // don't delete those that are pre-set
-        if (globalInitBoardValues[globalCursorY][globalCursorX] == '') {
+        if (puzzleInitBoardValues[globalCursorY][globalCursorX] == '') {
           addMove(globalCursorY,globalCursorX,'');
         }
         break;
       default:    // here we handle all digit keys including A-Z
         // don't overwrite those that are pre-set
         let setValue = 0;
-        if (globalInitBoardValues[globalCursorY][globalCursorX] == '') {
+        if (puzzleInitBoardValues[globalCursorY][globalCursorX] == '') {
           if (keynum >= KEY_1 && keynum <= KEY_9) {
             setValue = keynum-KEY_0;
           } else if (keynum >= ALT_1 && keynum <= ALT_9) {
@@ -298,12 +298,11 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallLight,constWallBorder,fillCellColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  puzzleInitBoardValues = initBoardValuesFromParams(numParams);
+  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,puzzleInitBoardValues);
 
   // initialize the wall states based upon the given parameters
-  globalInitWallStates  = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
-  globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalWallStates = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
 
   // find all the rooms
   puzzleRoomList = findRooms();
@@ -471,7 +470,7 @@ function updateDemoRegion(demoNum) {
       assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);
-    globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+    globalBoardValues = initYXFromArray(globalPuzzleH,globalPuzzleW,puzzleInitBoardValues);
     // now add in all of the moves from each step including this one
     for (let step=0;step<=demoStepNum;step++) {
       for (let dsteps of dmoves[step]) {

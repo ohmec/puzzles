@@ -311,8 +311,7 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,"white",constWallLight,constWallBorder,offFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalBoardValues =     initBoardValuesFromParams(numParams);
   globalBoardColors =     initBoardColorsBlackWhite(numParams);
   puzzleBoardStates =     initYXFromValue(CELL_WHITE);
 

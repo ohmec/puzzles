@@ -25,7 +25,7 @@ let debugMode = false;
 let handledKeys =
   [ KEY_BS, KEY_SP, KEY_CR, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum;
+let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleInitBoardValues;
 
 function puzzleInit() {
   globalCursorOn = true;
@@ -242,7 +242,7 @@ function addMove(y,x,moveType) {
     globalWallStates[y][x] ^= constWallUserEdge;
   } else {
     // don't change a static value
-    if (globalInitBoardValues[y][x] != "") {
+    if (puzzleInitBoardValues[y][x] != "") {
       return;
     }
     if (moveType==constMoveEraseCell) {
@@ -424,8 +424,8 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallLight,constWallBorder,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  puzzleInitBoardValues = initBoardValuesFromParams(numParams);
+  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,puzzleInitBoardValues);
   globalTextBold =        initYXFromValue(false);
 
   // bold the cells with fixed digits
@@ -659,7 +659,7 @@ function updateDemoRegion(demoNum) {
     // start by reseting all non-number cells to empty
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
-        if (globalInitBoardValues[y][x] == "") {
+        if (puzzleInitBoardValues[y][x] == "") {
           globalBoardValues[y][x] = "";
         }
       }

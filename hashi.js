@@ -527,10 +527,9 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallNone,constWallNone,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalLineStates   =    initLineValuesFromParams(numParams,true);
-  puzzleBoardStates =     initYXFromValue(STATE_BLANK);
+  globalBoardValues = initBoardValuesFromParams(numParams);
+  globalLineStates  = initLineValuesFromParams(numParams,true);
+  puzzleBoardStates = initYXFromValue(STATE_BLANK);
 
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {

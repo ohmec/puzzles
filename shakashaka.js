@@ -345,10 +345,10 @@ function initStructures(puzzle) {
         globalBoardColors[y][x] = "black";
       } else if (numParamsExt[ptr].search(/[01234]/) != -1) {
         puzzleBoardStates[y][x] = CELL_BLACK_0 + parseInt(numParamsExt[ptr]);
-        globalInitBoardValues[y][x] = parseInt(numParamsExt[ptr]);
+        globalBoardValues[y][x] = parseInt(numParamsExt[ptr]);
         globalBoardColors[y][x] = "black";
       } else if (numParamsExt[ptr].search(/[ABCD]/) != -1) {
-        globalInitBoardValues[y][x] = "";
+        globalBoardValues[y][x] = "";
         globalBoardColors[y][x] = "white";
         puzzleBoardStates[y][x] = CELL_DIAGONAL_NE + parseInt(numParamsExt[ptr],16) - 10;
         globalCircleStates[y][x] = CIRCLE_TRI_NE + parseInt(numParamsExt[ptr],16) - 10;
@@ -358,7 +358,6 @@ function initStructures(puzzle) {
       }
     }
   }
-  globalBoardValues = initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
 
   updateBoardStatus();
   drawBoard();
