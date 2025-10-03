@@ -328,13 +328,11 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallDash,constWallStandard,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  puzzleRoomList =        new Array();
+  globalBoardValues = initBoardValuesFromParams(numParams);
+  puzzleRoomList = new Array();
 
   if (roomParams) {     // for completed puzzle 0 only
-    globalInitWallStates = initWallStatesFromBoxes(roomParams, constWallDash, false);
-    globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+    globalWallStates = initWallStatesFromBoxes(roomParams, constWallDash, false);
   }
 
   // place black circles where each digit is

@@ -279,8 +279,7 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallLight,constWallBorder,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues = initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalBoardValues = initBoardValuesFromParams(numParams);
   puzzleBoardStates = initYXFromValue(false); // states are true/false for "black"
 
   // look for pre-black ones (denoted with *)

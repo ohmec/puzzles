@@ -293,9 +293,8 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,indetCellColor,constWallDash,constWallBorder,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  puzzleBoardStates =     initYXFromValue(STATE_INDET);
+  globalBoardValues = initBoardValuesFromParams(numParams);
+  puzzleBoardStates = initYXFromValue(STATE_INDET);
 
   // override board colors if the hexParams are included, just for 0th
   // entry of the puzzles (example completed puzzle). this uses hex values

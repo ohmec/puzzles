@@ -291,7 +291,7 @@ function handleKey(keynum) {
           // we can only move the wall cursor down if we're already on a vert wall
           // or corner
           if ((globalWallCursorX%2)==0) {
-            if (globalWallCursorY<=(2*globalPuzzleH)) {
+            if (globalWallCursorY<(2*globalPuzzleH)) {
               globalWallCursorY++;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
                 addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
@@ -323,7 +323,7 @@ function handleKey(keynum) {
           // we can only move the wall cursor right if we're already on a horz wall
           // or corner
           if ((globalWallCursorY%2)==0) {
-            if (globalWallCursorX<=(2*globalPuzzleW)) {
+            if (globalWallCursorX<(2*globalPuzzleW)) {
               globalWallCursorX++;
               if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
                 addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
@@ -374,13 +374,11 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,emptyCellColor,constWallDash,constWallBorder,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  globalBoardColors =     initBoardColorsFromHexes(grayParams, constColorMedGray);
-  puzzleBoardStates =     initBoolenBoardFromHexes(grayParams);
+  globalBoardValues = initBoardValuesFromParams(numParams);
+  globalBoardColors = initBoardColorsFromHexes(grayParams, constColorMedGray);
+  puzzleBoardStates = initBoolenBoardFromHexes(grayParams);
   if (puzzleSplit.length > 3) {
-    globalInitWallStates = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
-    globalWallStates = initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+    globalWallStates = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
   }
 
   // check that grayParams is 50/50 as a double check

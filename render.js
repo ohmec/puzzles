@@ -77,6 +77,7 @@ const KEY_L     = 0x4c;
 const KEY_N     = 0x4e;
 const KEY_S     = 0x53;
 const KEY_W     = 0x57;
+const KEY_X     = 0x58;
 const KEY_Z     = 0x5a;
 const KEY_CTLL  = 0x5b;
 const KEY_CTLR  = 0x5d;
@@ -105,6 +106,7 @@ const constWallBorder    = 0b000001000;
 const constWallUserEdge  = 0b000010000;
 const constWallSolveEdge = 0b000100000;
 const constWallDot       = 0b001000000;
+const constWallX         = 0b010000000;
 
 const constHoriz = true;
 const constVert  = false;
@@ -130,10 +132,10 @@ let globalWallCursorX = 0;
 let globalTextOutline = false;
 let globalBorderMargin = 4;
 
-let globalContext, globalInitBoardValues, globalInitWallStates;
-let globalBoardValues, globalBoardColors, globalBoardTextColors, globalBoardTextOppColors;
-let globalWallStates, globalLineStates, globalLineColors, globalDotColors;
-let globalCircleStates, globalCircleColors, globalTextBold;
+let globalContext, globalWallStates, globalBoardValues, globalBoardColors;
+let globalBoardTextColors, globalBoardTextOppColors, globalWallColors;
+let globalLineStates, globalLineColors, globalDotColors, globalCircleStates;
+let globalCircleColors, globalTextBold;
 
 function basicInitStructures(size,cellColor,wallState,borderState,textColor) {
   let wxh = size.split("x");
@@ -142,12 +144,11 @@ function basicInitStructures(size,cellColor,wallState,borderState,textColor) {
   setGridSize(globalPuzzleW);
   canvas.height = globalPuzzleH*globalGridSize+2*globalBorderMargin;
   canvas.width  = globalPuzzleW*globalGridSize+2*globalBorderMargin;
-  globalInitBoardValues =    initYXFromValue("");
-  globalBoardValues =        initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
+  globalBoardValues =        initYXFromValue("");
   globalLineStates   =       initYXFromValue(PATH_NONE);
   globalBoardColors =        initYXFromValue(cellColor);
-  globalInitWallStates  =    initWallStates(wallState,borderState);
-  globalWallStates =         initYXFromArray(globalPuzzleH*2+1,globalPuzzleW*2+1,globalInitWallStates);
+  globalWallStates =         initWallStates(wallState,borderState);
+  globalWallColors =         initYX2FromValue(constLineColor);
   globalBoardTextColors =    initYXFromValue(textColor);
   globalBoardTextOppColors = initYXFromValue("white");
   globalLineColors =         initYXFromValue(constLineColor);
@@ -580,12 +581,15 @@ function initRoomsFromBoxes(boxParams) {
   return roomStates;
 }
 
-function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
+function initWallStatesFromHexes(hexParamsRows,hexParamsCols,setState,defState,hasBorder=true) {
   let hexParamArrayRows = hexParamsRows.replace(/\./gi, "").split("");
   let hexParamArrayCols = hexParamsCols.replace(/\./gi, "").split("");
   let wallStates  = new Array(globalPuzzleH*2+1);
-  let expLenH = Math.floor((globalPuzzleW+2)/4)*globalPuzzleH;
-  let expLenW = Math.floor((globalPuzzleH+2)/4)*globalPuzzleW;
+  // if it has a solid border, we only need hexes between rows and columns;
+  // without we need one extra on both ends
+  let add = hasBorder ? 2 : 4;
+  let expLenH = Math.floor((globalPuzzleW+add)/4)*globalPuzzleH;
+  let expLenW = Math.floor((globalPuzzleH+add)/4)*globalPuzzleW;
   if (expLenH != hexParamArrayRows.length) {
     throw "ERROR in puzzle descriptor row walls, got length " + hexParamArrayRows.length +
           " expected " + expLenH;
@@ -599,8 +603,8 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
   // "true" wall states are all dashes at first
   for (let y=0;y<=2*globalPuzzleH;y++) {
     wallStates[y] = new Array(2*globalPuzzleW+1);
-    for (let x=0;x<2*globalPuzzleW;x++) {
-      if (y==0 || y==(2*globalPuzzleH) || x==0 || x==(2*globalPuzzleW)) {
+    for (let x=0;x<=2*globalPuzzleW;x++) {
+      if (hasBorder && (y==0 || y==(2*globalPuzzleH) || x==0 || x==(2*globalPuzzleW))) {
         wallStates[y][x] = constWallBorder;
       } else if(y%2 && x%2) {
         wallStates[y][x] = constWallNone;
@@ -617,11 +621,13 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
       ptr++;
       bit=0;
     }
-    for (let x=2;x<2*globalPuzzleW;x+=2) {
+    let xs = hasBorder ? 2 : 0;
+    let xe = hasBorder ? (2*globalPuzzleW-1) : (2*globalPuzzleW+1);
+    for (let x=xs;x<xe;x+=2) {
       let hexval = parseInt(hexParamArrayRows[ptr],16);
       let bitval = (hexval >> (3-bit)) & 1;
       if (bitval) {
-        wallStates[y][x] = constWallBorder;
+        wallStates[y][x] = setState;
       }
       if (bit==3) {
         ptr++;
@@ -639,11 +645,13 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
       ptr++;
       bit=0;
     }
-    for (let y=2;y<2*globalPuzzleH;y+=2) {
+    let ys = hasBorder ? 2 : 0;
+    let ye = hasBorder ? (2*globalPuzzleH-1) : (2*globalPuzzleH+1);
+    for (let y=ys;y<ye;y+=2) {
       let hexval = parseInt(hexParamArrayCols[ptr],16);
       let bitval = (hexval >> (3-bit)) & 1;
       if (bitval) {
-        wallStates[y][x] = constWallBorder;
+        wallStates[y][x] = setState;
       }
       if (bit==3) {
         ptr++;
@@ -657,6 +665,9 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,defState) {
 }
 
 function drawBoard(lineFirst = false, drawDots = false) {
+  // clear the canvas
+  globalContext.clearRect(0,0,canvas.width,canvas.height);
+  // draw each tile
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       drawTile(y,x,
@@ -675,13 +686,13 @@ function drawBoard(lineFirst = false, drawDots = false) {
   // draw horizontal walls
   for (let y=0;y<=2*globalPuzzleH;y+=2) {
     for (let x=1;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constHoriz,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
+      drawWall(constHoriz,y,x,globalWallStates[y][x],globalWallColors[y][x],globalDotColors[y][x]);
     }
   }
   // draw vertical walls
   for (let y=1;y<=2*globalPuzzleH;y+=2) {
     for (let x=0;x<=2*globalPuzzleW;x+=2) {
-      drawWall(constVert,y,x,globalWallStates[y][x],constLineColor,globalDotColors[y][x]);
+      drawWall(constVert,y,x,globalWallStates[y][x],globalWallColors[y][x],globalDotColors[y][x]);
     }
   }
   if (globalCursorOn) {
@@ -755,7 +766,7 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
   let vstr = "";
   globalContext.textAlign = "center";
   globalContext.fillStyle = textColor;
-  globalContext.font = (globalGridSize*globalFontSize) + "pt " + "Courier, sans-serif";
+  globalContext.font = (globalGridSize*globalFontSize) + 'pt Courier, sans-serif';
   if (isbold) {
     globalContext.font = "bold " + globalContext.font;
   }
@@ -839,7 +850,7 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
   let drawY1 = (horv == constVert)  ? (drawYM-globalGridSize*0.5) : drawYM;
   let drawY2 = (horv == constVert)  ? (drawYM+globalGridSize*0.5) : drawYM;
   globalContext.strokeStyle = lineColor;
-  if (wallState != constWallNone) {
+  if ((wallState != constWallNone) && (wallState != constWallX)) {
     // check for dashed, but not overridden with "harder" border
     let hardEdge = constWallBorder | constWallUserEdge | constWallSolveEdge;
     if ((wallState & (constWallDash | hardEdge)) == constWallDash) {
@@ -871,6 +882,16 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
     globalContext.stroke();
     globalContext.fill();
   }
+  if (wallState & constWallX) {
+    let xw = globalGridSize*0.06;
+    globalContext.lineWidth = 2.0;
+    globalContext.beginPath();
+    globalContext.moveTo(drawXM-xw,drawYM-xw);
+    globalContext.lineTo(drawXM+xw,drawYM+xw);
+    globalContext.moveTo(drawXM-xw,drawYM+xw);
+    globalContext.lineTo(drawXM+xw,drawYM-xw);
+    globalContext.stroke();
+  }
   // reset lineWidth
   globalContext.lineWidth = 1;
 }
@@ -881,7 +902,7 @@ function drawDot(y,x) {
   globalContext.lineWidth = 1;
   globalContext.fillStyle = "black";
   globalContext.beginPath();
-  globalContext.arc(drawX,drawY,0.05*globalGridSize,0,2*Math.PI);
+  globalContext.arc(drawX,drawY,0.06*globalGridSize,0,2*Math.PI);
   globalContext.fill();
 }
 
@@ -1101,93 +1122,51 @@ function findDigitRoom(arrayYX,y,x,value) {
 
 function advanceLine(y,x,state,dir,clockwise) {
   let inerror = false;
-  let alive = true;
   switch (state) {
-    case PATH_NONE:
-      alive = false;
-      break;
-    case PATH_DOT:
-      alive = false;
-      break;
+    case PATH_NONE:   return [false,y,x,dir];
+    case PATH_DOT:    return [false,y,x,dir];
+    case PATH_N: if (dir!=0 && dir!='N') inerror = true; break;
+    case PATH_S: if (dir!=0 && dir!='S') inerror = true; break;
+    case PATH_E: if (dir!=0 && dir!='E') inerror = true; break;
+    case PATH_W: if (dir!=0 && dir!='W') inerror = true; break;
     case PATH_WE:
-      if ((clockwise && dir==0) || dir=='W')
-        { x++; dir = 'W'; }
-      else if ((!clockwise && dir==0) || dir=='E')
-        { x--; dir = 'E'; }
-      else
-        { inerror = true; alive = false; }
+      if (( clockwise && dir==0) || dir=='W') return [true,y,x+1,'W'];
+      if ((!clockwise && dir==0) || dir=='E') return [true,y,x-1,'E'];
+      inerror = true;
       break;
     case PATH_NS:
-      if ((clockwise && dir==0) || dir=='N')
-        { y++; dir = 'N'; }
-      else if ((!clockwise && dir==0) || dir=='S')
-        { y--; dir = 'S'; }
-      else
-        { inerror = true; alive = false; }
-      break;
-    case PATH_N:
-      if (dir!=0 && dir!='N')
-        { inerror = true; }
-      alive = false;
-      break;
-    case PATH_S:
-      if (dir!=0 && dir!='S')
-        { inerror = true; }
-      alive = false;
-      break;
-    case PATH_E:
-      if (dir!=0 && dir!='E')
-        { inerror = true; }
-      alive = false;
-      break;
-    case PATH_W:
-      if (dir!=0 && dir!='W')
-        { inerror = true; }
-      alive = false;
+      if (( clockwise && dir==0) || dir=='N') return [true,y+1,x,'N'];
+      if ((!clockwise && dir==0) || dir=='S') return [true,y-1,x,'S'];
+      inerror = true;
       break;
     case PATH_SE:
-      if ((clockwise && dir==0) || dir=='S')
-        { x++; dir = 'W'; }
-      else if ((!clockwise && dir==0) || dir=='E')
-        { y++; dir = 'N'; }
-      else
-        { inerror = true; alive = false; }
+      if (( clockwise && dir==0) || dir=='S') return [true,y,x+1,'W'];
+      if ((!clockwise && dir==0) || dir=='E') return [true,y+1,x,'N'];
+      inerror = true;
       break;
     case PATH_NW:
-      if ((clockwise && dir==0) || dir=='N')
-        { x--; dir = 'E'; }
-      else if ((!clockwise && dir==0) || dir=='W')
-        { y--; dir = 'S'; }
-      else
-        { inerror = true; alive = false; }
+      if (( clockwise && dir==0) || dir=='N') return [true,y,x-1,'E'];
+      if ((!clockwise && dir==0) || dir=='W') return [true,y-1,x,'S'];
+      inerror = true;
       break;
     case PATH_NE:
-      if ((clockwise && dir==0) || dir=='N')
-        { x++; dir = 'W'; }
-      else if ((!clockwise && dir==0) || dir=='E')
-        { y--; dir = 'S'; }
-      else
-        { inerror = true; alive = false; }
+      if (( clockwise && dir==0) || dir=='N') return [true,y,x+1,'W'];
+      if ((!clockwise && dir==0) || dir=='E') return [true,y-1,x,'S'];
+      inerror = true;
       break;
     case PATH_SW:
-      if ((clockwise && dir==0) || dir=='S')
-        { x--; dir = 'E'; }
-      else if ((!clockwise && dir==0) || dir=='W')
-        { y++; dir = 'N'; }
-      else
-        { inerror = true; alive = false; }
+      if (( clockwise && dir==0) || dir=='S') return [true,y,x-1,'E'];
+      if ((!clockwise && dir==0) || dir=='W') return [true,y+1,x,'N'];
+      inerror = true;
       break;
-    default:
-      alive = false;
-      break;
-    }
+  }
   if (inerror) {
     console.log("ERROR: broken path, coming from " + y + "," + x + " with dir " + dir + " and found " + state);
   }
-  return [alive,y,x,dir];
+  return [false,y,x,dir];
 }
 
-// this routine travels the path and searches for loops.
+// this routine travels the path and searches for line loops.
 // it assumes everything is single-line paths
 
 function travelLineLoop(arrayYX,y,x) {
@@ -1228,6 +1207,85 @@ function travelLineLoop(arrayYX,y,x) {
     }
   }
   return [lineCells,isLoop];
+}
+
+function wallHasUserEdge(y,x) {
+  if ((globalWallStates[y][x] & constWallUserEdge) == constWallUserEdge) return true;
+  return false;
+}
+
+function advanceWall (y,x,state,dir,clockwise) {
+  // first figure out how many directions have walls. if none, then
+  // it is an easy null return
+  let ntrue = (y!=0) &&               wallHasUserEdge(y-1,x);
+  let strue = (y!=globalPuzzleH*2) && wallHasUserEdge(y+1,x);
+  let wtrue = (x!=0) &&               wallHasUserEdge(y,x-1);
+  let etrue = (x!=globalPuzzleW*2) && wallHasUserEdge(y,x+1);
+
+  // ignore segments that are in error
+  let segcount = 0;
+  if (ntrue) segcount++;
+  if (strue) segcount++;
+  if (wtrue) segcount++;
+  if (etrue) segcount++;
+  if (segcount > 2)            return [false,y,x,dir];
+
+  if (clockwise) {
+    if (ntrue && (dir != 'N')) return [true,y-2,x,'S'];
+    if (etrue && (dir != 'E')) return [true,y,x+2,'W'];
+    if (strue && (dir != 'S')) return [true,y+2,x,'N'];
+    if (wtrue && (dir != 'W')) return [true,y,x-2,'E'];
+  } else {
+    if (wtrue && (dir != 'W')) return [true,y,x-2,'E'];
+    if (strue && (dir != 'S')) return [true,y+2,x,'N'];
+    if (etrue && (dir != 'E')) return [true,y,x+2,'W'];
+    if (ntrue && (dir != 'N')) return [true,y-2,x,'S'];
+  }
+  return [false,y,x,dir];
+}
+
+// this routine travels the path and searches for wall loops
+// using UserEdge only
+
+function travelWallLoop(y,x) {
+  let vertices = new Array();
+  let isLoop = false;
+  vertices.push(y+","+x);
+  // we really only need to try one direction to find out if it is
+  // a loop or not. but if after completion it is not a loop, then
+  // prepend in the other direction to get the full list of connected
+  // vertices
+
+  let alive = true;
+  let cy = y;
+  let cx = x;
+  let dir = 0;
+  while (alive) {
+    if ((dir!=0) && cy==y && cx==x) {
+      isLoop = true;
+      alive = false;
+    } else {
+      [alive,cy,cx,dir] = advanceWall(cy,cx,globalWallStates[cy][cx],dir,true);
+      if (alive) {
+        vertices.push(cy+","+cx);
+      }
+    }
+  }
+
+  // if not a loop, go backwards from beginning and prepend to path
+  if (!isLoop) {
+    alive = true;
+    cy = y;
+    cx = x;
+    dir = 0;
+    while (alive) {
+      [alive,cy,cx,dir] = advanceWall(cy,cx,globalWallStates[cy][cx],dir,false);
+      if (alive) {
+        vertices.unshift(cy+","+cx);
+      }
+    }
+  }
+  return [vertices,isLoop];
 }
 
 // this routine travels the path and fans out in all directions.

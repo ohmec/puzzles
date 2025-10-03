@@ -315,10 +315,8 @@ function initStructures(puzzle) {
 
   basicInitStructures(size,indetCellColor,constWallStandard,constWallStandard,stdFontColor);
 
-  globalInitBoardValues = initBoardValuesFromParams(numParams);
-  globalBoardValues =     initYXFromArray(globalPuzzleH,globalPuzzleW,globalInitBoardValues);
-  puzzleBoardStates =     initYXFromValue(STATE_INDET);
-
+  globalBoardValues = initBoardValuesFromParams(numParams);
+  puzzleBoardStates = initYXFromValue(STATE_INDET);
 
   // override board states and colors for the initial digits, set to WHITE
   for (let y=0;y<globalPuzzleH;y++) {
