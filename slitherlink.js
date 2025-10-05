@@ -30,7 +30,7 @@ let curShiftMove = constMoveNone;
 // which keys are handled
 let handledKeys =
   [ KEY_BS, KEY_CR, KEY_SP, KEY_X, KEY_0, KEY_1, ALT_0, ALT_1,
-    KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
+    KEY_N, KEY_S, KEY_Z, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
 
 let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
 
@@ -385,7 +385,7 @@ function handleKey(keynum) {
           if (globalWallCursorOn) {
             if (globalWallStates[globalWallCursorY][globalWallCursorX] & constWallX) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveEraseWall);
-            } else if (wallHasUserEdge(globalWallCursorY,globalWallCursorX)) {
+            } else if (wallHasEdge(globalWallCursorY,globalWallCursorX)) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveXWall);
             } else {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
@@ -422,6 +422,16 @@ function handleKey(keynum) {
           if (globalWallCursorOn) {
             addMove(globalWallCursorY,globalWallCursorX,constMoveXWall);
           }
+          break;
+        // secret solve button for some "easy progress" solves
+        case KEY_S:
+          initSolve();
+          break;
+        case KEY_N:
+          nowhereElse();
+          break;
+        case KEY_Z:
+          initX();
       }
     }
     updateBoardStatus();
@@ -549,10 +559,10 @@ function updateBoardStatus() {
   // segments coming out. color them red if in assistState>=2
   for (let y=0;y<=globalPuzzleH*2;y+=2) {
     for (let x=0;x<=globalPuzzleW*2;x+=2) {
-      let ntrue = (y!=0) &&               wallHasUserEdge(y-1,x);
-      let strue = (y!=globalPuzzleH*2) && wallHasUserEdge(y+1,x);
-      let wtrue = (x!=0) &&               wallHasUserEdge(y,x-1);
-      let etrue = (x!=globalPuzzleW*2) && wallHasUserEdge(y,x+1);
+      let ntrue = (y!=0) &&               wallHasEdge(y-1,x);
+      let strue = (y!=globalPuzzleH*2) && wallHasEdge(y+1,x);
+      let wtrue = (x!=0) &&               wallHasEdge(y,x-1);
+      let etrue = (x!=globalPuzzleW*2) && wallHasEdge(y,x+1);
       let segcount = 0;
       if (ntrue) segcount++;
       if (strue) segcount++;
@@ -574,10 +584,10 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (globalBoardValues[y][x] || (globalBoardValues[y][x]=="0")) {
-        let ntrue = wallHasUserEdge(2*y  ,2*x+1);
-        let strue = wallHasUserEdge(2*y+2,2*x+1);
-        let wtrue = wallHasUserEdge(2*y+1,2*x  );
-        let etrue = wallHasUserEdge(2*y+1,2*x+2);
+        let ntrue = wallHasEdge(2*y  ,2*x+1);
+        let strue = wallHasEdge(2*y+2,2*x+1);
+        let wtrue = wallHasEdge(2*y+1,2*x  );
+        let etrue = wallHasEdge(2*y+1,2*x+2);
         let segcount = 0;
         if (ntrue) segcount++;
         if (strue) segcount++;
@@ -661,7 +671,7 @@ function updateBoardStatus() {
     for (let y=0;y<globalPuzzleH;y++) {
       let inside = false;
       for (let x=0;x<globalPuzzleW;x++) {
-        if (wallHasUserEdge(y*2+1,x*2)) {
+        if (wallHasEdge(y*2+1,x*2)) {
           inside = !inside;
         }
         if (inside) {
@@ -745,4 +755,343 @@ function updateDemoRegion(demoNum) {
     updateBoardStatus();
     drawBoard(false,true);
   }
+}
+
+function initSolve() {
+  // do a few simple solve moves, starting with just as a relationship of
+  // bordering numbers
+  solve30();
+  solve33();
+  solve20b();
+  lookFinish();
+  updateBoardStatus();
+  drawBoard(false,true);
+}
+
+function getBoardValue (y,x,dir) {
+  let cy = y;
+  let cx = x;
+  if (dir == "N" || dir == "NW" || dir == "NE") cy--;
+  if (dir == "S" || dir == "SW" || dir == "SE") cy++;
+  if (dir == "W" || dir == "NW" || dir == "SW") cx--;
+  if (dir == "E" || dir == "NE" || dir == "SE") cx++;
+  if (cy < 0) return "-";
+  if (cx < 0) return "-";
+  if (cy >= globalPuzzleH) return "-";
+  if (cx >= globalPuzzleW) return "-";
+  return (globalBoardValues[cy][cx] === "") ? "-" : globalBoardValues[cy][cx];
+}
+
+function setWallState (y,x,dir) {
+  if (y <  0)             return;
+  if (y >= globalPuzzleH) return;
+  if (x <  0)             return;
+  if (x >= globalPuzzleW) return;
+  let wy = 2*y+1;
+  let wx = 2*x+1;
+  if (dir == "N")  globalWallStates[wy-1][wx]   |= constWallSolveEdge;
+  if (dir == "S")  globalWallStates[wy+1][wx]   |= constWallSolveEdge;
+  if (dir == "W")  globalWallStates[wy]  [wx-1] |= constWallSolveEdge;
+  if (dir == "E")  globalWallStates[wy]  [wx+1] |= constWallSolveEdge;
+}
+
+// solve 3/0 pairs, first adjacent, then diagonal
+function solve30() {
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (globalBoardValues[y][x] == "3") {
+        // first look for neighboring 3:0 pairs
+        // check N, S, E, W
+        let nState = getBoardValue(y,x,"N");
+        let sState = getBoardValue(y,x,"S");
+        let wState = getBoardValue(y,x,"W");
+        let eState = getBoardValue(y,x,"E");
+
+        // if true the set wallState accordingly
+        if (nState == "0") {
+          setWallState(y,x,  "S");
+          setWallState(y,x,  "W");
+          setWallState(y,x,  "E");
+          setWallState(y,x-1,"N");
+          setWallState(y,x+1,"N");
+        }
+        if (sState == "0") {
+          setWallState(y,x,  "N");
+          setWallState(y,x,  "W");
+          setWallState(y,x,  "E");
+          setWallState(y,x-1,"S");
+          setWallState(y,x+1,"S");
+        }
+        if (wState == "0") {
+          setWallState(y,  x,"N");
+          setWallState(y,  x,"E");
+          setWallState(y,  x,"S");
+          setWallState(y-1,x,"W");
+          setWallState(y+1,x,"W");
+        }
+        if (eState == "0") {
+          setWallState(y,  x,"N");
+          setWallState(y,  x,"W");
+          setWallState(y,  x,"S");
+          setWallState(y-1,x,"E");
+          setWallState(y+1,x,"E");
+        }
+
+        // next look for diagonal 3:0 pairs
+        let nwState = getBoardValue(y,x,"NW");
+        let swState = getBoardValue(y,x,"SW");
+        let neState = getBoardValue(y,x,"NE");
+        let seState = getBoardValue(y,x,"SE");
+        // if true the set wallState accordingly
+        if (nwState == "0") {
+          setWallState(y,x,"N");
+          setWallState(y,x,"W");
+        }
+        if (swState == "0") {
+          setWallState(y,x,"S");
+          setWallState(y,x,"W");
+        }
+        if (neState == "0") {
+          setWallState(y,x,"N");
+          setWallState(y,x,"E");
+        }
+        if (seState == "0") {
+          setWallState(y,x,"S");
+          setWallState(y,x,"E");
+        }
+      }
+    }
+  }
+}
+
+// solve 3/3 pairs, first adjacent, then diagonal
+function solve33() {
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (globalBoardValues[y][x] == "3") {
+        // look for adjacent (only need to work forward to avoid duplication)
+        let sState  = getBoardValue(y,x,"S");
+        let eState  = getBoardValue(y,x,"E");
+        // if true the set wallState accordingly
+        if (sState == "3") {
+          setWallState(y,  x,"N");
+          setWallState(y,  x,"S");
+          setWallState(y+1,x,"S");
+        }
+        if (eState == "3") {
+          setWallState(y,x,  "W");
+          setWallState(y,x,  "E");
+          setWallState(y,x+1,"E");
+        }
+
+        // next look for diagonal 3:3 pairs
+        // only need to look SE and SW
+        let swState = getBoardValue(y,x,"SW");
+        let seState = getBoardValue(y,x,"SE");
+        // if true the set wallState accordingly, outer edges of the two
+        if (swState == "3") {
+          setWallState(y,  x,  "N");
+          setWallState(y,  x,  "E");
+          setWallState(y+1,x-1,"S");
+          setWallState(y+1,x-1,"W");
+        }
+        if (seState == "3") {
+          setWallState(y,  x,  "N");
+          setWallState(y,  x,  "W");
+          setWallState(y+1,x+1,"S");
+          setWallState(y+1,x+1,"E");
+        }
+      }
+    }
+  }
+}
+
+// 2:0 on the border is solveable like a 3:0
+function solve20b() {
+  // west and east side
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let ix=0;ix<2;ix++) {
+      let x = ix ? (globalPuzzleW-1) : 0;
+      if (globalBoardValues[y][x] == "2") {
+        // look for neighboring 2:0 pairs on N or S
+        let nState  = getBoardValue(y,x,"N");
+        let sState  = getBoardValue(y,x,"S");
+        if (nState == "0") {
+          if (x==0) { // west wall
+            setWallState(y,  x,  "S");
+            setWallState(y,  x,  "E");
+            setWallState(y+1,x,  "W");
+            setWallState(y,  x+1,"N");
+          } else {    // east wall
+            setWallState(y,  x,  "S");
+            setWallState(y,  x,  "W");
+            setWallState(y+1,x,  "E");
+            setWallState(y,  x-1,"N");
+          }
+        }
+        if (sState == "0") {
+          if (x==0) { // west wall
+            setWallState(y,  x,  "N");
+            setWallState(y,  x,  "E");
+            setWallState(y-1,x,  "W");
+            setWallState(y,  x+1,"S");
+          } else {    // east wall
+            setWallState(y,  x,  "N");
+            setWallState(y,  x,  "W");
+            setWallState(y-1,x,  "E");
+            setWallState(y,  x-1,"S");
+          }
+        }
+      }
+    }
+  }
+  // north and south side
+  for (let x=0;x<globalPuzzleW;x++) {
+    for (let iy=0;iy<2;iy++) {
+      let y = iy ? (globalPuzzleH-1) : 0;
+      if (globalBoardValues[y][x] == "2") {
+        // look for neighboring 2:0 pairs on W or E
+        let wState = getBoardValue(y,x,"W");
+        let eState = getBoardValue(y,x,"E");
+        if (wState == "0") {
+          if (y==0) { // north wall
+            setWallState(y,  x,  "S");
+            setWallState(y,  x,  "E");
+            setWallState(y+1,x,  "W");
+            setWallState(y,  x+1,"N");
+          } else {    // south wall
+            setWallState(y,  x,  "N");
+            setWallState(y,  x,  "E");
+            setWallState(y-1,x,  "W");
+            setWallState(y,  x+1,"S");
+          }
+        }
+        if (eState == "0") {
+          if (y==0) { // north wall
+            setWallState(y,  x,  "S");
+            setWallState(y,  x,  "W");
+            setWallState(y+1,x,  "E");
+            setWallState(y,  x-1,"N");
+          } else {    // south wall
+            setWallState(y,  x,  "N");
+            setWallState(y,  x,  "W");
+            setWallState(y-1,x,  "E");
+            setWallState(y,  x-1,"S");
+          }
+        }
+      }
+    }
+  }
+}
+
+function lookFinish() {
+  // go through each of the digits, and see if Xs indicate that
+  // we can finish this off
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (globalBoardValues[y][x] !== "") {
+        let nwall = wallHasEdge(2*y  ,2*x+1);
+        let swall = wallHasEdge(2*y+2,2*x+1);
+        let wwall = wallHasEdge(2*y+1,2*x  );
+        let ewall = wallHasEdge(2*y+1,2*x+2);
+        let nx    = wallHasX   (2*y  ,2*x+1);
+        let sx    = wallHasX   (2*y+2,2*x+1);
+        let wx    = wallHasX   (2*y+1,2*x  );
+        let ex    = wallHasX   (2*y+1,2*x+2);
+        let xcount = 0;
+        if (nx) xcount++;
+        if (sx) xcount++;
+        if (wx) xcount++;
+        if (ex) xcount++;
+        if ((parseInt(globalBoardValues[y][x]) + xcount) == 4) {
+          if (!nwall && !nx) globalWallStates[2*y  ][2*x+1] |= constWallSolveEdge;
+          if (!swall && !sx) globalWallStates[2*y+2][2*x+1] |= constWallSolveEdge;
+          if (!wwall && !wx) globalWallStates[2*y+1][2*x  ] |= constWallSolveEdge;
+          if (!ewall && !ex) globalWallStates[2*y+1][2*x+2] |= constWallSolveEdge;
+        }
+      }
+    }
+  }
+}
+
+function initX() {
+  // go through each of the digits, and check how many borders are set
+  for (let y=0;y<globalPuzzleH;y++) {
+    for (let x=0;x<globalPuzzleW;x++) {
+      if (globalBoardValues[y][x] || (globalBoardValues[y][x]=="0")) {
+        let nwall = wallHasEdge(2*y  ,2*x+1);
+        let swall = wallHasEdge(2*y+2,2*x+1);
+        let wwall = wallHasEdge(2*y+1,2*x  );
+        let ewall = wallHasEdge(2*y+1,2*x+2);
+        let segcount = 0;
+        if (nwall) segcount++;
+        if (swall) segcount++;
+        if (wwall) segcount++;
+        if (ewall) segcount++;
+        if (segcount == parseInt(globalBoardValues[y][x])) {
+          if (!nwall) globalWallStates[2*y  ][2*x+1] |= constWallX;
+          if (!swall) globalWallStates[2*y+2][2*x+1] |= constWallX;
+          if (!wwall) globalWallStates[2*y+1][2*x  ] |= constWallX;
+          if (!ewall) globalWallStates[2*y+1][2*x+2] |= constWallX;
+        }
+      }
+    }
+  }
+  // now go through each vertex and check for two completed
+  // segments in which case we can x the others
+  for (let y=0;y<=globalPuzzleH*2;y+=2) {
+    for (let x=0;x<=globalPuzzleW*2;x+=2) {
+      let nwall = wallHasEdge(y-1,x  );
+      let swall = wallHasEdge(y+1,x  );
+      let wwall = wallHasEdge(y,  x-1);
+      let ewall = wallHasEdge(y,  x+1);
+      let segcount = 0;
+      if (nwall) segcount++;
+      if (swall) segcount++;
+      if (wwall) segcount++;
+      if (ewall) segcount++;
+      if (segcount == 2) {
+        if (!nwall && y>0)                 globalWallStates[y-1][x  ] |= constWallX;
+        if (!swall && y<(2*globalPuzzleH)) globalWallStates[y+1][x  ] |= constWallX;
+        if (!wwall && x>0)                 globalWallStates[y  ][x-1] |= constWallX;
+        if (!ewall && x<(2*globalPuzzleW)) globalWallStates[y  ][x+1] |= constWallX;
+      }
+    }
+  }
+  updateBoardStatus();
+  drawBoard(false,true);
+}
+
+// look to see if a vertex with one segment has no other options
+function nowhereElse () {
+  for (let y=0;y<=globalPuzzleH*2;y+=2) {
+    for (let x=0;x<=globalPuzzleW*2;x+=2) {
+      let nwall = wallHasEdge(y-1,x  );
+      let swall = wallHasEdge(y+1,x  );
+      let wwall = wallHasEdge(y,  x-1);
+      let ewall = wallHasEdge(y,  x+1);
+      let segcount = 0;
+      if (nwall) segcount++;
+      if (swall) segcount++;
+      if (wwall) segcount++;
+      if (ewall) segcount++;
+      let nx = wallHasX(y-1,x  );
+      let sx = wallHasX(y+1,x  );
+      let wx = wallHasX(y,  x-1);
+      let ex = wallHasX(y,  x+1);
+      let xcount = 0;
+      if (nx) xcount++;
+      if (sx) xcount++;
+      if (wx) xcount++;
+      if (ex) xcount++;
+      if ((segcount==1) && (xcount==2)) {
+        if (!nwall && !nx) globalWallStates[y-1][x  ] |= constWallSolveEdge;
+        if (!swall && !sx) globalWallStates[y+1][x  ] |= constWallSolveEdge;
+        if (!wwall && !wx) globalWallStates[y  ][x-1] |= constWallSolveEdge;
+        if (!ewall && !ex) globalWallStates[y  ][x+1] |= constWallSolveEdge;
+      }
+    }
+  }
+  updateBoardStatus();
+  drawBoard(false,true);
 }

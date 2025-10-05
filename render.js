@@ -1209,18 +1209,32 @@ function travelLineLoop(arrayYX,y,x) {
   return [lineCells,isLoop];
 }
 
-function wallHasUserEdge(y,x) {
-  if ((globalWallStates[y][x] & constWallUserEdge) == constWallUserEdge) return true;
+function wallHasEdge(y,x) {
+  if (y<0) return false;
+  if (x<0) return false;
+  if (y>(2*globalPuzzleH)) return false;
+  if (x>(2*globalPuzzleW)) return false;
+  if ((globalWallStates[y][x] & (constWallUserEdge | constWallSolveEdge)) != 0) return true;
+  return false;
+}
+
+function wallHasX(y,x) {
+  // effectively, off board equals X
+  if (y<0) return true;
+  if (x<0) return true;
+  if (y>(2*globalPuzzleH)) return true;
+  if (x>(2*globalPuzzleW)) return true;
+  if (globalWallStates[y][x] & constWallX) return true;
   return false;
 }
 
 function advanceWall (y,x,state,dir,clockwise) {
   // first figure out how many directions have walls. if none, then
   // it is an easy null return
-  let ntrue = (y!=0) &&               wallHasUserEdge(y-1,x);
-  let strue = (y!=globalPuzzleH*2) && wallHasUserEdge(y+1,x);
-  let wtrue = (x!=0) &&               wallHasUserEdge(y,x-1);
-  let etrue = (x!=globalPuzzleW*2) && wallHasUserEdge(y,x+1);
+  let ntrue = (y!=0) &&               wallHasEdge(y-1,x);
+  let strue = (y!=globalPuzzleH*2) && wallHasEdge(y+1,x);
+  let wtrue = (x!=0) &&               wallHasEdge(y,x-1);
+  let etrue = (x!=globalPuzzleW*2) && wallHasEdge(y,x+1);
 
   // ignore segments that are in error
   let segcount = 0;
