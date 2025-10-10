@@ -7,6 +7,8 @@ const constMoveEraseWall =  51;
 const constMoveAddWall =    52;
 const constMoveToggleWall = 53;
 
+const gameName = 'fillomino';
+
 let clicking = false;
 let dragging = false;
 let shifting = false;
@@ -19,7 +21,7 @@ let curClickType = CLICK_UNKNOWN;
 let curClickIsWall = false;
 let curClickNumber = constMoveEraseCell;
 let curShiftNumber = constMoveEraseCell;
-let debugMode = false;
+let isDemo = false;
 
 // which keys are handled, letters and numbers handled algorithmically afterwards
 let handledKeys =
@@ -29,6 +31,7 @@ let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleInitBoardValues;
 
 function puzzleInit() {
   globalCursorOn = true;
+  initRibbons(gameName);
 
   // add digits and letters to handled key list
   for (let key=KEY_1;key<=KEY_9;key++) {
@@ -44,6 +47,7 @@ function puzzleInit() {
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -59,6 +63,8 @@ function puzzleInit() {
       ctrling = true;
     } else if (!ctrling && (handledKeys.find(element => element == evnt.which))) {
       handleKey(evnt.which);
+    } else {
+      console.log("got " + evnt.which);
     }
   });
 
@@ -106,12 +112,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -162,6 +170,17 @@ function puzzleInit() {
     let resetDialog = confirm("Reset puzzle?");
     if (resetDialog == true) {
       resetBoard();
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
     }
   });
 
@@ -296,7 +315,6 @@ function handleKey(keynum) {
         case KEY_ESC:
           console.log(globalBoardValues);
           console.log(globalWallStates);
-          debugMode = true;
           break;
         case KEY_UP:
           if (globalCursorOn) {
@@ -407,7 +425,7 @@ function handleKey(keynum) {
             addMove(globalWallCursorY,globalWallCursorX,constMoveEraseWall);
           }
           break;
-        }
+      }
     }
     updateBoardStatus();
     drawBoard();
@@ -421,6 +439,8 @@ function initStructures(puzzle) {
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,emptyCellColor,constWallLight,constWallBorder,stdFontColor);
 
@@ -620,7 +640,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0) && !incompleteBoard) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -641,21 +661,14 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
   globalCursorOn = false;
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
-      assistState = 2;
-    } else {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     // start by reseting all non-number cells to empty
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
@@ -670,20 +683,13 @@ function updateDemoRegion(demoNum) {
         globalWallStates[y][x] &= ~constWallUserEdge;
       }
     }
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let steps = dsteps.split("");
-        if (steps[0]=="_") {          // south wall
-          addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall);
-        } else if (steps[0]=="|") {   // east wall
-          addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveAddWall);
-        } else {                      // digit entry
-          addMove(parseInt(steps[1],36),parseInt(steps[2],36),parseInt(steps[0],36));
-        }
-      }
+  }, function (steps) {
+    if (steps[0]=="_") {          // south wall
+      addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall);
+    } else if (steps[0]=="|") {   // east wall
+      addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveAddWall);
+    } else {                      // digit entry
+      addMove(parseInt(steps[1],36),parseInt(steps[2],36),parseInt(steps[0],36));
     }
-    updateBoardStatus();
-    drawBoard();
-  }
+  });
 }

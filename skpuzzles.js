@@ -48,9 +48,15 @@ let cannedPuzzles = [
         "a4j8a.d9d6d.a3c4b2c6a.b8h4b.c4b33b4c",                                 // godzilla 275
   // D4
 ];
+
 let puzzleChoice = 1;
 let puzzleCount = cannedPuzzles.length;
-const demoPuzzles = [1,9];
+
+// which puzzles have demos
+const demoPuzzles =  [1,9];
+// which puzzles are at which level [D1,D2,D3,D4]
+const puzzleLevels = [1,10,18,99];
+
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +
     "Press the 'next' button to walk through the solving steps, or the " +

@@ -21,6 +21,7 @@ const cannedPuzzles = [
   "10x10:d3a22a1.b6e5a.j.2g7a.i4.j.b4a2b4a1.2i.a22e4a.c4f",
   "10x10:b3d25a.a2e2b.a2h.i2.4d4a1a2.1a9d91a.j.j.a64g.a18g",
   "10x10:a223f.4f2a3.j.d9b3a3.e8d.i2.9b6e2.c6b3b5.i6.3a3c6b6",
+  // D2
   "10x10:e3b73.a4f7a.h7a.h98.j.c6f.4a2g.b2b4d.22b2c1a.j",
   "10x10:61h.d6226b.g6b.b22f.g8b.a6h.e4d.f1c.j.23b5d6",           // two solutions?
   "10x10:f7c.h6a.3a6g.92e3b.a2h.h4a.6f3b.i3.c7e1.f4c",
@@ -28,6 +29,7 @@ const cannedPuzzles = [
   "10x10:2c4a1b3.3i.h5a.1b6a6d.j.j.a2g3.j.22b5c2a.99b1d1",
   "10x10:gBBB.88e999.j.j.a887bBc.c2f.c2a4d.a6e8b.66h.6i",
   "10x10:j.j.b9Cb27b.b92bC5b.j.j.j.b6CbC5b.b48b85b.j",
+  // D3
   "10x10:h6a.b6g.a714c1b.b3g.j.j.g5b.b1c713a.g4b.a6h",
   "10x10:h2a.b2g.a2c3d.g3b.c3d4a.h4a.3e65b.b2g.b2g.41d522a",
   "17x17:a1aAj4b.3a6hAd2.2n2a.6d8cBe4a.q.g331g.p5.c6a8k.2h55f.q." +
@@ -35,7 +37,12 @@ const cannedPuzzles = [
 ];
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
-const demoPuzzles = [1,2];
+
+// which puzzles have demos
+const demoPuzzles  = [1,2];
+// which puzzles are at which level [D1,D2,D3,D4]
+const puzzleLevels = [1,13,20,99];
+
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +
     "Press the 'next' button to walk through the solving steps, or the " +

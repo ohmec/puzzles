@@ -15,6 +15,12 @@ let cannedPuzzles = [
   "10x10:4e4b3.g4b.3a3g.j.d4e.5h2.j.i4.j.3a2a4d3",              // 2024 #3
   "10x10:a5h.j.c3e6.d3c3a.j.j.b4g.i5.j.8a2b7c6",                // 2024 #4
   "10x10:aAh.b7e1a.i3.j.j.a6h.4h5.h2a.d4e.c2f",                 // 2024 #5 fun
+  "10x10:4b6e2.d3e.h1a.e2c4.j.j.5c3e.a2h.e2d.3e3b6",            // box2014 #1
+  "10x10:6c3e.i8.2g2a.j.d3e.e2d.j.a3g1.8i.e2c8",                // 2018 #1
+  "10x10:d3e.j.3d4a3a4.j.g3a3.3a3g.d3b2b.3a3g.d1e.g2a3",        // 2018 #2
+  "10x10:b1b2c5.a5h.i4.j.c5a1d.d1a3c.j.2i.h4a.3c5b2b",          // box2014 #2
+  "10x10:3f2b.i1.e3d.2b3f.g3b.i4.j.a3a5f.2i.c2c6a6",            // 2018 #3
+  "10x10:3d2a2a6.j.2c3e.j.1a5a2e.i3.f2c.i2.j.4a3a2b2a1",        // 2018 #4
   // D2
   "10x10:7f5b.f3c.3i.j.3f2b.c1f.i3.a2c4d.g8b.a3a1f",            // 2024 #6
   "10x10:4b2c4a1.d2e.j.j.1c4c6a.j.b3c6c.c4f.j.4h2",             // 2024 #7
@@ -22,8 +28,42 @@ let cannedPuzzles = [
   "10x10:2aBa3e.j.e4a3b.j.d4b1b.e5c2.j.i4.j.i3",                // 2024 #12
   "17x17:a4d2a2h.b3n.k4a6a2a.b5c3i2.c2c3a3c2c.o1a.m3c.n2b." +
         "3c5a4j.g3c5e.c5m.h5b7a2b7.a1c2k.k4e.6p.c3e4g.2g3e2a4", // 2024 #17
+  "10x10:c3f.d5c5a.a1h.g7b.a4h.b2g.j.b3d4b.c2b6c.a1h",          // box2014 #3
+  "10x10:4a4e1a.e1d.j.g3b.a5d5c.b2e5a.j.d6e.g3a1.3d2d",         // box2014 #4
+  "10x10:1a7a2b3b.h3a.j.c1b4c.j.j.c4b4c.j.a2h.b3b2a2a4",        // 2018 #5
+  "10x10:a7d2c.b6f1.j.h3a.d3d4.2a4g.j.d1e.j.1a4d4a3",           // 2018 #6
+  "10x10:2e1a2a.j.c4b4c.1a2f4.j.4e4c.b4b2d.i1.b1g.c4c2b",       // box2014 #5
+  "10x10:a5a4a3d.i4.h4a.j.c5f.2i.j.j.h5a.5a3d7b",               // 2018 #7
+  "10x10:4e6b4.g2b.a5h.b5g.j.j.g4b.h4a.b3g.3b5e5",              // 2018 #8
+  "10x10:b3b3d.c3e2.j.3f5b.a3a3f.j.f3c.e3d.h3a.4a3d3b",         // 2018 #9
+  "10x10:e4d.j.e1a3b.j.b2a4a2b4.6i.e4a3b.3i.e4d.5i",            // 2018 #10
+  "10x10:j.1a3a4a5c.g2b.b6g.g1b.b3g.g4b.b1g.c6a2a3a5.j",        // 2018 #11
   // D3
   "10x10:c5e3.1i.e1d.g3a2.4i.i2.3a6g.d5e.i3.6e2c",              // 2024 #14 nice, guesswork
+  "10x10:1i.h1a.g9b.a1b2e.i5.4a5g.i4.j.2e5c.g4b",               // box2014 #6
+  "10x10:a5h.b4e2a.i3.c3b3c.j.j.c1b4c.4i.a5e3b.h6a",            // 2018 #12
+  "17x17:b5l4a.a4l4b.k2e.g5b6f.h5h.4i4f.a5g7d4b.o7a.a4f4h." +
+        "4h4e4a.d3i3b.e5k.q.g4c4e.f2c7f.a4l3b.b5l7a",           // box2014 #7
+  "17x17:h1d7b6.b7f2d2b.4p.a4f2h.m1c.5e2a2h.g1c2e.m3b2." +      
+        "3a3b3b3a2f.k3d4.3a2n.i2g.l3d.c3c4c8e.p4.g5i.4a3c8c4e2",// 2018 #13
+  "17x17:a6c3c1f7.b4a4l.p4.h6h.o4a.p2.g1a4g.c2b7c1b4c." +      
+        "4g1g3.c4b6c3b3c.g1a5g.2p.a2o.h6h.5p.l3a6b.6f1c5c9a",   // 2018 #14
+  "17x17:a4d3c3d8a.b2b2e3b2b.q.f2b2a3e.b2n.a4h1f.d4a2j.e3c7f5." +
+        "2b5k2a.k5e.e3j4.3g2a6f.d4b2i.q.p5.d2b2i.5b3d4c4c6",    // box2014 #8
+  "17x17:d4j9a.e7b8e7b.b2d8a3g.aAo.b2n.q.q.o7a.a3n6.b3n.f2j." +
+        "g8b2f.f2b3g.4a4n.a7i6e.j4a2d.n4a7",                    // 2018 #15
+  "17x17:a6j3d.b4c3d4e.e3j5.o2a.i2g.h4b5e.b7g5e6.a4m4a.g4i." +  
+        "a7d2j.b3i7d.e4e3d4.d2j3a.q.q.b4d8g5a.a4d3g4b",         // 2018 #16
+  "17x17:p5.a5b4e3a6d.6d2c3f5.q.g4i.f5j.d4b4g8a.n3b.d5l.e2h3b." +
+        "q.b3j3c.a4j4d.bHn.h3h.c2c2a2g.b5h6a2b4",               // box2014 #9
+  "17x17:1j5e.a2a3a4f4b4a.k4e.b4l2a.5h3g.g5h2.q.2e3g4a4.i3g." +
+        "4e6g6b.q.6g3d5a2a.b3a3l.f2a2b1e.b3a3j2a.h3d5c.g2f4b",  // 2018 #17
+  "17x17:5a5f2f4.n5b.f3f4c.d3b2c5e.l1d.4c4f1d5.a1g3g.j4c4b." +
+        "q.b3c4j.g9g5a.4d1f3c7.d5l.e1c2b1d.c4f2f.b4n.1f5f2a3",  // 2018 #18
+  "17x17:3f2c3e.j8d3a.2d5j4.m3c.g1i.c7b3d4e.6g6h.m1c.h4c2a4b." +
+        "b1a4l.a1h4f.4n4a.f6c2b5c.q.j2e5.a4o.b4d4d4c4",         // box2014 #10
+  "17x17:3a2e2e2b.d4d2e5a.q.i6c4c.f4j.4j5e.a2b2b6i.m5c.i6g." +
+        "d5k2.a4f7h.3i6d3a.d5k2.k7e.q.a5f3h.b4g1c4a1",          // 2018 #19
   "17x17:h6c6a6a6.g2i.a8o.6a7d1i.q.q.iDg.q.q.q.9o7.a9j5b6a.q." +
         "q.p5.b5e4f8a.a7e8i",                                   // 2024 #18
   // D4
@@ -36,7 +76,11 @@ let cannedPuzzles = [
 ];
 let puzzleChoice = 1;
 let puzzleCount = cannedPuzzles.length;
-const demoPuzzles = [1,2];
+
+// which puzzles have demos
+const demoPuzzles =  [1,2];
+// which puzzles are at which level [D1,D2,D3,D4]
+const puzzleLevels = [1,14,29,44];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

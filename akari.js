@@ -6,13 +6,15 @@ const offFontColor = "white";
 const errorFontColor = "red";
 const correctFontColor = "#a0ffa0";     // bright green
 
+const gameName = 'akari';
+
 let clicking = false;
 let errorCount = 0;
 let incompleteDigits = 0;
 let incompleteCells = 0;
 let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
-let debugMode = false;
+let isDemo = false;
 
 const CELL_BLACK = 1;
 const CELL_BLACK_NUM = 2;
@@ -32,10 +34,12 @@ let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
 function puzzleInit() {
   globalCursorOn = true;
   globalCircleRadius = 0.3; // slightly smaller circle for light bulbs
+  initRibbons(gameName);
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -85,12 +89,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -132,6 +138,17 @@ function puzzleInit() {
     let resetDialog = confirm("Reset puzzle?");
     if (resetDialog == true) {
       resetBoard();
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
     }
   });
 
@@ -254,7 +271,6 @@ function handleKey(keynum) {
       case KEY_ESC:
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
-        debugMode = true;
         break;
       case KEY_UP:
         if (globalCursorY) {
@@ -308,6 +324,8 @@ function initStructures(puzzle) {
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,"white",constWallLight,constWallBorder,offFontColor);
 
@@ -527,7 +545,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount==0) && (incompleteCells==0) && (incompleteDigits==0)) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -548,13 +566,18 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
-function updateDemoRegion(demoNum) {
-  let dtext  = (demoNum==1) ?  demoText[0] : (demoNum==2) ?  demoText[1] :  demoText[2];
-  let dmoves = (demoNum==1) ? demoMoves[0] : (demoNum==2) ? demoMoves[1] : demoMoves[2];
+function updateDemoRegionGeneric(demoNum,initFunc,stepFunc) {
+  let which = 0;
+  for (let i=0;i<demoPuzzles.length;i++) {
+    if (demoNum==demoPuzzles[i]) which = i;
+  }
+  let dtext  =  demoText[which];
+  let dmoves = demoMoves[which];
   if (demoStepNum < dtext.length) {
     if (demoStepNum) {
       assistState = 2;
@@ -562,7 +585,20 @@ function updateDemoRegion(demoNum) {
       assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);
-    // start by reseting all non-black cells to bulb-less
+    initFunc();
+    // now add in all of the moves from each step including this one
+    for (let step=0;step<=demoStepNum;step++) {
+      for (let dstep of dmoves[step]) {
+        stepFunc(dstep);
+      }
+    }
+    updateBoardStatus();
+    drawBoard();
+  }
+}
+
+function updateDemoRegion(demoNum) {
+  updateDemoFunction(demoNum,function () {
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
         if (puzzleBoardStates[y][x] > CELL_BLACK_NUM) {
@@ -572,15 +608,8 @@ function updateDemoRegion(demoNum) {
         }
       }
     }
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let steps = dsteps.split("");
-        let s0 = (steps[0] == '@') ? CELL_BULB : CELL_DOT;
-        addMove(s0,parseInt(steps[1],36),parseInt(steps[2],36));
-      }
-    }
-    updateBoardStatus();
-    drawBoard();
-  }
+  }, function (steps) {
+    let s0 = (steps[0] == '@') ? CELL_BULB : CELL_DOT;
+    addMove(s0,parseInt(steps[1],36),parseInt(steps[2],36));
+  });
 }

@@ -108,6 +108,11 @@ const constWallSolveEdge = 0b000100000;
 const constWallDot       = 0b001000000;
 const constWallX         = 0b010000000;
 
+const constRibbonColorWhite = "white";
+const constRibbonColorRed   = "#ffc0c0";
+const constRibbonColorBlue  = "#c0c0ff";
+const constRibbonColorGold  = "#ffffc0";
+
 const constHoriz = true;
 const constVert  = false;
 
@@ -131,6 +136,8 @@ let globalWallCursorY = 0;
 let globalWallCursorX = 0;
 let globalTextOutline = false;
 let globalBorderMargin = 4;
+let globalLineFirst = false;
+let globalDrawDots = false;
 
 let globalContext, globalWallStates, globalBoardValues, globalBoardColors;
 let globalBoardTextColors, globalBoardTextOppColors, globalWallColors;
@@ -664,7 +671,7 @@ function initWallStatesFromHexes(hexParamsRows,hexParamsCols,setState,defState,h
   return wallStates;
 }
 
-function drawBoard(lineFirst = false, drawDots = false) {
+function drawBoard() {
   // clear the canvas
   globalContext.clearRect(0,0,canvas.width,canvas.height);
   // draw each tile
@@ -678,7 +685,7 @@ function drawBoard(lineFirst = false, drawDots = false) {
                globalCircleColors[y][x],
                globalLineStates[y][x],
                globalLineColors[y][x],
-               lineFirst,
+               globalLineFirst,
                globalBoardTextColors[y][x],
                globalBoardTextOppColors[y][x]);
     }
@@ -701,7 +708,7 @@ function drawBoard(lineFirst = false, drawDots = false) {
   if (globalWallCursorOn) {
     drawWallCursor();
   }
-  if (drawDots) {
+  if (globalDrawDots) {
     for (let y=0;y<=globalPuzzleH;y++) {
       for (let x=0;x<=globalPuzzleW;x++) {
         drawDot(y,x);
@@ -1446,7 +1453,28 @@ function updateDynamicHtmlEntries(etext,astate) {
   updateHtmlText('assistButton', 'Current Assist Mode (' + astate + ')', true);
 }
 
-function canvasSuccess() {
+function canvasSuccess(isdemo,gamename,gamenum) {
+  if (!isdemo && gamenum) {
+    let gameStorage = localStorage.getItem("OPSaved" + gamename);
+    let gamesWon;
+    let isNewRibbon = false;
+    if (gameStorage != null) {
+      gamesWon = gameStorage.split(",");
+      if (gamesWon.indexOf(gamenum) == -1) {
+        isNewRibbon = true;
+      }
+    } else {
+      gamesWon = new Array();
+      isNewRibbon = true;
+    }
+    if (isNewRibbon) {
+      gamesWon.push(gamenum);
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.appendChild(returnRibbon(gamenum));
+      localStorage.setItem("OPSaved" + gamename,gamesWon.join(","));
+      $("#clearButton").show();
+    }
+  }
   $("#canvasDiv").css("border-color", constColorSuccess);
   $("#canvasDiv").css("background", constColorSuccess);
 }
@@ -1743,4 +1771,94 @@ function compareRooms(room1, room2) {
     }
   }
   return true;
+}
+
+function updateDemoFunction(demoNum,initFunc,stepFunc,postFunc=null) {
+  let which = 0;
+  for (let i=0;i<demoPuzzles.length;i++) {
+    if (demoNum==demoPuzzles[i]) which = i;
+  }
+  let dtext  =  demoText[which];
+  let dmoves = demoMoves[which];
+  if (demoStepNum < dtext.length) {
+    if (demoStepNum) {
+      assistState = 2;
+    } else {
+      assistState = 0;
+    }
+    updateHtmlText('demotext', dtext[demoStepNum]);
+    initFunc();
+    // now add in all of the moves from each step including this one
+    for (let step=0;step<=demoStepNum;step++) {
+      for (let dstep of dmoves[step]) {
+        stepFunc(dstep.split(""));
+      }
+    }
+    if (postFunc) {
+      postFunc();
+    }
+    updateBoardStatus();
+    drawBoard();
+  }
+}
+
+function initRibbons(gamename) {
+  let gameStorage = localStorage.getItem("OPSaved" + gamename);
+  if (gameStorage) {
+    const ribbonBar = document.getElementById("ribbonbar");
+    let gamesWon = gameStorage.split(",");
+    if (gamesWon.length) {
+      $("#clearButton").show();
+    }
+    for (let game of gamesWon) {
+      if (game) {
+        ribbonBar.appendChild(returnRibbon(game));
+      }
+    }
+  }
+}
+
+function returnRibbon (gamenum) {
+  // figure out which level this game is by consulting the level array
+  let gamelevel;
+  for (let i=0;i<puzzleLevels.length;i++) {
+    if (gamenum >= puzzleLevels[i]) {
+      gamelevel = i+1;
+    }
+  }
+  if (gamelevel==4) {
+    gamecolor = constRibbonColorGold;
+  } else if (gamelevel==3) {
+    gamecolor = constRibbonColorBlue;
+  } else if (gamelevel==2) {
+    gamecolor = constRibbonColorRed;
+  } else {
+    gamecolor = constRibbonColorWhite;
+  }
+  let ribbonElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  ribbonElement.setAttribute('xmlns',   "http://www.w3.org/2000/svg");
+  ribbonElement.setAttribute('width',   50);
+  ribbonElement.setAttribute('height',  50);
+  ribbonElement.setAttribute('viewBox', "0 0 400 400");
+  let ribbonInner = '<path d="M 150 230 L 105 390 L 80 330 L  25 360 L 90 215 Z" fill="' + gamecolor +
+    '" stroke="black" stroke-width="10" />' +
+    '<path d="M 150 230 L 195 390 L 220 330 L 275 360 L 210 215 Z" fill="' + gamecolor +
+    '" stroke="black" stroke-width="10" />' +
+    '<path d="M 150 250' +
+             'C 150 250, 169 269, 181 245 C 181 245, 186 221, 209 231' +
+             'C 209 231, 235 235, 231 209 C 231 209, 221 186, 245 181' +
+             'C 245 181, 269 169, 250 150 C 250 150, 229 137, 245 119' +
+             'C 245 119, 257  96, 231  91 C 231  91, 207  93, 209  69' +
+             'C 209  69, 204  43, 181  55 C 181  55, 163  71, 150  50' +
+             'C 150  50, 131  31, 119  55 C 119  55, 114  79,  91  69' +
+             'C  91  69,  65  65,  69  91 C  69  91,  79 114,  55 119' +
+             'C  55 119,  31 131,  50 150 C  50 150,  71 163,  55 181' +
+             'C  55 181,  43 204,  69 209 C  69 209,  93 207,  91 231' +
+             'C  91 231,  96 257, 119 245 C 119 245, 137 229, 150 250' +
+             'Z" fill="' + gamecolor + '" stroke="black" stroke-width="10"/>' +
+    '<circle cx="150" cy="150" r="80" fill="none" stroke="black" stroke-width="10" />' +
+    '<text text-anchor="middle" font-family="Open Sans" font-size="100px" x="150" y="185">' + gamenum +
+    '</text>';
+  ribbonElement.innerHTML = ribbonInner;
+  return ribbonElement;
 }

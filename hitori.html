@@ -4,18 +4,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./hitori.js"></script>
     <script type="text/javascript" src="./hipuzzles.js"></script>
     <script src="./jquery.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
     <title>Hitori Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Hitori &#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
+      Player for Hitori <span id="jpfont">&#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;</span>
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -56,7 +56,7 @@
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
         <a href="https://en.wikipedia.org/wiki/Hitori" target="_blank">Hitori</a>
-        (&#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;
+        (<span id="jpfont">&#x3072;&#x3068;&#x308a;&#x3057;&#x3066;&#x304f;&#x308c;</span>
         <i>Hitori ni shite kure</i>; literally "leave me alone")
         is a Japanese logic puzzle published by
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
@@ -134,15 +134,18 @@
         <input class="button small" type="button" value="Undo" id="undoButton"  />
         <input class="button small" type="button" value="Reset" id="resetButton" />
         <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <input class="button small" type="button" value="Clear Ribbons" id="clearButton" style="display: none" />
         <p><span id='puzzledescr'></span></p>
         <p><span id='errortext'></span></p>
-        </pr>
       </div>
     </div>
-    <div id="demotab">
+    <div id="demotab" style="display: none;">
       <input class="button small" type="button" value="prev" id="prevDemoButton"  />
       <input class="button small" type="button" value="next" id="nextDemoButton" />
       <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <div id="ribbonbar">
+      &nbsp;
     </div>
     <!-- some space to avoid the canvas from shrinking on demo mode -->
     <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>

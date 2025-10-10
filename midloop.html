@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
     <script type="application/javascript" src="./fastclick.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./mlpuzzles.js"></script>
     <script type="text/javascript" src="./midloop.js"></script>
     <script src="./jquery.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400"/>
     <title>Mid-loop Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Mid-loop &#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;
+      Player for Mid-loop <span id="jpfont">&#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;</span>
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -68,8 +68,8 @@
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
         <a href="https://www.nikoli.co.jp/en/puzzles/mid_loop" target="_blank">Mid-loop</a>
-        (&#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;), is a less known
-        Japanese logic puzzle published by
+        (<span id="jpfont">&#x30DF;&#x30C3;&#x30C9;&#x30EB;&#x30FC;&#x30D7;</span>),
+        is a less known Japanese logic puzzle published by
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>,
         similar to its more complex sister <a href="./masyu.html">Masyu</a>.
         In Mid-loop, the board begins with a collection of black circles,
@@ -163,14 +163,18 @@
         <input class="button small" type="button" value="Undo"  id="undoButton"  />
         <input class="button small" type="button" value="Reset" id="resetButton" />
         <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <input class="button small" type="button" value="Clear Ribbons" id="clearButton" style="display: none" />
         <p><span id='puzzledescr'></span></p>
         <p><span id='errortext'></span></p>
       </div>
     </div>
-    <div id="demotab">
+    <div id="demotab" style="display: none;">
       <input class="button small" type="button" value="prev" id="prevDemoButton"  />
       <input class="button small" type="button" value="next" id="nextDemoButton" />
       <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <div id="ribbonbar">
+      &nbsp;
     </div>
     <!-- some space to avoid the canvas from shrinking on demo mode -->
     <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>

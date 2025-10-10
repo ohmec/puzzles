@@ -151,9 +151,14 @@ const cannedPuzzles = [
         "h422-.h6230.h9222.hB22-.hD222.hF230.hI22-.hK21-.hL233.hO253." +
         "hT222.i0132",                                                    // 2018
 ];
+
 let puzzleChoice = 16;
 let puzzleCount = cannedPuzzles.length;
-const demoPuzzles = [1,4];
+
+// which puzzles have demos
+const demoPuzzles  = [1,4];
+// which puzzles are at which level [D1,D2,D3,D4]
+const puzzleLevels = [1,11,24,35];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

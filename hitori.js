@@ -7,10 +7,13 @@ const incorrectRiverColor = "#C0C040";  // light brown
 const stdFontColor = "black";
 const offFontColor = "white";
 
+const gameName = 'hitori';
+
 let clicking = false;
 let dragging = false;
 let errorCount = 0;
 let assistState = 0;
+let isDemo = false;
 
 const MOVE_TOGGLE = 1;
 const MOVE_SET    = 2;
@@ -21,9 +24,11 @@ const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY
 let initPuzzle, puzzle, moveHistory, puzzleBoardStates, demoStepNum;
 
 function puzzleInit() {
+  initRibbons(gameName);
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -73,12 +78,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -128,6 +135,17 @@ function puzzleInit() {
     let resetDialog = confirm("Reset puzzle?");
     if (resetDialog == true) {
       resetBoard();
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
     }
   });
 
@@ -276,6 +294,8 @@ function initStructures(puzzle) {
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,emptyCellColor,constWallLight,constWallBorder,stdFontColor);
 
@@ -432,7 +452,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if (errorCount == 0) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -449,31 +469,15 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
-      assistState = 2;
-    } else {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     puzzleBoardStates = initYXFromValue(false);
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let curCell = dsteps.split(",");
-        let iy = curCell[0];
-        let ix = curCell[1];
-        addMove(MOVE_SET,iy,ix);
-      }
-    }
-    updateBoardStatus();
-    drawBoard();
-  }
+  }, function (steps) {
+    addMove(MOVE_SET,steps[0],steps[1]);
+  });
 }

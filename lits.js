@@ -7,6 +7,8 @@ const incorrectCellColor = "#e04040";   // reddish
 
 const stdFontColor = "black";
 
+const gameName = 'lits';
+
 const STATE_WHITE = 1;
 const STATE_BLACK = 2;
 const STATE_INDET = 3;
@@ -36,19 +38,23 @@ let incompleteCount = 0;
 let brokenRiver = true;
 let assistState = 0;
 let curShiftState = STATE_INDET;
+let isDemo = false;
 
 // which keys are handled
-let handledKeys = [ KEY_BS, KEY_CR, KEY_SP, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1, ALT_0, ALT_1 ];
+let handledKeys = [ KEY_BS, KEY_CR, KEY_SP, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN,
+  KEY_0, KEY_1, ALT_0, ALT_1 ];
 
 let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
 let puzzleRoomList, puzzleRoomShapes, puzzleCellRooms;
 
 function puzzleInit() {
   globalCursorOn = true;
+  initRibbons(gameName);
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -108,12 +114,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -164,6 +172,17 @@ function puzzleInit() {
     let resetDialog = confirm("Reset puzzle?");
     if (resetDialog == true) {
       resetBoard();
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
     }
   });
 
@@ -345,11 +364,13 @@ function initStructures(puzzle) {
   let rwallParams = puzzleSplit[1];
   let cwallParams = puzzleSplit[2];
   let hexParams = puzzleSplit[3];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,indetCellColor,constWallLight,constWallBorder,stdFontColor);
 
   // initialize the wall states based upon the given parameters
-  globalWallStates = initWallStatesFromHexes(rwallParams, cwallParams, constWallLight);
+  globalWallStates = initWallStatesFromHexes(rwallParams, cwallParams, constWallBorder, constWallLight);
   puzzleBoardStates = initYXFromValue(STATE_INDET);
 
   // override board colors if the hexParams are included, just for 0th
@@ -597,7 +618,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0) && !brokenRiver) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -614,31 +635,17 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
-      assistState = 2;
-    } else {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     puzzleBoardStates = initYXFromValue(STATE_INDET);
     globalBoardColors = initYXFromValue(indetCellColor);
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let steps = dsteps.split("");
-        let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
-        addMove(s0,steps[1],steps[2]);
-      }
-    }
-    updateBoardStatus();
-    drawBoard();
-  }
+  }, function (steps) {
+    let s0 = (steps[0] == 'W') ? STATE_WHITE : STATE_BLACK;
+    addMove(s0,steps[1],steps[2]);
+  });
 }
