@@ -8,6 +8,8 @@ const incorrectRoomColor = "#ffc0c0";
 const constMoveAddRoom = 1;
 const constMoveDelRoom = 2;
 
+const gameName = 'shikaku';
+
 let clicking = false;
 let dragging = false;
 let shifting = false;
@@ -17,7 +19,7 @@ let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
 let curPinCellY = 0;
 let curPinCellX = 0;
-let debugMode = false;
+let isDemo = false;
 
 // which keys are handled, letters and numbers handled algorithmically afterwards
 let handledKeys =
@@ -27,10 +29,12 @@ let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList;
 
 function puzzleInit() {
   globalCursorOn = true;
+  initRibbons(gameName);
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -93,6 +97,7 @@ function puzzleInit() {
     } else {
       $("#demotab").hide();
       initPuzzle = pval;
+      puzzleChoice = 0;
       puzzle = removeDot(pval);
       updateHtmlDescr(initPuzzle);
     }
@@ -100,6 +105,7 @@ function puzzleInit() {
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -156,6 +162,17 @@ function puzzleInit() {
     let resetDialog = confirm("Reset puzzle?");
     if (resetDialog == true) {
       resetBoard();
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
     }
   });
 
@@ -298,7 +315,6 @@ function handleKey(keynum) {
         console.log(globalBoardValues);
         console.log(globalWallStates);
         console.log(puzzleRoomList);
-        debugMode = true;
         break;
       case KEY_UP:    if (globalCursorY)                        globalCursorY--; break;
       case KEY_DOWN:  if (globalCursorY < (globalPuzzleH-1))    globalCursorY++; break;
@@ -325,6 +341,8 @@ function initStructures(puzzle) {
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
   let roomParams = puzzleSplit[2];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,emptyCellColor,constWallDash,constWallStandard,stdFontColor);
 
@@ -462,7 +480,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0)) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -483,6 +501,7 @@ function undoMove() {
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
@@ -522,36 +541,22 @@ function drawDragRoom(y,x) {
 
 function updateDemoRegion(demoNum) {
   globalCursorOn = false;
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
-      assistState = 2;
-    } else {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     // start by reseting the room list
     puzzleRoomList = new Array();
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let drooms of dmoves[step]) {
-        let droom = drooms.split("");
-        let action = droom[0];
-        let isAdd = (action == 'A');
-        let y0 = parseInt(droom[1],36);
-        let x0 = parseInt(droom[2],36);
-        if (isAdd) {
-          let y1 = parseInt(droom[3],36)+y0-1;
-          let x1 = parseInt(droom[4],36)+x0-1;
-          addRoom(y0,x0,y1,x1);
-        } else {
-          deleteRoom(y0,x0);
-        }
-      }
+  }, function (steps) {
+    let action = steps[0];
+    let isAdd = (action == 'A');
+    let y0 = parseInt(steps[1],36);
+    let x0 = parseInt(steps[2],36);
+    if (isAdd) {
+      let y1 = parseInt(steps[3],36)+y0-1;
+      let x1 = parseInt(steps[4],36)+x0-1;
+      addRoom(y0,x0,y1,x1);
+    } else {
+      deleteRoom(y0,x0);
     }
+  }, function () {
     globalWallStates = initWallStatesFromRooms(puzzleRoomList,constWallDash);
-    updateBoardStatus();
-    drawBoard();
-  }
+  });
 }

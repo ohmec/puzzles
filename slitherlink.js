@@ -7,6 +7,7 @@ const correctFillColor = "#e0ffe0";
 const errorFillColor   = "#ffe0e0";
 const correctWallColor = "#20ff20";
 const errorWallColor   = "#ff2020";
+const gameName         = "slitherlink";
 
 const constMoveNone =       0;
 const constMoveEraseWall =  1;
@@ -26,6 +27,7 @@ let assistState = 0;
 let curClickType = CLICK_UNKNOWN;
 let curClickEdge = false;
 let curShiftMove = constMoveNone;
+let isDemo = false;
 
 // which keys are handled
 let handledKeys =
@@ -38,10 +40,13 @@ function puzzleInit() {
   globalCursorOn = false;
   globalWallCursorOn = false;
   globalBorderMargin = 8;
+  globalDrawDots = true;
+  initRibbons(gameName);
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
@@ -105,12 +110,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -164,11 +171,22 @@ function puzzleInit() {
     }
   });
 
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
+    }
+  });
+
   // click on show errors, converts to show how many errors remain
   $("#assistButton").click(function() {
     assistState = (assistState+1)%3;
     updateBoardStatus();
-    drawBoard(false,true);
+    drawBoard();
   });
 
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
@@ -435,7 +453,7 @@ function handleKey(keynum) {
       }
     }
     updateBoardStatus();
-    drawBoard(false,true);
+    drawBoard();
   }
 }
 
@@ -448,6 +466,8 @@ function initStructures(puzzle) {
   let numParams = puzzleSplit[1];
   let rwallParams = puzzleSplit[2];
   let cwallParams = puzzleSplit[3];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,emptyCellColor,constWallNone,constWallNone,stdFontColor);
 
@@ -460,7 +480,7 @@ function initStructures(puzzle) {
   }
 
   updateBoardStatus();
-  drawBoard(false,true);
+  drawBoard();
 }
 
 function removeDot(strval) {
@@ -524,7 +544,7 @@ function handleClick(evnt) {
     }
   }
   updateBoardStatus();
-  drawBoard(false,true);
+  drawBoard();
 }
 
 // look for errors
@@ -685,7 +705,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount == 0) && (incompleteCount == 0) && !incompleteLoop) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -700,27 +720,20 @@ function undoMove() {
       puzzleBoardStates[lastMove[1]][lastMove[2]] = lastMove[3];
     }
     updateBoardStatus();
-    drawBoard(false,true);
+    drawBoard();
   }
 }
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {
   globalWallCursorOn = false;
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum) {
-      assistState = 2;
-    } else {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     // start by reseting all walls to empty, and all colors to empty
     for (let y=0;y<=globalPuzzleH*2;y++) {
       for (let x=0;x<=globalPuzzleW*2;x++) {
@@ -733,28 +746,21 @@ function updateDemoRegion(demoNum) {
         globalBoardColors[y][x] = emptyCellColor;
       }
     }
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let steps = dsteps.split("");
-        switch (steps[0]) {
-          case '1': addMove(  parseInt(steps[1],36),    parseInt(steps[2],36),  constMoveShadeCell); break;
-          // walls
-          case 'N': addMove(2*parseInt(steps[1],36),  2*parseInt(steps[2],36)+1,constMoveAddWall); break;
-          case 'S': addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall); break;
-          case 'E': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveAddWall); break;
-          case 'W': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36),  constMoveAddWall); break;
-          // Xs
-          case 'n': addMove(2*parseInt(steps[1],36),  2*parseInt(steps[2],36)+1,constMoveXWall); break;
-          case 's': addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveXWall); break;
-          case 'e': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveXWall); break;
-          case 'w': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36),  constMoveXWall); break;
-        }
-      }
+  }, function (steps) {
+    switch (steps[0]) {
+      case '1': addMove(  parseInt(steps[1],36),    parseInt(steps[2],36),  constMoveShadeCell); break;
+      // walls
+      case 'N': addMove(2*parseInt(steps[1],36),  2*parseInt(steps[2],36)+1,constMoveAddWall); break;
+      case 'S': addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveAddWall); break;
+      case 'E': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveAddWall); break;
+      case 'W': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36),  constMoveAddWall); break;
+      // Xs
+      case 'n': addMove(2*parseInt(steps[1],36),  2*parseInt(steps[2],36)+1,constMoveXWall); break;
+      case 's': addMove(2*parseInt(steps[1],36)+2,2*parseInt(steps[2],36)+1,constMoveXWall); break;
+      case 'e': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36)+2,constMoveXWall); break;
+      case 'w': addMove(2*parseInt(steps[1],36)+1,2*parseInt(steps[2],36),  constMoveXWall); break;
     }
-    updateBoardStatus();
-    drawBoard(false,true);
-  }
+  });
 }
 
 function initSolve() {
@@ -765,7 +771,7 @@ function initSolve() {
   solve20b();
   lookFinish();
   updateBoardStatus();
-  drawBoard(false,true);
+  drawBoard();
 }
 
 function getBoardValue (y,x,dir) {
@@ -1059,7 +1065,7 @@ function initX() {
     }
   }
   updateBoardStatus();
-  drawBoard(false,true);
+  drawBoard();
 }
 
 // look to see if a vertex with one segment has no other options
@@ -1093,5 +1099,5 @@ function nowhereElse () {
     }
   }
   updateBoardStatus();
-  drawBoard(false,true);
+  drawBoard();
 }

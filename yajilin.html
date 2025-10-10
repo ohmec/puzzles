@@ -4,18 +4,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./yjpuzzles.js"></script>
     <script type="text/javascript" src="./yajilin.js"></script>
     <script src="./jquery.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
     <title>Yajilin Player</title>
   </head>
   <body>
     <div id="banner">
       <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Yajilin &#x30E4;&#x30B8;&#x30EA;&#x30F3;
+      Player for Yajilin <span id="jpfont">&#x30E4;&#x30B8;&#x30EA;&#x30F3;</span>
     </div>
     <div id="tabContainer">
       <ul id="tabs">
@@ -81,8 +81,8 @@
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
         <a href="https://www.nikoli.co.jp/en/puzzles/yajilin" target="_blank">Yajilin</a>
-        (&#x30E4;&#x30B8;&#x30EA;&#x30F3; or roughly "Arrow Link"),
-        is a classic Japanese logic puzzle published by 
+        (<span id="jpfont">&#x30E4;&#x30B8;&#x30EA;&#x30F3;</span> or roughly
+        "Arrow Link"), is a classic Japanese logic puzzle published by 
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
         In Yajilin, the board begins with a collection of numbers and
         arrows within gray squares. These numbers and arrows indicate
@@ -182,14 +182,18 @@
         <input class="button small" type="button" value="Undo"  id="undoButton"  />
         <input class="button small" type="button" value="Reset" id="resetButton" />
         <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
+        <input class="button small" type="button" value="Clear Ribbons" id="clearButton" style="display: none" />
         <p><span id='puzzledescr'></span></p>
         <p><span id='errortext'></span></p>
       </div>
     </div>
-    <div id="demotab">
+    <div id="demotab" style="display: none;">
       <input class="button small" type="button" value="prev" id="prevDemoButton"  />
       <input class="button small" type="button" value="next" id="nextDemoButton" />
       <p id='demop'><span id='demotext'></span></p>
+    </div>
+    <div id="ribbonbar">
+      &nbsp;
     </div>
     <!-- some space to avoid the canvas from shrinking on demo mode -->
     <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>

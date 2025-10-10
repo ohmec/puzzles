@@ -78,7 +78,11 @@ let cannedPuzzles = [
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
 
-const demoPuzzles = [1,7];
+// which puzzles have demos
+const demoPuzzles =  [1,7];
+// which puzzles are at which level [D1,D2,D3,D4]
+const puzzleLevels = [1,11,19,22];
+
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +
     "Press the 'next' button to walk through the solving steps, or the " +

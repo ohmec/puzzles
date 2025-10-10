@@ -4,6 +4,8 @@ const stdFontColor = "black";
 const errorFontColor = "red";
 const correctFontColor = "green";
 
+const gameName = 'hashiwokakero';
+
 const MOVE_TOGGLE_N   = 1;
 const MOVE_TOGGLE_W   = 2;
 const MOVE_TOGGLE_S   = 3;
@@ -34,8 +36,8 @@ let errorCount = 0;
 let incompleteDigits = 0;
 let disjointedPaths = true;
 let assistState = 0;
-let debugMode = false;
 let curClickType = CLICK_UNKNOWN;
+let isDemo = false;
 
 // which keys are handled
 let handledKeys = [ KEY_CR, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_N, KEY_S, KEY_E, KEY_W ];
@@ -44,10 +46,13 @@ let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = true;
+  globalLineFirst = true;   // lines are underneath circles
+  initRibbons(gameName);
 
   // any key anywhere as long as canvas is in focus
   $(document).keydown(function(evnt) {
     $("#resetButton").blur();
+    $("#clearButton").blur();
     $("#undoButton").blur();
     $("#assistButton").blur();
     if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
@@ -102,12 +107,14 @@ function puzzleInit() {
       $("#demotab").hide();
       initPuzzle = pval;
       puzzle = removeDot(pval);
+      puzzleChoice = 0;
       updateHtmlDescr(initPuzzle);
     }
     initStructures(puzzle);
   });
 
   $("#nextDemoButton").click(function() {
+    isDemo = true;
     demoStepNum++;
     updateDemoRegion(puzzleChoice);
   });
@@ -162,11 +169,22 @@ function puzzleInit() {
     }
   });
 
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  $("#clearButton").click(function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      localStorage.setItem("OPSaved" + gameName,'');
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      $("#clearButton").hide();
+    }
+  });
+
   // click on show errors, converts to show how many errors remain
   $("#assistButton").click(function() {
     assistState = (assistState+1)%4;
     updateBoardStatus();
-    drawBoard(true);
+    drawBoard();
   });
 
   $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
@@ -360,7 +378,7 @@ function addMove(moveType,y,x,noHistory=false) {
       addHistory(y,x,moveType);
     }
     updateBoardStatus();
-    drawBoard(true);
+    drawBoard();
     return;
   }
 
@@ -460,7 +478,6 @@ function handleKey(keynum) {
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalLineStates);
-        debugMode = true;
         break;
       case KEY_UP:
         if (globalCursorY) {
@@ -513,7 +530,7 @@ function handleKey(keynum) {
         break;
       }
     updateBoardStatus();
-    drawBoard(true);
+    drawBoard();
   }
 }
 
@@ -524,6 +541,8 @@ function initStructures(puzzle) {
   let puzzleSplit = puzzle.split(":");
   let size = puzzleSplit[0];
   let numParams = puzzleSplit[1];
+  // reset to non-demo
+  isDemo = false;
 
   basicInitStructures(size,emptyCellColor,constWallNone,constWallNone,stdFontColor);
 
@@ -563,7 +582,7 @@ function initStructures(puzzle) {
   }
 
   updateBoardStatus();
-  drawBoard(true);
+  drawBoard();
 }
 
 function removeDot(strval) {
@@ -622,7 +641,7 @@ function handleClick(evnt) {
     }
   }
   updateBoardStatus();
-  drawBoard(true);
+  drawBoard();
 }
 
 // look for errors
@@ -714,7 +733,7 @@ function updateBoardStatus() {
 
   updateDynTextFields();
   if ((errorCount==0) && (incompleteDigits==0) && (disjointedPaths==false)) {
-    canvasSuccess();
+    canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
   }
@@ -730,26 +749,19 @@ function undoMove() {
       addMove(lastMove[2]-4,lastMove[0],lastMove[1],true);
     }
     updateBoardStatus();
-    drawBoard(true);
+    drawBoard();
   }
 }
 
 function resetBoard() {
   $("#resetButton").blur();
+  $("#clearButton").blur();
   $("#assistButton").blur();
   initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {
-  let dtext  = (demoNum==1) ?  demoText[0] :  demoText[1];
-  let dmoves = (demoNum==1) ? demoMoves[0] : demoMoves[1];
-  if (demoStepNum < dtext.length) {
-    if (demoStepNum==1) {
-      assistState = 2;
-    } else if (demoStepNum==0) {
-      assistState = 0;
-    }
-    updateHtmlText('demotext', dtext[demoStepNum]);
+  updateDemoFunction(demoNum,function () {
     // start by reseting all non-number cells to indeterminate
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
@@ -759,18 +771,11 @@ function updateDemoRegion(demoNum) {
         globalLineStates[y][x] = PATH_NONE;
       }
     }
-    // now add in all of the moves from each step including this one
-    for (let step=0;step<=demoStepNum;step++) {
-      for (let dsteps of dmoves[step]) {
-        let steps = dsteps.split("");
-        let s0 =
-          (steps[0] == 'N') ? MOVE_TOGGLE_N :
-          (steps[0] == 'W') ? MOVE_TOGGLE_W :
-          (steps[0] == 'S') ? MOVE_TOGGLE_S : MOVE_TOGGLE_E;
-        addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
-      }
-    }
-    updateBoardStatus();
-    drawBoard(true);
-  }
+  }, function (steps) {
+    let s0 =
+        (steps[0] == 'N') ? MOVE_TOGGLE_N :
+        (steps[0] == 'W') ? MOVE_TOGGLE_W :
+        (steps[0] == 'S') ? MOVE_TOGGLE_S : MOVE_TOGGLE_E;
+    addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
+  });
 }
