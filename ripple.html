@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./ripple.js"></script>
@@ -28,16 +28,19 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell, then enter a digit value. If needed,
-          digit values greater than '9' can be entered by pressing the
-          corresponding letter from 'A' (10) to 'Z' (35). Digit values
-          greater than the largest polyomino ("room") on the board will be
-          ignored. Once on a cell, you can use the arrow keys to move
-          around the board. Press the space bar to remove an entry
-          (except those defined by the puzzle itself).
+          In the game Ripple Effect, you enter number values into cells
+          in order to complete the game according to the rules (see
+          Rules tab). To play, click on a cell, then enter a digit value
+          <b>1-9</b>.  If needed, digit values greater than '9' can be
+          entered by pressing the corresponding letter, eg. <b>'A'</b>
+          (10), <b>'B'</b> (11), etc. Digit values greater than the largest
+          polyomino ("room") on the board will be ignored. Once on a cell,
+          you can use the <b>arrow keys</b> to move around the board.
+          Press the <b>space bar</b> to remove an entry (except those
+          defined by the puzzle itself).
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete rooms is indicated.  In Assist Mode (1), the
           number of errors and incomplete rooms is indicated, see game rules.
           In Assist Mode (2), errors are highlighted with digit colors, and
@@ -49,10 +52,10 @@
           page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have <b>demos</b>,
           which will walk you through a solve to help you on the path to
           mastery: <span id='demolist1'>[]</span>).
         </p>
@@ -90,11 +93,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

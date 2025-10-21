@@ -28,21 +28,44 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          A left-click on a while cell toggles through all potential
-          settings for the cell, starting with a black triangle in
-          the NE corner, then rotating SE, SW, NW, then back to white.
-          That is &#x25e5; &rarr; &#x25e2; &rarr; &#x25e3; &rarr; &#x25e4;
-          &rarr; white.  Alternately you can use arrow keys to move around
-          the board, and press the space bar to toggle through the options,
-          or press '1' - '4' to set a triangle in the corresponding corner
-          (starting with '1' for NE &#x25e5; and moving clockwise to '4'
-          for &#x25e4;), or '0' or the backspace key to return to white.
-          You can right-click or press the '.' button to put a dot
-          place-holder for a cell that, by your determination, must stay
-          white.
+          In the game Shakashaka, players create white "rooms" surrounded
+          by black borders in either an upright direction, or angled
+          at 45 degrees (see Rules tab). The black edges of these rooms
+          and be created using either the mouse or keyboard keys:
+          <ul>
+            <li>
+              A <b>left-click</b> on a white cell toggles through 5 potential
+              settings for the cell (one of 4 black triangles, or empty; the
+              rules do not allow for adding a pure black cell).
+            </li>
+            <li>
+              The rotation of states starts with a black triangle in
+              the <b>NE corner</b>, then rotating <b>SE, SW, NW</b>, then
+              back to white.  That is <b>&#x25e5; &rarr; &#x25e2; &rarr;
+              &#x25e3; &rarr; &#x25e4; &rarr; white</b>.
+            </li>
+            <li>
+              Alternately you can use <b>arrow keys</b> to move around the
+              board, and press the <b>space bar</b> to toggle through the
+              options, or
+            </li>
+            <li>
+              Press number keys <b>'1' - '4'</b> to set a triangle in the
+              corresponding corner (starting with '1' for NE &#x25e5; and
+              moving clockwise to '4' for &#x25e4;), or
+            </li>
+            <li>
+              Press <b>'0'</b> or the <b>backspace</b> key to return to white.
+            </li>
+            <li>
+              You can <b>right-click</b> or press the <b>'.'</b> key to put
+              a dot place-holder for a cell that, by your determination,
+              must stay white.
+            </li>
+          </ul>
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete numbered cells is indicated.  In Assist Mode
           (1), the number of errors and incomplete cells is indicated,
           see game rules.  In Assist Mode (2), errors and completed
@@ -54,10 +77,10 @@
           previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
           (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
+          puzzle that can be helpful. The following puzzle codes have <b>demos</b>,
           which will walk you through a solve to help you on the path to
           mastery: <span id='demolist1'>[]</span>).
         </p>
@@ -91,16 +114,16 @@
             of any size.
           </li>
         </ol>
-        Enter puzzle #0 in the tab below to see a completed puzzle.
+        <b>Enter puzzle #0</b> in the tab below to see a completed puzzle.
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

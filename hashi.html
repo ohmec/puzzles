@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./hkpuzzles.js"></script>
@@ -28,27 +28,49 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
+          In Hashiwokakero, the goal is to create bridges between
+          circles in order to complete the puzzle (see Rules tab).
           There are several ways to create and remove bridges.
-          The user can start at a circle and drag the left mouse
-          towards one of the four directions to indicate the
-          creation of the bridge in that direction.  The environment
-          will extend the bridge to the next nearest circle, and
-          will not allow the user to create illegal bridges (i.e.
-          in the direction of a wall with no other circles, or into
-          another perpindicular bridge). Alternately you can use the
-          arrow keys to move around the board, and hold down the shift
-          key followed by an arrow key to create a bridge in that
-          direction. Or, you can press one of the directional
-          keys N, S, E, W to create a bridge in that direction.
-          Once a bridge has been created, the user can
-          left-click on it a second time to double-bridge it, or 
-          a third time to delete it. Or the right-mouse click can
-          remove a bridge. Pressing the directional key N, S, E or W
-          converts a single bridge in that direction to a double
-          bridge, or erases a double bridge.
+          <ul>
+            <li>
+              The user can start at a circle and drag the <b>left
+              mouse</b> towards one of the four directions to
+              indicate the creation of the bridge in that direction.
+              The environment will extend the bridge to the next
+              nearest circle, and will not allow the user to create
+              illegal bridges (i.e. in the direction of a wall
+              with no other circles, or into another perpindicular
+              bridge).
+            </li>
+            <li>
+              Alternately the user can use the <b>arrow keys</b>
+              to move around the board, and hold down the <b>shift
+              key</b> followed by an <b>arrow key</b> to create a
+              bridge in that direction.
+            </li>
+            <li>
+              Alternately, once on a circle, you can press one
+              of the directional keys <b>N, S, E, W</b> to create
+              a bridge in that direction.
+            </li>
+            <li>
+              Once a bridge has been created, the user can
+              <b>left-click</b> on it a second time to double-bridge it
+              (see rules), or a third time to delete it.
+            </li>
+            <li>
+              The user can also <b>right-click</b> the mouse to
+              remove a bridge.
+            </li>
+            <li>
+              Pressing the directional keys <b>N, S, E</b> or <b>W</b>
+              converts a single bridge in that direction to a double
+              bridge, or erases a double bridge.
+            </li>
+          </ul>
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete numbers is indicated.  In Assist Mode (1), the
           number of errors and incomplete numbers is indicated, see game rules.
           In Assist Mode (2), errors and completed rules are highlighted
@@ -61,12 +83,12 @@
           the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
-          which will walk you through a solve to help you on the path to
-          mastery: <span id='demolist1'>[]</span>).
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have
+          <b>demos</b>, which will walk you through a solve to help you
+          on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
@@ -102,11 +124,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./hitori.js"></script>
@@ -28,13 +28,16 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell to toggle from light to dark. Alternately,
-          you can use the arrow keys to move around the board, and press
-          the space bar to toggle, or the '1' key to turn black, or the '0'
-          key to turn white.
+          In Hitori, the goal is to set some cells black in order
+          to avoid duplicate numbers in a row or column (see Rules
+          tab). To play, <b>left-click</b> on a cell to toggle from
+          light to dark. Alternately, you can use the <b>arrow keys</b>
+          to move around the board, and press the <b>space bar</b>
+          to toggle, or the <b>'1'</b> key to turn black, or the
+          <b>'0'</b> key to turn white.
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           is indicated.  In Assist Mode (1), the number of errors is
           indicated, be they duplicate digits per row or column, adjacent
           blackened cells, or stranded "rivers" of white cells. In Assist
@@ -46,12 +49,12 @@
           to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
-          which will walk you through a solve to help you on the path to
-          mastery: <span id='demolist1'>[]</span>).
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have
+          <b>demos</b>, which will walk you through a solve to help you
+          on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
@@ -77,13 +80,13 @@
             through diagonally adjacent white cells.
           </li>
         </ol>
-        Below select puzzle 0 to see a completed sample grid.
+        Below select <b>puzzle 0</b> to see a completed sample grid.
         See the Game Play or Puzzles tab for how to invoke a demo.
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.

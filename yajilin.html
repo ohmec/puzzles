@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./yjpuzzles.js"></script>
@@ -28,39 +28,71 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To set the colors of cells, right-click on a cell to turn dark,
-          or middle-click to turn white.  Alternately, you can use the
-          arrow keys to move around the board, and press the space bar
-          to toggle between the states, the '1' key to turn black,
-          or the '0' key to turn white.  You can not alter the state
-          of a square with a number and arrow value.
-        </p>
-        <p>
-          To draw a path, left click on the center of a white cell to
-          begin. From there, drag the mouse in the direction to create
-          the path. The path will draw as the dragging continues. Alternately,
-          once on the board, you can press the shift key and hold while
-          moving around the board with the arrow keys. In addition, you
-          can enter a key to indicate the type of path desired for that
-          cell (and into its neighbors). These keys are as follows, and
-          will extend the line into the center of the adjoining cells:
+          In the game Yajilin, the user sets some cells black, and
+          creates one continuous line through the remaining white
+          cells to satisfy the requirements of pre-set number
+          cells (see Rules tab). To set the colors and draw the
+          lines, you can use the mouse or keyboard keys:
           <ul>
-            <li>'-' key to draw a full horizontal line through the cell</li>
-            <li>'|' or 'I' key to draw a full vertical line through the cell</li>
-            <li>'L','J','7', or 'F' key to draw a correspondingly shaped turn in the cell</li>
+            <li>
+              Press the <b>right mouse button</b> to turn a cell
+              black, or <b>middle mouse</b> to return to white.
+            </li>
+            <li>
+              Alternately, you can use the <b>arrow keys</b> to move
+              around the board, and press the <b>space bar</b> to
+              toggle between the states, the <b>'1'</b> key to turn
+              black, or the <b>'0'</b> key to turn white.  You can
+              not alter the state of a square with a number and arrow value.
+            </li>
+            <li>
+              To draw a path, <b>left click</b> on the center of a
+              white cell to begin. From there, <b>drag</b> the mouse
+              in the direction to create the path. The path will draw
+              as the dragging continues.
+            </li>
+            <li>
+              Alternately, once on the board, you can press the
+              <b>shift key</b> and hold while moving around the board with
+              the <b>arrow keys</b>.
+            </li>
+            <li>
+              In addition, you can enter a key to indicate the type of
+              path desired for that cell (and into its neighbors). These
+              keys are as follows, and will extend the line into the
+              center of the adjoining cells:
+              <ul>
+                <li>
+                  <b>'-' key</b> to draw a full horizontal line
+                  through the cell
+                </li>
+                <li>
+                  <b>'|'</b> or <b>'I'</b> key to draw a full
+                  vertical line through the cell
+                </li>
+                <li>
+                  <b>'L','F','7'</b>, or <b>'7'</b> key to draw a
+                  correspondingly shaped turn in the cell (i.e.
+                  a left turn starting from the N, E, S, or
+                  W direction).
+                </li>
+              </ul>
+            </li>
+            <li>
+              Once created, a path can be removed by pressing the
+              <b>backspace</b> key within a white cell. This deletes
+              it just for this cell, but deletes the "arms" into the
+              adjoining cells.
+            </li>
+            <li>
+              You can press the <b>'.'</b> key to temporarily insert
+              a dot in a cell as a visual reminder that it will eventually
+              need a path. A <b>backspace</b> clears the dot.
+            </li>
           </ul>
-          Once created, a path can be removed by pressing the backspace
-          key within a white cell. This deletes it just for this cell,
-          but deletes the "arms" into the adjoining cells. You can also
-          attempt to redraw with the left-click dragging method.
         </p>
         <p>
-          You can press the '.' key to temporarily insert a dot in a
-          cell to indicate that it will eventually need a path. A
-          backspace clears the dot.
-        </p>
-        <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete numbers is indicated.  In Assist Mode (1), the
           number of errors and incomplete numbers is indicated, see game rules.
           In Assist Mode (2), errors and completed rules are highlighted
@@ -71,10 +103,10 @@
           the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle 0 shows an example of a completed
-          puzzle. The following puzzle codes have demos, which will walk
+          (see "Puzzles" tab). <b>Puzzle 0</b> shows an example of a completed
+          puzzle. The following puzzle codes have <b>demos</b>, which will walk
           you through a solve to help you on the path to mastery:
           <span id='demolist1'>[]</span>).
         </p>
@@ -122,11 +154,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

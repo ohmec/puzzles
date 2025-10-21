@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Hina+Mincho"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./akpuzzles.js"></script>
@@ -28,17 +28,33 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          A left-click on the board adds a light bulb to a white
-          square, or removes one that is already there. Alternately
-          you can use arrow keys to move around the board, and press
-          the space bar to toggle light bulbs, or the '1' key to add
-          a bulb, or '0' key or backspace to remove. You can right-click
-          or press the '.' button to put a dot place-holder for a cell
-          that, by your determination, can not contain a light bulb
-          (for instance next to a '0' black cell).
+          The goal of the game is to set light bulbs on the board
+          to illuminate all white cells (see rules). There are several
+          ways to set elements on the board:
+          <ul>
+            <li>
+              A <b>left-click</b> on the board adds a light bulb to a white
+              square, or removes one that is already there.
+            </li>
+            <li>
+              Once the board has been selected, you can use arrow keys
+              to move around the board, and press the <b>space bar</b>
+              to toggle light bulbs.
+            </li>
+            <li>
+              You can press the <b>'1'</b> key to add a bulb, or <b>'0'</b> key or
+              <b>backspace</b> to remove.
+            </li>
+            <li>
+              You can <b>right-click</b> or press the <b>'.' button</b>
+              to put a dot place-holder for a cell that, by your determination,
+              can not contain a light bulb (for instance next to a '0'
+              black cell).
+            </li>
+          </ul>
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or un-illuminated white cells  is indicated.  In Assist Mode
           (1), the number of errors and incomplete cells is indicated,
           see game rules.  In Assist Mode (2), errors and illuminated rooms
@@ -49,12 +65,12 @@
           the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
-          which will walk you through a solve to help you on the path to
-          mastery: <span id='demolist1'>[]</span>).
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have
+          <b>demos</b>, which will walk you through a solve to help you
+          on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
@@ -93,11 +109,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the
