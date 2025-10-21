@@ -28,27 +28,70 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell and enter a digit. Once selected, arrow
-          keys can be used to move around the canvas. Use keys 1-9, or A-Z
-          for double digit values 10-35. Bold digits are the initial puzzle
-          values.  You can also click on an existing number and "drag" it
-          to other cells to overwrite their value with its value. Similarly
-          you can press and hold the shift key, then use the arrow keys to
-          move around the board to propagate the current number to other
-          cells. To remove an entered number, you can right-click the cell,
-          or press the back space to clear. You can also drag a cleared
-          cell to clear out new cells.
+          In Fillomino, the goal is to place a number in every cell in
+          order to complete the puzzle according to the rules (see
+          Rules tab). To play, you can click on a cell or move around
+          with the arrow keys, then enter a digit.
+          <ul>
+            <li>
+              Use the mouse <b>left-click</b> to move the cursor to
+              a desired cell.
+            </li>
+            <li>
+              Once selected, <b>arrow keys</b> can be used to move
+              around the canvas.
+            </li>
+            <li>
+              Use digit keys <b>1-9</b> to enter a single-digit value
+            </li>
+            <li>
+              Use letter keys <b>A-Z</b> for double digit values 10-35,
+              respectively.
+            </li>
+            <li>
+              Bold digits are the initial puzzle values, and can not
+              be overwritten.
+            </li>
+            <li>
+              You can also <b>left-click</b> on an existing number 
+              and "drag" it to other cells to overwrite their value
+              with its value.
+            </li>
+            <li>
+              Similarly you can press and hold the <b>shift key</b>,
+              then use the <b>arrow keys</b> to move around the board
+              to propagate the current number to other cells.
+            </li>
+            <li>
+              To remove an entered number, you can <b>right-click</b>
+              the cell, or press the <b>back space</b> to clear.
+            </li>
+            <li>
+              You can also drag a cleared cell with the mouse
+              <b>left-click</b> or <b>shift- and arrow keys</b>
+              to clear out new cells.
+            </li>
+            <li>
+              For visualization of numerical boundaries, you can
+              <b>left-click</b> on a cell border between cells to make
+              a note of expected numeric separations, though no error
+              checking is made.
+            </li>
+            <li>
+              You can <b>right-click</b> to remove drawn borders, but
+              not calculated ones.
+            </li>
+            <li>
+              Once on a boundary, you can <b>shift- arrow move</b> to add
+              more borders. You can also <b>drag left-click</b> to
+              draw borders, or <b>drag right-click</b> to clear borders.
+            </li>
+          </ul>
         </p>
         <p>
-          For visualization of numerical boundaries, you can left-click on
-          borders between cells to make a note of expected numeric separations,
-          though no error checking is made. You can right-click to remove
-          drawn borders, but not calculated ones. Once on a boundary, you can
-          shift-move to add more borders. You can also drag left-click to
-          draw borders, or drag right-click to clear borders.
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete numbers is indicated.  In Assist Mode (1), the
           number of errors and incomplete numbers is indicated, see game rules.
           In Assist Mode (1) or higher, each numbered square is given a different
@@ -62,12 +105,12 @@
           the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
-          which will walk you through a solve to help you on the path to
-          mastery: <span id='demolist1'>[]</span>).
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have
+          <b>demos</b>, which will walk you through a solve to help you
+          on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
@@ -110,11 +153,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

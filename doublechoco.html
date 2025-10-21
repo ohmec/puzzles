@@ -3,8 +3,8 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <link rel="stylesheet" href="./puzzles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./dcpuzzles.js"></script>
@@ -28,16 +28,35 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, left-click on a border between cells to create a wall
-          between cells, or right-click to remove a wall. You can drag
-          around to continue to draw the wall, or erase the wall. Alternately,
-          once on a boundary, you can shift-move to add more borders in the
-          direction of arrow keys. Additionally, if the cursor is on a wall,
-          you can press the space bar to toggle the wall state, or press
-          '1' to set, or '0' or backspace to clear.
+          In Double Choco, the goal is to draw border walls around cells
+          to satisfy the goals of the game (see rules tab). To draw
+          borders, you can use the mouse or arrow and button keys:
+          <ul>
+            <li>
+              A <b>left-click</b> on a border between cells creates
+              a wall between cells
+            </li>
+            <li>
+              A <b>right-click</b> on an existing wall removes it.
+            </li>
+            <li>
+              You can <b>mouse drag</b> around to continue to draw
+              the wall, or erase the wall.
+            </li>
+            <li>
+              Once on a boundary, you can press the <b>shift key</b>
+              and then <b>arrow keys</b> to add border walls in the
+              direction of the arrow keys.
+            </li>
+            <li>
+              Once on a wall, you can press the <b>space bar</b> to
+              toggle the wall state, or press the <b>'1' key</b>
+              to set, or <b>'0' key</b> or backspace to clear a wall.
+            </li>
+          </ul>
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete numbers is indicated.  In Assist Mode (1), the
           number of errors and incomplete numbers is indicated, see game rules.
           In Assist Mode (1) or higher, each numbered square is given a different
@@ -53,10 +72,10 @@
           to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have <b>demos</b>,
           which will walk you through a solve to help you on the path to
           mastery: <span id='demolist1'>[]</span>).
         </p>
@@ -95,11 +114,11 @@
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
-          Puzzle 0 shows a completed correct puzzle.
+          <b>Puzzle 0</b> shows a completed correct puzzle.
         </p>
         <p>
           To describe a puzzle, the character string must be of the

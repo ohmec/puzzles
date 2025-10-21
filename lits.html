@@ -4,12 +4,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
     <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./lits.js"></script>
     <script type="text/javascript" src="./lipuzzles.js"></script>
     <script src="./jquery.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
     <title>LITS Player</title>
   </head>
   <body>
@@ -28,20 +28,36 @@
     <div id="tabsContent">
       <div id="tab1" class="tab_content" style="display: block;">
         <p>
-          To play, click on a cell to switch between light, dark, and the
-          default indeterminate state.  A left-click turns it dark, a
-          right-click turns to white, and a middle-click returns to
-          indeterminate. Once the mouse is pressed down, you can drag
-          the mouse to set multiple squares in one sequence.
-          Alternately, you can use the arrow keys to move
-          around the board, and press the space bar to toggle between
-          the states, or the '1' key to turn black, the '0' key to turn
-          white, or the backspace key to set back to indeterminate.
-          Once on a cell, you can drag its color by holding the shift
-          key and moving the arrow keys up down left or right.
+          In the game LITS, the goal is to set some cells black and
+          the rest white in order to satisfy the goals of the game
+          (see Rules tab). To play, you can click on a cell to switch
+          states, or use the arrow and other keys:
+          <ul>
+            <li>
+              A <b>left-click</b> turns a cell dark, a <b>right-click</b>
+              turns it white, and a <b>middle-click</b> returns it to
+              indeterminate (gray).
+            </li>
+            <li>
+              Once the mouse is pressed down, you can <b>drag</b>
+              the mouse to set multiple squares in one sequence.
+            </li>
+            <li>
+              Alternately, you can use the <b>arrow keys</b> to move
+              around the board, then press the <b>space bar</b> to
+              toggle between the states, or the <b>'1'</b> key to turn
+              black, the <b>'0'</b> key to turn white, or the
+              <b>backspace</b> key to set back to indeterminate.
+            </li>
+            <li>
+              Once on a cell, you can drag its color by holding the
+              <b>shift</b> key and moving the <b>arrow keys</b> up
+              down left or right.
+            </li>
+          </ul>
         </p>
         <p>
-          In Assist Mode (0), the default, only the existance of errors
+          In <b>Assist Mode</b> (0), the default, only the existance of errors
           or incomplete rooms is indicated.  In Assist Mode (1), the
           number of errors and incomplete rooms is indicated, see game rules.
           In Assist Mode (2), errors are highlighted with different colors
@@ -54,12 +70,12 @@
           the "undo" button on the bottom of the page to undo previous moves.
         </p>
         <p>
-          Below, enter puzzle code (0-<span id='puzzlecount1'>0</span>)
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
           for one of a list of pre-defined puzzles, or a puzzle descriptor
-          (see "Puzzles" tab). Puzzle code 0 shows an example completed
-          puzzle that can be helpful. The following puzzle codes have demos,
-          which will walk you through a solve to help you on the path to
-          mastery: <span id='demolist1'>[]</span>).
+          (see "Puzzles" tab). <b>Puzzle code 0</b> shows an example completed
+          puzzle that can be helpful. The following puzzle codes have
+          <b>demos</b>, which will walk you through a solve to help you
+          on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
       <div id="tab2" class="tab_content" style="display: none;">
@@ -80,7 +96,7 @@
           <li>
             The arrangement of the dark squares must resemble the letters
             'L', 'I', 'T' or 'S'. See the completed solution using puzzle
-            entry number 0 for an example.
+            <b>entry number 0</b> for an example.
           </li>
           <li>
             Identical shapes (two 'L' shapes, for instance) can not touch
@@ -97,13 +113,13 @@
             if it only flows through diagonally adjacent dark cells.
           </li>
         </ol>
-        Below select puzzle 0 to see a completed sample grid.
+        Below select <b>puzzle 0</b> to see a completed sample grid.
         See the Game Play or Puzzles tab for how to invoke a demo.
       </div>
       <div id="tab3" class="tab_content" style="display: none;">
         <p>
           Puzzles can be invoked by either a numerical entry from
-          0-<span id='puzzlecount2'>0</span>, or through a character
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
           form on the 'Game Play' tab. The numbered puzzles are
           hand-crafted of varying difficulty, roughly easy to hard.
