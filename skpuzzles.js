@@ -32,6 +32,8 @@ let cannedPuzzles = [
         "g6b.b6b5c6.c4dAa.a3d6c.d8e.4a5c2c",                                    // godzilla 272 "nice"
   // D3
   "10x10:9h9.e9d.dAe.c4b6c.aCe3b.b4e3a.c3b4c.e5d.d7e.4h8",                      // v189 #4
+  "17x17:bAc86b2c5b.m6c.8c8c74b9c6.o6a.b6c4c79b2b.q.2c5g46b3.h6h.a34d3a6d32a." +
+        "h7h.4b35g2c8.q.bAb24c6cAb.a8o.6c4b26cCc9.c2m.b6c4b42c3b",              // v189 #6 "methodical and fun"
   "17x17:2a2a2a3i6.i2a6a2c.2a9a4a6c2a2a2b.i6a2a2a4a.2a2a6a3c2a2a3b.i4a2a2a4a." +
         "4a4a6a4c2a2a3b.k2a2a6a.h4h.a8a2a6k.b3a3a3cAaCa2a6.a2a2a2a2i." +
         "b2a2a2c4a3a6a2.a2a2a2a3i.b3a2a4c2a9a2a2.c6a4a9i.6i2a2a2a4",            // 2014 #7

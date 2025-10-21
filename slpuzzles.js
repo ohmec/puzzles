@@ -45,6 +45,9 @@ let cannedPuzzles = [
         "b23b13b.22b23b32.03b10b22.b03b12b.b22b31b.12b30b03.31b22b23." +
         "b12b21b.b32b32b.22b23b21.13b02b33",                            // vol3 #48
   // D3s
+  "15x15:d2j.3123c11232b3.c1b222b0213.b2313c2a2a1a.2b3b2b31d.a20323d12a12." +
+        "2a2211c210222.3212a2b223a1a2.232222b1a03b3.c3a3e21a3.c20a131222b2." +
+        "b12a2b2a1a2a3.2b2222a21d1.3b1h2a2.323333b2b1c",                // another GC puzzle
   "25x15:b2a3a3a0f2f1a1.33b2a2b3322e331a1a0.c2c3e3c2d3b.103e3312b3a2b020a23." +
         "e3f2a3a3a3c1b.122e211a2a2a2a2a1a1a2.c2c3d1c2a3a1a2b." +
         "20b2a3b231a123b1a3b23.b3a2a3a3c1d3c3c.2a3a3a1a1a1a3a232e113." +
@@ -81,7 +84,7 @@ let puzzleCount = cannedPuzzles.length;
 // which puzzles have demos
 const demoPuzzles =  [1,7];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,11,19,22];
+const puzzleLevels = [1,11,19,23];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

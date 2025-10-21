@@ -1460,7 +1460,7 @@ function canvasSuccess(isdemo,gamename,gamenum) {
     let isNewRibbon = false;
     if (gameStorage != null) {
       gamesWon = gameStorage.split(",");
-      if (gamesWon.indexOf(gamenum) == -1) {
+      if (gamesWon.indexOf(gamenum.toString()) == -1) {
         isNewRibbon = true;
       }
     } else {
@@ -1468,7 +1468,7 @@ function canvasSuccess(isdemo,gamename,gamenum) {
       isNewRibbon = true;
     }
     if (isNewRibbon) {
-      gamesWon.push(gamenum);
+      gamesWon.push(gamenum.toString());
       const ribbonBar = document.getElementById("ribbonbar");
       ribbonBar.appendChild(returnRibbon(gamenum));
       localStorage.setItem("OPSaved" + gamename,gamesWon.join(","));
