@@ -295,7 +295,8 @@ function handleKey(keynum) {
         }
         break;
       case KEY_SP: // toggle through white -> NE -> SE -> SW -> NW -> white
-        if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_WHITE) {
+        if ((puzzleBoardStates[globalCursorY][globalCursorX] == CELL_WHITE) ||
+            (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DOT)) {
           addMove(CELL_DIAGONAL_NE,globalCursorY,globalCursorX);
         } else if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DIAGONAL_NW) {
           addMove(CELL_WHITE,globalCursorY,globalCursorX);

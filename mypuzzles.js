@@ -30,6 +30,9 @@ let cannedPuzzles = [
   // D3
   "10x10:h1a.a11a2b1a1.a1d2c.h1a.1i.a1b1d1.1a2a1a11b.h1a.j.a1b2a22b",           // 6 17 2018 #12 pretty brilliant
   "10x10:g2b.a2h.b2f2.1d2a1b.d1e.b22b2c.g1a1.c22e.b1d2b.g1b",                   // 11 7 2024 #14 pretty tough, nice
+  "17x17:b1c1c2f.b1k11a.d1c1a2a2a21a.a2a1c21h.b1d2b11a11b.b1e2a21a12b.q." +
+        "c2f1f.112a2a2c1a22c.h11e11.c1a11j.e1b2a12b2b.2a2g11e.1e22g11." +
+        "d1h11b.2a2f1a2a11b.d1l",                                               //      v189 #5 elegant
   "17x17:b2b1b2a1f.o2a.1c2d1g.e1a2d1a2a1.1c1b2c2e.b2i1d.b2g2c1b." +
         "d2b1h2.1g1d1a1a.1a2c1a1b1e.c11g2b1a.a1e1i.d22b1a1a1a1a1." +
         "j1a1b2a.1a1c2j.h2a1f.b22d1a1b2b2",                                     // 24 37 2018 #15
@@ -62,7 +65,7 @@ let puzzleCount = cannedPuzzles.length;
 // which puzzles have demos
 const demoPuzzles =  [1,3];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,4,11,19];
+const puzzleLevels = [1,4,11,20];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

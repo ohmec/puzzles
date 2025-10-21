@@ -279,6 +279,12 @@ function addMove(moveType,y,x,noHistory=false) {
     }
     return;
   }
+  // a dot on a black cell clears it and adds the dot
+  if ((puzzleBoardStates[y][x] == CELL_BLACK) && (moveType == PATH_DOT)) {
+    puzzleBoardStates[y][x] = CELL_WHITE;
+    globalLineStates[y][x] = PATH_DOT;
+    return;
+  }
   // the rest are path changes, make sure they're legal
   // don't try and add paths that move into a black or fixed cell or edge or black cell
   if (puzzleBoardStates[y][x] == CELL_BLACK) {
