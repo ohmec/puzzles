@@ -16,6 +16,10 @@ const cannedPuzzles = [
         "448.7e8.930.6c8.a58.da8.2d0.d68.298.860",        // 2014 Box #1
   "10x10:120.ad8.988.6d0.538.6c8.f30.298.dc8.220:" +
         "928.b50.928.e90.968.a90.5c8.d28.6d8.920",        // 2014 Box #2
+  "10x10:308.d20.918.630.930.3c0.a58.748.b68.988:" +
+        "8c0.7b0.aa0.148.ba0.b68.bd0.d48.ca8.2c0",        // godzilla 129
+  "10x10:150.ca8.528.cc8.a30.4d8.d28.2c8.b30.188:" +
+        "648.9b0.a70.bc8.ff0.088.b78.4d0.d98.120",        // godzilla 130
   "10x10:120.ab8.598.a48.898.a48.4b8.c48.360.888:" +
         "490.fe8.9b8.fe8.5f0.a98.be0.7b8.858.200",        // godzilla 139
   // D2
@@ -65,7 +69,7 @@ let puzzleCount = cannedPuzzles.length;
 // which puzzles have demos
 const demoPuzzles  = [1,2];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,5,9,12];
+const puzzleLevels = [1,7,11,14];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

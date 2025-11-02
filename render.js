@@ -1425,12 +1425,20 @@ function updateHtmlText(spanName, value, isbutton=false) {
 function updateHtmlDescr(pdescr) {
   // these can get long, break into pieces
   if (pdescr) {
+    // convert < and > to avoid issues, but we
+    // need to put other text placeholder in there
+    // to make sure they don't themselves get
+    // broken up below
+    pdescr = pdescr.replaceAll('<', '@');
+    pdescr = pdescr.replaceAll('>', '#');
     let ptext = "puzzle descriptor:<br/>";
     while (pdescr.length > 120) {
-      ptext = ptext + pdescr.substr(0,120) + "<br/>";
+      ptext += pdescr.substr(0,120) + "<br/>";
       pdescr = pdescr.substr(120);
     }
-    ptext = ptext + pdescr;
+    ptext += pdescr;
+    ptext = ptext.replaceAll('@', '&lt;');
+    ptext = ptext.replaceAll('#', '&gt;');
     updateHtmlText('puzzledescr',  ptext);
   }
 }

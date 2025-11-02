@@ -10,14 +10,24 @@ let cannedPuzzles = [
       "F__7F__7.|F7||F_J.|||LJL_7.LJL_7F_J.F70FJL_7.||0|F_7|.|L_J|0||.L___J0LJ",
   // demos
   "8x8:2b22c.f1a.11d1a.b2c1a.h.e1b.a2a2b11.a1a1d",
-  "10x10:a1b11d.d2d1.a111b2a21.j.1a11f.f1a11.2e1b1.j.1c2a111a.c1f",             // 5 21 2018 #1
   // D1
+  "10x10:a1b11d.d2d1.a111b2a21.j.1a11f.f1a11.2e1b1.j.1c2a111a.c1f",             //  5 21 2018 #1
+  "10x10:a1b22b1a.1a1d1b.f1c.2b11a1a11.b1e1a.1a2b1c1.1d1b1a." +
+        "c1d1a.e11c.b22c1a2",                                                   //  7 24 box 2014 #1
+  "10x10:a11b12b2.j.11a2c1a1.b12c1b.2f11a.a2c11c.b2g.d1c21.11b1a1b1.c1b1c",     //  8 22 2018 #2
+  "10x10:c11b1a2.e11c.2h2.2b111b1a.c1d1a.a11g.j.b1a2a1b1.h2a.b1a22d",           //  8 17 box 2014 #2
   "10x10:2a2a1a1c.c1d11.c1b11b.f21a2.1d1c2.b12f.2b1c2a2.a2d2c.a1b1d1.b11b2a1a", // 12 19 2018 #3
   // D2
+  "10x10:b2e1a.e21c.1f11a.a2b2c2a.1e1c.a1a1b2c.a1a1e2.e11b2.j.a2c11c",          //  9 15 2018 #4
+  "10x10:2a1g.j.2d2a2a1.e1c1.a112b11b.1b11e.f22b.1b11e.g11a.c22c1a",            //  9 17 box 2014 #3
   "10x10:a2b1a2a1a.j.e1d.1a1a2c2a.1b2f.f1b2.a1c1a2a2.d2e.j.a2a1a2b1a",          // 11 11 2018 #5
+  "10x10:2e1c.h1a.c2d2a.d2211a1.1a1a22d.j.c1c2b.b21f.d2a2b1.a1e2b",             // 12 11 2018 #6
+  "10x10:2d2a2b.a2f11.1i.g1a1.2b11b1b.b1g.1c2d1.b11f.a1e2b.d22d",               //  9 14 box 2014 #4
   "10x10:a2b2b1b.j.b1c2b2.1c2c1a.a2h.h1a.a2c1c2.1b1c2b.j.b2b1b1a",              // 10 10 2018 #7
-  "10x10:j.1b2b1a1a.i2.f1c.1c22d.b1g.f1b1.2b11a11b.i1.b11c2b",                  // 6 15 2018 #9
-  "10x10:d1e.a11d1b.a11b2b1a.e1b1a.a2a2f.f2b1.a2h.d2c11.b11a2a2b.j",            // 8 14 2018 #11
+  "10x10:a1e1b.c1f.2a1b2c1.h2a.a1b1e.b2g.f2c.1b1b11b.a2c1c1.c1c1b",             //  6 15 2018 #8
+  "10x10:j.1b2b1a1a.i2.f1c.1c22d.b1g.f1b1.2b11a11b.i1.b11c2b",                  //  6 15 2018 #9
+  "10x10:c2f.d2d2.a2f2a.c2f.b2b2b2a.h2a.j.2e2c.c2d2a.b2g",                      // 15  0 2018 #10
+  "10x10:d1e.a11d1b.a11b2b1a.e1b1a.a2a2f.f2b1.a2h.d2c11.b11a2a2b.j",            //  8 14 2018 #11
   "17x17:2b22d1d11a.i1c1c.c2b22b1d1a.h1a1a1d.b2f1a1c11.e2g1a1a.2d2a1d1c1." +
         "b2a2l.f1a2a2e2.11g2d2b.d11b22c2c.1b11b1f2b.b11i2c.b1d1a22e2." +
         "11g22f.1c1b1h2.c1b11e2c",                                              // 29 40 2018 #13
@@ -30,21 +40,46 @@ let cannedPuzzles = [
   // D3
   "10x10:h1a.a11a2b1a1.a1d2c.h1a.1i.a1b1d1.1a2a1a11b.h1a.j.a1b2a22b",           // 6 17 2018 #12 pretty brilliant
   "10x10:g2b.a2h.b2f2.1d2a1b.d1e.b22b2c.g1a1.c22e.b1d2b.g1b",                   // 11 7 2024 #14 pretty tough, nice
+  "17x17:d1d1g.b1a1l.b1b11a2a1b1c.2a2f2b2b2a.b1b11a1f1a.b11h2c2.1d2a1a112e." +
+        "1a1e1d1a1a.b1b1c11a2d.a1e1a11f.a1c11e1d.c2b1b1e1a.d1b2b1e1.1i11b2a1." +
+        "1a2b1a111g.e1g1c.e1i1a",                                               // 15 56 box 2014 #7
   "17x17:b1c1c2f.b1k11a.d1c1a2a2a21a.a2a1c21h.b1d2b11a11b.b1e2a21a12b.q." +
         "c2f1f.112a2a2c1a22c.h11e11.c1a11j.e1b2a12b2b.2a2g11e.1e22g11." +
         "d1h11b.2a2f1a2a11b.d1l",                                               //      v189 #5 elegant
   "17x17:b2b1b2a1f.o2a.1c2d1g.e1a2d1a2a1.1c1b2c2e.b2i1d.b2g2c1b." +
         "d2b1h2.1g1d1a1a.1a2c1a1b1e.c11g2b1a.a1e1i.d22b1a1a1a1a1." +
         "j1a1b2a.1a1c2j.h2a1f.b22d1a1b2b2",                                     // 24 37 2018 #15
+  "17x17:h1h.b2c2f2a2a.c1c1c2d1.1a1a2d1g.j2c2b.a1a2b2b1b1b1a.2c1l." +
+        "b2c2c2b1b2.d1i1b.1h2b2c1.c2a1a2b1d1a.h1d2c.a2a1c2b2d1a.f1j." +
+        "1a1a2l.f2b2b1b2a.b1a1l",                                               // 27 29 box 2014 #8
   "17x17:k1e.a2a211b2a12c2a.m1b1.c2e1a2e.1b1a2h1a2.j2f.2a2b2b1e1b.f1j." +
         "2h2b2b2a.c11d2b1b1a.2d1f1b2a.b1d2a1g.b1a2e111b2a.b1c12g1a." +
         "c2a1e2a11b.g1g1a.b22a1c11b2a1a",                                       // 29 37 2024 #20 wow great
+  "17x17:d12e12d.a12d1a1d11a.a11a11a2a2a12a12a.q.a12a11a1a2a21a12a." +
+        "a12d1a1d21a.d21e21d.a11d211d21a.d11e11d.a11d212d11a.d21e21d." +
+        "a11d1a2d12a.a12a11a1a2a11a12a.q.a12a12a2a2a12a12a.a21d1a1d11a." +
+        "d11e12d",                                                              // 34 64 2018 #16
+  "17x17:c1j1b.2d1b2a1a1a2b.d2l.b2c1c2a2c2.a1g2g.d1a1a1c2c2.q.a2b1a1e1a2a1." +
+        "i2a1e.c11a1j.a2f1b212a2a.c1a12d2e.12m2a.f1b1g.d2c2b1a2c." +
+        "a2a1c1i.e2d2a1a1b",                                                    // 28 30 box 2014 #9
   "17x17:f1c2a1b2a.a2a1a1b1h.d1a1a1c2a1b.1b2a1b1a1e1.a1k11b.b1b1211212a1c." +
         "e2e1d1.a2a1a1e1b2b.2d2e1a121a.a2c1e2a1c.c1a1e1e.e2111112b1b.2l1b2." +
         "a2b1d1d2b.c1a1a1a1e1a.d1f2a1c.p2",                                     // 24 52 2024 #22 playful and fun
+  "17x17:2a1n.e2b1b2d2.c1d1c11c.b2b1a1f2b.k2a2c.a2a2a2a2i.l2a2a1.c1a2a2i." +
+        "1a1a2e2a2c2.c2m.2d2h2a1.j22e.a2e11g2.c1c11g2.d2g2d.e2d11a2b1." +
+        "2a1c1a2h",                                                             // 35 23 2018 #17
   "17x17:b11b2c1b22b.b2n.f2c2b1c.a111a2a2a1a2e.a1d2c1d2a.d1i1a2.2b1a1b2f1a." +
         "d1b2a2b2d.11f1b1e.d1g2c1.c2a1c2g.2c2c1a2c2a1.i1g.1e1j.b1b2a2c2b1a1." +
         "a1h1b1c.a1c1a1b1c2a2.",                                                // 29 38 2024 #23 methodical but good
+  "17x17:c2j2b.1c1a2a1a2f.b2f1d2a1.c2b1j.h2c1c2.a2b1b2a2a2c1a.b1b2k." +
+        "1b2c1a2a2a2a2a.a1b2l.g2a1b1b2a.a2b2a1a2e1b.c2a1e1c1a.a1b2e1f." +
+        "g2d2b2a.2a1a2a1d1e.n1a2.b1c1a1b2e",                                    // 34 29 2018 #18
+  "17x17:b1h1a1c.a1c11a1h.a1b2f1c2a.a1f1b1c2a.f2a1b1e.a2b1d2c1a1a.e2e1b2b." +
+        "b1f1g.c11b2d1d.1f21a1a1c1.c11g1a1a1.a1b1d1d1b.2d2a11d2c.h1a11e." +
+        "c1c2a1d1b.d2h1b2.a2g2b2d",                                             // 19 46 box 2014 #10
+  "17x17:c2c2c1e.b2f11b11b.e2c11d2a.2b1b1f1c.f1a2b11d.1a2b1k.d11e1a2a2a." +
+        "g1i.b1a2d1c11b.2e1c2f.a11d2e11b.l2d.a2e1a1g.c111c1a1b2b.a1i1b2b." +
+        "d1a2d1d1.b2f1c1c",                                                     // 20 42 2018 #19
   // D4
   "31x45:k1b1b1a2a2a2f2.a2b1c22e1a1g11d.l1a1f2f1a2.c1a2b11a11c11b11c12a2b." +
         "11l1h11d1a.c2a2a2a2a1a2e2a11c2a1b.d1e1c1a1e1d1c.b11b1b2b1a2i1f." +
@@ -63,9 +98,9 @@ let puzzleChoice = 11;
 let puzzleCount = cannedPuzzles.length;
 
 // which puzzles have demos
-const demoPuzzles =  [1,3];
+const demoPuzzles =  [1,4];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,4,11,20];
+const puzzleLevels = [1,7,20,35];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +
