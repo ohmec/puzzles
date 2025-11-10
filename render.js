@@ -1,17 +1,17 @@
-const CLICK_LEFT    = 0;
-const CLICK_MIDDLE  = 1;
-const CLICK_RIGHT   = 2;
-const CLICK_UNKNOWN = 9;
+const constClickLeft    = 0;
+const constClickMiddle  = 1;
+const constClickRight   = 2;
+const constClickUnknown = 9;
 
-const CIRCLE_NONE   = 0;
-const CIRCLE_WHITE  = 1;
-const CIRCLE_BLACK  = 2;
-const CIRCLE_DOT    = 3;
-const CIRCLE_MOON   = 4;
-const CIRCLE_TRI_NE = 5;
-const CIRCLE_TRI_SE = 6;
-const CIRCLE_TRI_SW = 7;
-const CIRCLE_TRI_NW = 8;
+const constCircleNone   = 0;
+const constCircleWhite  = 1;
+const constCircleBlack  = 2;
+const constCircleDot    = 3;
+const constCircleMoon   = 4;
+const constCircleTriNE = 5;
+const constCircleTriSE = 6;
+const constCircleTriSW = 7;
+const constCircleTriNW = 8;
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
@@ -23,69 +23,69 @@ const CIRCLE_TRI_NW = 8;
 // and double lines, i.e. single north is 0b00000001
 // and double north is 0b00000010
 
-const PATH_NONE    = 0b0000000000;
-const PATH_LINE    = 0b0100000000;
-const PATH_SPECIAL = 0b1000000000;
-const PATH_DOT     = PATH_SPECIAL | 0b01;
-const PATH_CLEAR   = PATH_SPECIAL | 0b10;
+const constPathNone    = 0b0000000000;
+const constPathLine    = 0b0100000000;
+const constPathSpecial = 0b1000000000;
+const constPathDot     = constPathSpecial | 0b01;
+const constPathClear   = constPathSpecial | 0b10;
 // these are the standard single-line versions
-const PATH_N       = PATH_LINE | 0b00000001;
-const PATH_W       = PATH_LINE | 0b00000100;
-const PATH_S       = PATH_LINE | 0b00010000;
-const PATH_E       = PATH_LINE | 0b01000000;
-const PATH_NW      = PATH_N | PATH_W;
-const PATH_NE      = PATH_N | PATH_E;
-const PATH_SW      = PATH_S | PATH_W;
-const PATH_SE      = PATH_S | PATH_E;
-const PATH_NS      = PATH_N | PATH_S;
-const PATH_WE      = PATH_W | PATH_E;
+const constPathN       = constPathLine | 0b00000001;
+const constPathW       = constPathLine | 0b00000100;
+const constPathS       = constPathLine | 0b00010000;
+const constPathE       = constPathLine | 0b01000000;
+const constPathNW      = constPathN | constPathW;
+const constPathNE      = constPathN | constPathE;
+const constPathSW      = constPathS | constPathW;
+const constPathSE      = constPathS | constPathE;
+const constPathNS      = constPathN | constPathS;
+const constPathWE      = constPathW | constPathE;
 // doubleline version
-const PATH_2N      = PATH_LINE | 0b00000010;
-const PATH_2W      = PATH_LINE | 0b00001000;
-const PATH_2S      = PATH_LINE | 0b00100000;
-const PATH_2E      = PATH_LINE | 0b10000000;
-const PATH_ALL     = 0b11111111;
+const constPath2N      = constPathLine | 0b00000010;
+const constPath2W      = constPathLine | 0b00001000;
+const constPath2S      = constPathLine | 0b00100000;
+const constPath2E      = constPathLine | 0b10000000;
+const constPathAll     = 0b11111111;
 
-const KEY_BS    = 0x08;
-const KEY_CR    = 0x0d;
-const KEY_SHIFT = 0x10;
-const KEY_ESC   = 0x1b;
-const KEY_SP    = 0x20;
-const KEY_LEFT  = 0x25;
-const KEY_UP    = 0x26;
-const KEY_RIGHT = 0x27;
-const KEY_DOWN  = 0x28;
-const KEY_0     = 0x30;
-const KEY_1     = 0x31;
-const KEY_2     = 0x32;
-const KEY_3     = 0x33;
-const KEY_4     = 0x34;
-const KEY_7     = 0x37;
-const KEY_9     = 0x39;
-const ALT_0     = 0x60; // these are the number pad versions
-const ALT_1     = 0x61;
-const ALT_2     = 0x62;
-const ALT_3     = 0x63;
-const ALT_4     = 0x64;
-const ALT_9     = 0x69;
-const KEY_A     = 0x41;
-const KEY_E     = 0x45;
-const KEY_F     = 0x46;
-const KEY_I     = 0x49;
-const KEY_J     = 0x4a;
-const KEY_L     = 0x4c;
-const KEY_N     = 0x4e;
-const KEY_S     = 0x53;
-const KEY_W     = 0x57;
-const KEY_X     = 0x58;
-const KEY_Z     = 0x5a;
-const KEY_CTLL  = 0x5b;
-const KEY_CTLR  = 0x5d;
-const KEY_a     = 0x61;
-const KEY_z     = 0x7a;
-const KEY_DASH  = 0xbd;
-const KEY_DOT   = 0xbe;
-const KEY_VERT  = 0xdc;
+const constKeyBackspace = 0x08;
+const constKeyCR        = 0x0d;
+const constKeyShift     = 0x10;
+const constKeyEsc       = 0x1b;
+const constKeySpace     = 0x20;
+const constKeyLeft      = 0x25;
+const constKeyUp        = 0x26;
+const constKeyRight     = 0x27;
+const constKeyDown      = 0x28;
+const constKey0         = 0x30;
+const constKey1         = 0x31;
+const constKey2         = 0x32;
+const constKey3         = 0x33;
+const constKey4         = 0x34;
+const constKey7         = 0x37;
+const constKey9         = 0x39;
+const constKeyAlt0      = 0x60; // these are the number pad versions
+const constKeyAlt1      = 0x61;
+const constKeyAlt2      = 0x62;
+const constKeyAlt3      = 0x63;
+const constKeyAlt4      = 0x64;
+const constKeyAlt9      = 0x69;
+const constKeyA         = 0x41;
+const constKeyE         = 0x45;
+const constKeyF         = 0x46;
+const constKeyI         = 0x49;
+const constKeyJ         = 0x4a;
+const constKeyL         = 0x4c;
+const constKeyN         = 0x4e;
+const constKeyS         = 0x53;
+const constKeyW         = 0x57;
+const constKeyX         = 0x58;
+const constKeyZ         = 0x5a;
+const constKeyCtrlL     = 0x5b;
+const constKeyCtrlR     = 0x5d;
+const constKeyAlc       = 0x61;
+const constKeyZlc       = 0x7a;
+const constKeyDash      = 0xbd;
+const constKeyDot       = 0xbe;
+const constKeyVert      = 0xdc;
 
 const numberColor = [
   // 0 unused     1          2          3          4          5          6           7          8        9
@@ -97,6 +97,21 @@ const numberColor = [
   //  U-30       V-31       W-32       X-33       Y-34       Z-35
   "#009000", "#b00000", "#b000ff",   "#ffb000", "#b0b000", "#b0b0b0",
 ];
+
+const stdFontColor       = "black";
+const offFontColor       = "white";
+const errorFontColor     = "red";
+const correctFontColor   = "green";
+const correctFontColorBr = "#a0ffa0";     // bright green
+const correctFontColorDr = "#20c020";     // darker green
+const emptyCellColor     = "white";       // not-filled
+const litCellColor       = "#ffffd0";     // yellow lit hallway color
+const indetCellColor     = "#e0e0e0";     // indeterminant color (default)
+const fillCellColor      = "black";
+const fillCellColorDB    = "#000060";     // filled, slightly dark blue
+const fillCellColorBlue  = "#6060b0";     // filled, more dark blue to contrast with black walls
+const errorCircleColor   = "red";
+const correctCircleColor = "green";
 
 const constWallNone      = 0b000000000;
 const constWallLight     = 0b000000001;
@@ -121,7 +136,23 @@ const constColorSuccess   = "#1be032";
 const constColorCursor    = "#ff80ff";
 const constLineColor      = "black";
 
-const EMPTYCELL = -1;
+const constEmptyCell = -1;
+
+const elemStruct = {
+  resetButton: null, assistButton: null, clearButton: null, undoButton: null,
+  displayButton: null, nextDemoButton: null, prevDemoButton: null, tab1: null,
+  demotab: null, canvas: null, canvasDiv: null, puzzleCanvas: null, userPuzzle: null
+};
+
+const playState = {
+  clicking: false, dragging: false, shifting: false, ctrling: false,
+  shiftState: 0, shiftNumber: 0, clickNumber: 0, pinCellY: 0, pinCellX: 0,
+  assistState: 0, bridgeBuilt: false, errorCount: 0
+};
+
+let initPuzzle, puzzle;
+let isDemo = false;
+let demoStepNum = 0;
 
 let globalFontSize = 0.5;
 let globalGridSize = 45;
@@ -144,6 +175,216 @@ let globalBoardTextColors, globalBoardTextOppColors, globalWallColors;
 let globalLineStates, globalLineColors, globalDotColors, globalCircleStates;
 let globalCircleColors, globalTextBold;
 
+function initElements () {
+  elemStruct.assistButton =   document.getElementById('assistButton');
+  elemStruct.canvas =         document.getElementById('puzzleCanvas');
+  elemStruct.canvasDiv =      document.getElementById('canvasDiv');
+  elemStruct.clearButton =    document.getElementById('clearButton');
+  elemStruct.demotab =        document.getElementById('demotab');
+  elemStruct.displayButton =  document.getElementById('displayButton');
+  elemStruct.nextDemoButton = document.getElementById('nextDemoButton');
+  elemStruct.prevDemoButton = document.getElementById('prevDemoButton');
+  elemStruct.puzzleCanvas =   document.getElementById('puzzleCanvas');
+  elemStruct.resetButton =    document.getElementById('resetButton');
+  elemStruct.tab1 =           document.getElementById('tab1');
+  elemStruct.undoButton =     document.getElementById('undoButton');
+  elemStruct.userPuzzle =     document.getElementById('userPuzzle');
+
+  elemStruct.tab1.style.display = 'block';
+  elemStruct.puzzleCanvas.addEventListener('contextmenu', function(evnt) { evnt.preventDefault(); });
+  canvas = document.getElementById('puzzleCanvas');
+  globalContext = canvas.getContext('2d');
+}
+
+function moveGlobalCursor(keydir) {
+  switch (keynum) {
+    case constKeyUp:    if (globalCursorY)                     globalCursorY--; break;
+    case constKeyDown:  if (globalCursorY < (globalPuzzleH-1)) globalCursorY++; break;
+    case constKeyLeft:  if (globalCursorX)                     globalCursorX--; break;
+    case constKeyRight: if (globalCursorX < (globalPuzzleW-1)) globalCursorX++; break;
+  }
+}
+
+function listenKeys(keyList,handleFunc,shiftFunc=null,unshiftFunc=null) {
+  // any key anywhere as long as canvas is in focus
+  document.addEventListener('keydown', function(evnt) {
+    elemStruct.resetButton.blur();
+    elemStruct.clearButton.blur();
+    elemStruct.undoButton.blur();
+    elemStruct.assistButton.blur();
+    if (evnt.which === constKeySpace && !evnt.target.matches("input")) {
+      evnt.preventDefault();
+    }
+    if (evnt.which >= constKeyLeft && evnt.which <= constKeyDown && !evnt.target.matches("input, textarea")) {
+      evnt.preventDefault();
+    }
+    if (evnt.which == constKeyShift) {
+      playState.shifting = true;
+      playState.pinCellY = globalCursorY;
+      playState.pinCellX = globalCursorX;
+      if (shiftFunc) {
+        shiftFunc();
+      }
+    } else if ((evnt.which == constKeyCtrlL) || (evnt.which == constKeyCtrlR)) {
+      playState.ctrling = true;
+    } else if (!playState.ctrling && keyList.find(element => element == evnt.which)) {
+      handleFunc(evnt.which);
+    }
+  });
+
+  document.addEventListener('keyup', function(evnt) {
+    if (evnt.which == constKeyShift) {
+      playState.shifting = false;
+      if (unshiftFunc) {
+        unshiftFunc();
+      }
+    } else if ((evnt.which == constKeyCtrlL) || (evnt.which == constKeyCtrlR)) {
+      playState.ctrling = false;
+    }
+  });
+}
+
+function listenClick(handleClick,initStructures,undoMove,mouseupFunc=null) {
+  // a click (except right-click i.e. ctrl-click) on tabs.
+  // hide old, show new
+  document.querySelectorAll("#tabs li").forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault(); // replaces "return false"
+
+      // Remove 'active' class from all tabs
+      document.querySelectorAll("#tabs li").forEach(function(t) {
+        t.classList.remove('active');
+      });
+
+      // Add 'active' class to clicked tab
+      this.classList.add('active');
+
+      // Hide all tab content
+      document.querySelectorAll(".tab_content").forEach(function(content) {
+        content.style.display = 'none';
+      });
+
+      // Show the target tab content
+      const targetHref = this.querySelector("a").getAttribute("href");
+      document.querySelector(targetHref).style.display = 'block';
+
+      playState.clicking = false;
+    });
+  });
+
+  elemStruct.displayButton.addEventListener('click', function() {
+    let pval = elemStruct.userPuzzle.value;
+    if (pval.search(/:/) == -1) {
+      if (pval < cannedPuzzles.length) {
+        puzzleChoice = pval;
+        initPuzzle = cannedPuzzles[pval];
+        puzzle = removeDot(initPuzzle);
+        updateHtmlDescr(initPuzzle);
+        // check to see if this is a demo puzzle
+        let search = demoPuzzles.find(element => element == pval);
+        if (search !== undefined) {
+          elemStruct.demotab.style.display = 'block';
+          demoStepNum = 0;
+          updateDemoRegion(pval);
+        } else {
+          elemStruct.demotab.style.display = 'none';
+        }
+      }
+    } else {
+      elemStruct.demotab.style.display = 'none';
+      initPuzzle = pval;
+      puzzle = removeDot(pval);
+      puzzleChoice = 0;
+      updateHtmlDescr(initPuzzle);
+    }
+    initStructures(puzzle);
+  });
+
+  elemStruct.nextDemoButton.addEventListener('click', function() {
+    isDemo = true;
+    demoStepNum++;
+    updateDemoRegion(puzzleChoice);
+  });
+
+  elemStruct.prevDemoButton.addEventListener('click', function() {
+    if (demoStepNum) {
+      demoStepNum--;
+    }
+    updateDemoRegion(puzzleChoice);
+  });
+
+  // click (down) within puzzle number entry, remove clicking
+  // effect on canvas
+  elemStruct.userPuzzle.addEventListener('mousedown', function(evnt) {
+    playState.clicking = false;
+  });
+
+  // click (down) within puzzle frame
+  elemStruct.puzzleCanvas.addEventListener('mousedown', function(evnt) {
+    playState.clicking = true;
+    playState.bridgeBuilt = false;
+    elemStruct.puzzleCanvas.style.borderColor = "black";
+    handleClick(evnt);
+  });
+
+  // moving mouse within puzzle area (clicking is true if already moused down => dragging)
+  elemStruct.puzzleCanvas.addEventListener('mousemove', function(evnt) {
+    if (playState.clicking == false) return;
+    evnt.preventDefault();
+    playState.dragging = true;
+    handleClick(evnt);
+  });
+
+  // releasing mouse within puzzle or not within puzzle
+  document.addEventListener('mouseup', function() {
+    if (mouseupFunc && playState.dragging && (curClickType==constClickLeft)) {
+      mouseupFunc();
+    }
+    playState.clicking = false;
+    playState.dragging = false;
+  });
+
+  // undo click, remove the last move
+  elemStruct.undoButton.addEventListener('click', function() {
+    elemStruct.canvasDiv.style.borderColor = "black";
+    undoMove();
+  });
+
+  // click on reset, brings up confirmation, then resets puzzle
+  elemStruct.resetButton.addEventListener('click', function() {
+    elemStruct.canvasDiv.style.borderColor = "black";
+    let resetDialog = confirm("Reset puzzle?");
+    if (resetDialog == true) {
+      elemStruct.resetButton.blur();
+      elemStruct.clearButton.blur();
+      elemStruct.assistButton.blur();
+      initStructures(puzzle);
+    }
+  });
+
+  // click on clear ribbons, brings up confirmation, then resets puzzle
+  elemStruct.clearButton.addEventListener('click', function() {
+    let resetDialog = confirm("Clear Ribbons Shelf?");
+    if (resetDialog == true) {
+      try {
+        localStorage.setItem("OPSaved" + gameName,'');
+      } catch (e) {
+        console.warn("couldn't save to localStorage: " + e);
+      }
+      const ribbonBar = document.getElementById("ribbonbar");
+      ribbonBar.innerHTML = '';
+      elemStruct.clearButton.style.display = 'none';
+    }
+  });
+
+  // click on show errors, converts to show how many errors remain
+  elemStruct.assistButton.addEventListener('click', function() {
+    playState.assistState = (playState.assistState+1)%3;
+    updateBoardStatus();
+    drawBoard();
+  });
+}
+
 function basicInitStructures(size,cellColor,wallState,borderState,textColor) {
   let wxh = size.split("x");
   globalPuzzleW = parseInt(wxh[0]);
@@ -152,17 +393,21 @@ function basicInitStructures(size,cellColor,wallState,borderState,textColor) {
   canvas.height = globalPuzzleH*globalGridSize+2*globalBorderMargin;
   canvas.width  = globalPuzzleW*globalGridSize+2*globalBorderMargin;
   globalBoardValues =        initYXFromValue("");
-  globalLineStates   =       initYXFromValue(PATH_NONE);
+  globalLineStates   =       initYXFromValue(constPathNone);
   globalBoardColors =        initYXFromValue(cellColor);
   globalWallStates =         initWallStates(wallState,borderState);
   globalWallColors =         initYX2FromValue(constLineColor);
   globalBoardTextColors =    initYXFromValue(textColor);
   globalBoardTextOppColors = initYXFromValue("white");
   globalLineColors =         initYXFromValue(constLineColor);
-  globalCircleStates =       initYXFromValue(CIRCLE_NONE);
+  globalCircleStates =       initYXFromValue(constCircleNone);
   globalCircleColors =       initYXFromValue(constLineColor);
   globalDotColors =          initYX2FromValue(constLineColor);
   globalTextBold =           initYXFromValue(true);
+}
+
+function removeDot(strval) {
+  return strval.replace(/\./gi, "");
 }
 
 function expandNumParams(numStr) {
@@ -304,7 +549,7 @@ function initLineValuesFromParams(numParamText,hasDir=false) {
   // to treat the FJL7|_ characters as line segments
   let lineValues;
   if (numParamText &&
-      (numParamText.search(/F/)!=-1) && (numParamText.search(/J/)!=-1) && 
+      (numParamText.search(/F/)!=-1) && (numParamText.search(/J/)!=-1) &&
       (numParamText.search(/7/)!=-1) && (numParamText.search(/L/)!=-1)) {
     // special case for hasDir; 1v (2v 3v etc) indicates a south
     // arrow so we need to convert those to another character
@@ -582,7 +827,7 @@ function initRoomsFromBoxes(boxParams) {
     let bh = parseBase62(boxParamArray[b+2]);
     let bw = parseBase62(boxParamArray[b+3]);
     let bd = parseBase62(boxParamArray[b+4]);
-    let count = (bd == '-') ? EMPTYCELL : bd;
+    let count = (bd == '-') ? constEmptyCell : bd;
     roomStates.push([by,bx,bh,bw,count]);
   }
   return roomStates;
@@ -728,15 +973,15 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
   // draw circle next if it exists
   if (circle) {
     // "circle" might be a triangle for Shakashaka
-    if (circle >= CIRCLE_TRI_NE) {
+    if (circle >= constCircleTriNE) {
       let cornersY = [drawY,drawY,drawY+globalGridSize,drawY+globalGridSize];
       let cornersX = [drawX,drawX+globalGridSize,drawX+globalGridSize,drawX];
-      let drawY1 = cornersY[(circle-CIRCLE_TRI_NE)%4];
-      let drawX1 = cornersX[(circle-CIRCLE_TRI_NE)%4];
-      let drawY2 = cornersY[(circle-CIRCLE_TRI_NE+1)%4];
-      let drawX2 = cornersX[(circle-CIRCLE_TRI_NE+1)%4];
-      let drawY3 = cornersY[(circle-CIRCLE_TRI_NE+2)%4];
-      let drawX3 = cornersX[(circle-CIRCLE_TRI_NE+2)%4];
+      let drawY1 = cornersY[(circle-constCircleTriNE)%4];
+      let drawX1 = cornersX[(circle-constCircleTriNE)%4];
+      let drawY2 = cornersY[(circle-constCircleTriNE+1)%4];
+      let drawX2 = cornersX[(circle-constCircleTriNE+1)%4];
+      let drawY3 = cornersY[(circle-constCircleTriNE+2)%4];
+      let drawX3 = cornersX[(circle-constCircleTriNE+2)%4];
       globalContext.fillStyle = circlecolor;
       globalContext.beginPath();
       globalContext.moveTo(drawX1,drawY1);
@@ -745,19 +990,19 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
       globalContext.closePath();
       globalContext.fill();
     } else {
-      let radius = (circle==CIRCLE_DOT) ? globalCircleRadius*globalGridSize*0.35 :
+      let radius = (circle==constCircleDot) ? globalCircleRadius*globalGridSize*0.35 :
                                           globalCircleRadius*globalGridSize;
       globalContext.lineWidth = 4.0;
       globalContext.strokeStyle = circlecolor;
-      globalContext.fillStyle = (circle>=CIRCLE_BLACK) ? circlecolor : "white";
+      globalContext.fillStyle = (circle>=constCircleBlack) ? circlecolor : "white";
       globalContext.beginPath();
       globalContext.arc(drawX+globalGridSize/2,
                         drawY+globalGridSize/2,
                         radius,0,2*Math.PI);
       globalContext.stroke();
       globalContext.fill();
-      // if CIRCLE_MOON draw another white one to eclipse the original one
-      if (circle==CIRCLE_MOON) {
+      // if constCircleMoon draw another white one to eclipse the original one
+      if (circle==constCircleMoon) {
         globalContext.strokeStyle = "white";
         globalContext.fillStyle = "white";
         globalContext.beginPath();
@@ -915,7 +1160,7 @@ function drawDot(y,x) {
 
 function drawLine(y,x,state,color) {
   // special case for "line dot"
-  if (state == PATH_DOT) {
+  if (state == constPathDot) {
     let drawX = Math.floor((x+0.5)*globalGridSize)+globalBorderMargin;
     let drawY = Math.floor((y+0.5)*globalGridSize)+globalBorderMargin;
     globalContext.strokeStyle = color;
@@ -926,8 +1171,8 @@ function drawLine(y,x,state,color) {
     globalContext.fill();
     return;
   }
-  if (((state & PATH_LINE) == PATH_LINE) &&
-      ((state & PATH_ALL)  != 0)) {
+  if (((state & constPathLine) == constPathLine) &&
+      ((state & constPathAll)  != 0)) {
     // now walk through each of the 4 directions to check for one
     // or two line segments
     globalContext.strokeStyle = color;
@@ -1001,9 +1246,11 @@ function drawLine(y,x,state,color) {
 // returns [vcell, hcell, isCorner, isEdge, vedge, hedge ]
 
 function getClickCellInfo(evnt, canvas) {
-  let canvasElement = document.getElementById(canvas);
-  let yCoord = evnt.pageY-$(canvasElement).offset().top-parseInt( $(canvasElement).css("border-top-width"))-globalBorderMargin;
-  let xCoord = evnt.pageX-$(canvasElement).offset().left-parseInt($(canvasElement).css("border-left-width"))-globalBorderMargin;
+  let rect = elemStruct.canvas.getBoundingClientRect();
+  let borderTop  = parseInt(getComputedStyle(elemStruct.canvas).borderTopWidth);
+  let borderLeft = parseInt(getComputedStyle(elemStruct.canvas).borderLeftWidth);
+  let yCoord = evnt.pageY - rect.top  - window.scrollY - borderTop  - globalBorderMargin;
+  let xCoord = evnt.pageX - rect.left - window.scrollX - borderLeft - globalBorderMargin;
   let vertCell = Math.floor(yCoord/globalGridSize);
   let horzCell = Math.floor(xCoord/globalGridSize);
   let horzDistFromEdgeL = Math.abs((horzCell  )*globalGridSize - xCoord);
@@ -1130,45 +1377,45 @@ function findDigitRoom(arrayYX,y,x,value) {
 function advanceLine(y,x,state,dir,clockwise) {
   let inerror = false;
   switch (state) {
-    case PATH_NONE:   return [false,y,x,dir];
-    case PATH_DOT:    return [false,y,x,dir];
-    case PATH_N: if (dir!=0 && dir!='N') inerror = true; break;
-    case PATH_S: if (dir!=0 && dir!='S') inerror = true; break;
-    case PATH_E: if (dir!=0 && dir!='E') inerror = true; break;
-    case PATH_W: if (dir!=0 && dir!='W') inerror = true; break;
-    case PATH_WE:
+    case constPathNone:   return [false,y,x,dir];
+    case constPathDot:    return [false,y,x,dir];
+    case constPathN:      if (dir!=0 && dir!='N') inerror = true; break;
+    case constPathS:      if (dir!=0 && dir!='S') inerror = true; break;
+    case constPathE:      if (dir!=0 && dir!='E') inerror = true; break;
+    case constPathW:      if (dir!=0 && dir!='W') inerror = true; break;
+    case constPathWE:
       if (( clockwise && dir==0) || dir=='W') return [true,y,x+1,'W'];
       if ((!clockwise && dir==0) || dir=='E') return [true,y,x-1,'E'];
       inerror = true;
       break;
-    case PATH_NS:
+    case constPathNS:
       if (( clockwise && dir==0) || dir=='N') return [true,y+1,x,'N'];
       if ((!clockwise && dir==0) || dir=='S') return [true,y-1,x,'S'];
       inerror = true;
       break;
-    case PATH_SE:
+    case constPathSE:
       if (( clockwise && dir==0) || dir=='S') return [true,y,x+1,'W'];
       if ((!clockwise && dir==0) || dir=='E') return [true,y+1,x,'N'];
       inerror = true;
       break;
-    case PATH_NW:
+    case constPathNW:
       if (( clockwise && dir==0) || dir=='N') return [true,y,x-1,'E'];
       if ((!clockwise && dir==0) || dir=='W') return [true,y-1,x,'S'];
       inerror = true;
       break;
-    case PATH_NE:
+    case constPathNE:
       if (( clockwise && dir==0) || dir=='N') return [true,y,x+1,'W'];
       if ((!clockwise && dir==0) || dir=='E') return [true,y-1,x,'S'];
       inerror = true;
       break;
-    case PATH_SW:
+    case constPathSW:
       if (( clockwise && dir==0) || dir=='S') return [true,y,x-1,'E'];
       if ((!clockwise && dir==0) || dir=='W') return [true,y+1,x,'N'];
       inerror = true;
       break;
   }
   if (inerror) {
-    console.log("ERROR: broken path, coming from " + y + "," + x + " with dir " + dir + " and found " + state);
+    throw "ERROR: broken path, coming from " + y + "," + x + " with dir " + dir + " and found " + state;
   }
   return [false,y,x,dir];
 }
@@ -1320,23 +1567,23 @@ function travelPathNetwork(arrayYX,y,x) {
     let curCell = networkCells[tryindex].split(",");
     let iy = parseInt(curCell[0]);
     let ix = parseInt(curCell[1]);
-    if ((((globalLineStates[iy][ix] & PATH_N)  == PATH_N) ||
-         ((globalLineStates[iy][ix] & PATH_2N) == PATH_2N)) &&
+    if ((((globalLineStates[iy][ix] & constPathN)  == constPathN) ||
+         ((globalLineStates[iy][ix] & constPath2N) == constPath2N)) &&
         (networkCells.indexOf((iy-1)+","+ix) == -1)) {
       networkCells.push((iy-1)+","+ix);
     }
-    if ((((globalLineStates[iy][ix] & PATH_W)  == PATH_W) ||
-         ((globalLineStates[iy][ix] & PATH_2W) == PATH_2W)) &&
+    if ((((globalLineStates[iy][ix] & constPathW)  == constPathW) ||
+         ((globalLineStates[iy][ix] & constPath2W) == constPath2W)) &&
         (networkCells.indexOf(iy+","+(ix-1)) == -1)) {
       networkCells.push(iy+","+(ix-1));
     }
-    if ((((globalLineStates[iy][ix] & PATH_S)  == PATH_S) ||
-         ((globalLineStates[iy][ix] & PATH_2S) == PATH_2S)) &&
+    if ((((globalLineStates[iy][ix] & constPathS)  == constPathS) ||
+         ((globalLineStates[iy][ix] & constPath2S) == constPath2S)) &&
         (networkCells.indexOf((iy+1)+","+ix) == -1)) {
       networkCells.push((iy+1)+","+ix);
     }
-    if ((((globalLineStates[iy][ix] & PATH_E)  == PATH_E) ||
-         ((globalLineStates[iy][ix] & PATH_2E) == PATH_2E)) &&
+    if ((((globalLineStates[iy][ix] & constPathE)  == constPathE) ||
+         ((globalLineStates[iy][ix] & constPath2E) == constPath2E)) &&
         (networkCells.indexOf(iy+","+(ix+1)) == -1)) {
       networkCells.push(iy+","+(ix+1));
     }
@@ -1463,7 +1710,12 @@ function updateDynamicHtmlEntries(etext,astate) {
 
 function canvasSuccess(isdemo,gamename,gamenum) {
   if (!isdemo && gamenum) {
-    let gameStorage = localStorage.getItem("OPSaved" + gamename);
+    let gameStorage;
+    try {
+      gameStorage = localStorage.getItem("OPSaved" + gamename);
+    } catch (e) {
+      console.warn("couldn't read from localStorage: " + e);
+    }
     let gamesWon;
     let isNewRibbon = false;
     if (gameStorage != null) {
@@ -1479,186 +1731,273 @@ function canvasSuccess(isdemo,gamename,gamenum) {
       gamesWon.push(gamenum.toString());
       const ribbonBar = document.getElementById("ribbonbar");
       ribbonBar.appendChild(returnRibbon(gamenum));
-      localStorage.setItem("OPSaved" + gamename,gamesWon.join(","));
-      $("#clearButton").show();
+      try {
+        localStorage.setItem("OPSaved" + gamename,gamesWon.join(","));
+      } catch (e) {
+        console.warn("couldn't save to localStorage: " + e);
+      }
+      elemStruct.clearButton.style.display = 'inline';
     }
   }
-  $("#canvasDiv").css("border-color", constColorSuccess);
-  $("#canvasDiv").css("background", constColorSuccess);
+  elemStruct.canvasDiv.style.borderColor = constColorSuccess;
+  elemStruct.canvasDiv.style.background = constColorSuccess;
 }
 
 function canvasIncomplete() {
-  $("#canvasDiv").css("border-color", "black");
-  $("#canvasDiv").css("background", "white");
+  elemStruct.canvasDiv.style.borderColor = "black";
+  elemStruct.canvasDiv.style.background = "white";
 }
 
 function clickType(evnt) {
-  if((evnt.button==CLICK_LEFT) && !evnt.altKey) {
-    return CLICK_LEFT;
+  if((evnt.button==constClickLeft) && !evnt.altKey) {
+    return constClickLeft;
   }
-  if(evnt.button==CLICK_MIDDLE) {
-    return CLICK_MIDDLE;
+  if(evnt.button==constClickMiddle) {
+    return constClickMiddle;
   }
-  if((evnt.button==CLICK_RIGHT) || ((evnt.button==CLICK_LEFT) && evnt.altKey)) {
-    return CLICK_RIGHT;
+  if((evnt.button==constClickRight) || ((evnt.button==constClickLeft) && evnt.altKey)) {
+    return constClickRight;
   }
-  return CLICK_UNKNOWN;
+  return constClickUnknown;
 }
 
 function pathHasTurn(line) {
-  if (line==PATH_NW || line==PATH_NE || line==PATH_SW || line==PATH_SE) {
+  if (line==constPathNW || line==constPathNE || line==constPathSW || line==constPathSE) {
     return true;
   }
   return false;
 }
 
 function mergePathLines(line1,line2) {
-  if ((line1==0) || (line1==PATH_DOT)) {
-    return line2;
-  } else if (line1==line2) {
-    return line1;
-  } else {
-    // often the merges are incompatible, just need to return
-    // the new one
-    if (((line1==PATH_WE) && (line2==PATH_N || line2==PATH_S)) ||
-        ((line1==PATH_NS) && (line2==PATH_W || line2==PATH_E)) ||
-        ((line1==PATH_SE) && (line2==PATH_N || line2==PATH_W)) ||
-        ((line1==PATH_NE) && (line2==PATH_S || line2==PATH_W)) ||
-        ((line1==PATH_NW) && (line2==PATH_S || line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_N || line2==PATH_E))) {
-      return line2;
-    }
-    // often the merges are identical, just return the old one
-    if (((line1==PATH_WE) && (line2==PATH_W || line2==PATH_E)) ||
-        ((line1==PATH_NS) && (line2==PATH_N || line2==PATH_S)) ||
-        ((line1==PATH_SE) && (line2==PATH_S || line2==PATH_E)) ||
-        ((line1==PATH_NE) && (line2==PATH_N || line2==PATH_E)) ||
-        ((line1==PATH_NW) && (line2==PATH_N || line2==PATH_W)) ||
-        ((line1==PATH_SW) && (line2==PATH_S || line2==PATH_W))) {
-      return line1;
-    }
+  // basic cases
+  if (line1==0)             return line2;
+  if (line1==constPathDot)  return line2;
+  if (line1==line2)         return line1;
+
+  // lookup table of merges
+  const chooseLine1 = 99991;
+  const chooseLine2 = 99992;
+  const constMergeLineTable = {
+    // often the merges are incompatible, just need to return the new one (line2)
+    [`${constPathWE},${constPathN}`]: chooseLine2,
+    [`${constPathWE},${constPathS}`]: chooseLine2,
+    [`${constPathNS},${constPathW}`]: chooseLine2,
+    [`${constPathNS},${constPathE}`]: chooseLine2,
+    [`${constPathSE},${constPathN}`]: chooseLine2,
+    [`${constPathSE},${constPathW}`]: chooseLine2,
+    [`${constPathNE},${constPathS}`]: chooseLine2,
+    [`${constPathNE},${constPathW}`]: chooseLine2,
+    [`${constPathNW},${constPathS}`]: chooseLine2,
+    [`${constPathNW},${constPathE}`]: chooseLine2,
+    [`${constPathSW},${constPathN}`]: chooseLine2,
+    [`${constPathSW},${constPathE}`]: chooseLine2,
     // these are actual merges
-    if ((line1==PATH_W && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_W)) {
-      return PATH_WE;
-    }
-    if ((line1==PATH_N && line2==PATH_S) ||
-        (line1==PATH_S && line2==PATH_N)) {
-      return PATH_NS;
-    }
-    if ((line1==PATH_N && line2==PATH_W) ||
-        (line1==PATH_W && line2==PATH_N)) {
-      return PATH_NW;
-    }
-    if ((line1==PATH_S && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_S)) {
-      return PATH_SE;
-    }
-    if ((line1==PATH_N && line2==PATH_E) ||
-        (line1==PATH_E && line2==PATH_N)) {
-      return PATH_NE;
-    }
-    if ((line1==PATH_S && line2==PATH_W) ||
-        (line1==PATH_W && line2==PATH_S)) {
-      return PATH_SW;
-    }
-    return line1;
-  }
+    [`${constPathW},${constPathE}`]: constPathWE,
+    [`${constPathE},${constPathW}`]: constPathWE,
+    [`${constPathN},${constPathS}`]: constPathNS,
+    [`${constPathS},${constPathN}`]: constPathNS,
+    [`${constPathN},${constPathW}`]: constPathNW,
+    [`${constPathW},${constPathN}`]: constPathNW,
+    [`${constPathS},${constPathE}`]: constPathSE,
+    [`${constPathE},${constPathS}`]: constPathSE,
+    [`${constPathN},${constPathE}`]: constPathNE,
+    [`${constPathE},${constPathN}`]: constPathNE,
+    [`${constPathS},${constPathW}`]: constPathSW,
+    [`${constPathW},${constPathS}`]: constPathSW
+    // default: just return the old one (line1)
+  };
+
+  const mergeResult = constMergeLineTable[`${line1},${line2}`] ?? chooseLine1;
+  if (mergeResult==chooseLine1) return line1;
+  if (mergeResult==chooseLine2) return line2;
+  return mergeResult;
 }
 
 function unmergePathLines(line1,line2) {
-  if (line1==PATH_NONE) {
-    return PATH_NONE;
-  } else if (line1==PATH_DOT) {
-    return PATH_DOT;
-  } else if (line1==line2) {
-    return PATH_NONE;
+  // basic cases
+  if (line1==constPathNone)         return line1;
+  if (line1==constPathDot)          return line1;
+  if (line1==line2)                 return constPathNone;
   // if there is no intersection, ignore
-  } else if ((line1&line2)==PATH_LINE) {
-    return line1;
-  } else {
-    if (((line1==PATH_WE) && (line2==PATH_W)) ||
-        ((line1==PATH_SE) && (line2==PATH_S)) ||
-        ((line1==PATH_NE) && (line2==PATH_N))) {
-      return PATH_E;
-    }
-    if (((line1==PATH_WE) && (line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_S)) ||
-        ((line1==PATH_NW) && (line2==PATH_N))) {
-      return PATH_W;
-    }
-    if (((line1==PATH_NS) && (line2==PATH_N)) ||
-        ((line1==PATH_SE) && (line2==PATH_E)) ||
-        ((line1==PATH_SW) && (line2==PATH_W))) {
-      return PATH_S;
-    }
-    if (((line1==PATH_NS) && (line2==PATH_S)) ||
-        ((line1==PATH_NE) && (line2==PATH_E)) ||
-        ((line1==PATH_NW) && (line2==PATH_W))) {
-      return PATH_N;
-    }
-    // everything else is incompatible, return 0
-    return 0;
+  if ((line1&line2)==constPathLine) return line1;
+
+  // lookup table of unmerges
+  const constUnmergeLineTable = {
+    [`${constPathWE},${constPathW}`]: constPathE,
+    [`${constPathSE},${constPathS}`]: constPathE,
+    [`${constPathNE},${constPathN}`]: constPathE,
+    [`${constPathWE},${constPathE}`]: constPathW,
+    [`${constPathSW},${constPathS}`]: constPathW,
+    [`${constPathNW},${constPathN}`]: constPathW,
+    [`${constPathNS},${constPathN}`]: constPathS,
+    [`${constPathSE},${constPathE}`]: constPathS,
+    [`${constPathSW},${constPathW}`]: constPathS,
+    [`${constPathNS},${constPathS}`]: constPathN,
+    [`${constPathNE},${constPathE}`]: constPathN,
+    [`${constPathNW},${constPathW}`]: constPathN
+  };
+  // everything not in table is incompatible, return none
+  const mergeResult = constUnmergeLineTable[`${line1},${line2}`] ?? constPathNone;
+
+  return mergeResult;
+}
+
+function setLine (y,x,dir,val) {
+  switch (dir) {
+    case 'W': globalLineStates[y  ][x-1] = val; break;
+    case 'E': globalLineStates[y  ][x+1] = val; break;
+    case 'N': globalLineStates[y-1][x  ] = val; break;
+    case 'S': globalLineStates[y+1][x  ] = val; break;
+    default:  globalLineStates[y  ][x  ] = val; break;
+  }
+}
+
+function getLine (y,x,dir) {
+  switch (dir) {
+    case 'W': return globalLineStates[y  ][x-1];
+    case 'E': return globalLineStates[y  ][x+1];
+    case 'N': return globalLineStates[y-1][x  ];
+    case 'S': return globalLineStates[y+1][x  ];
+    default:  return globalLineStates[y  ][x  ];
   }
 }
 
 function preClearPathNeighbors(y,x,state) {
-  switch (state) {
-    case PATH_WE:
-      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
+  if ((state & constPathW) == constPathW) setLine(y,x,'W',unmergePathLines(getLine(y,x,'W'),constPathE));
+  if ((state & constPathE) == constPathE) setLine(y,x,'E',unmergePathLines(getLine(y,x,'E'),constPathW));
+  if ((state & constPathN) == constPathN) setLine(y,x,'N',unmergePathLines(getLine(y,x,'N'),constPathS));
+  if ((state & constPathS) == constPathS) setLine(y,x,'S',unmergePathLines(getLine(y,x,'S'),constPathN));
+}
+
+function contains(state,list) {
+  let hit = false;
+  for (let lmem of list) {
+    if (state==lmem) {
+      hit = true;
+    }
+  }
+  return hit;
+}
+
+function preclearLinePaths(moveType,y,x) {
+  const clearNone = 0;
+  const clearSelf = 1;
+  const lineSelf = globalLineStates[y][x];
+
+  // for "dragging/shifting" adds, we might need to pre-clear the existing
+  // paths on both sides of the move if they are conflicting
+  const constClearSelfTable = {
+    [`${constPathN},${constPathSW}`]: clearSelf,
+    [`${constPathN},${constPathSE}`]: clearSelf,
+    [`${constPathN},${constPathWE}`]: clearSelf,
+    [`${constPathS},${constPathNW}`]: clearSelf,
+    [`${constPathS},${constPathNE}`]: clearSelf,
+    [`${constPathS},${constPathWE}`]: clearSelf,
+    [`${constPathW},${constPathSE}`]: clearSelf,
+    [`${constPathW},${constPathNE}`]: clearSelf,
+    [`${constPathW},${constPathNS}`]: clearSelf,
+    [`${constPathE},${constPathSW}`]: clearSelf,
+    [`${constPathE},${constPathNW}`]: clearSelf,
+    [`${constPathE},${constPathNS}`]: clearSelf
+  };
+
+  if (moveType==constPathN || moveType==constPathE || moveType==constPathW || moveType==constPathS) {
+    const selfCheck = constClearSelfTable[`${moveType},${lineSelf}`] ?? clearNone;
+    if (selfCheck==clearSelf) preClearPathNeighbors(y,x,globalLineStates[y][x]);
+    // and the following need clearing for the precursor cell
+    if (moveType==constPathN && getLine(y,x,'N')==constPathNW) preClearPathNeighbors(y-1,x,getLine(y,x,'N'));
+    if (moveType==constPathN && getLine(y,x,'N')==constPathNE) preClearPathNeighbors(y-1,x,getLine(y,x,'N'));
+    if (moveType==constPathN && getLine(y,x,'N')==constPathWE) preClearPathNeighbors(y-1,x,getLine(y,x,'N'));
+    if (moveType==constPathS && getLine(y,x,'S')==constPathSW) preClearPathNeighbors(y+1,x,getLine(y,x,'S'));
+    if (moveType==constPathS && getLine(y,x,'S')==constPathSE) preClearPathNeighbors(y+1,x,getLine(y,x,'S'));
+    if (moveType==constPathS && getLine(y,x,'S')==constPathWE) preClearPathNeighbors(y+1,x,getLine(y,x,'S'));
+    if (moveType==constPathW && getLine(y,x,'W')==constPathSW) preClearPathNeighbors(y,x-1,getLine(y,x,'W'));
+    if (moveType==constPathW && getLine(y,x,'W')==constPathNW) preClearPathNeighbors(y,x-1,getLine(y,x,'W'));
+    if (moveType==constPathW && getLine(y,x,'W')==constPathNS) preClearPathNeighbors(y,x-1,getLine(y,x,'W'));
+    if (moveType==constPathE && getLine(y,x,'E')==constPathSE) preClearPathNeighbors(y,x+1,getLine(y,x,'E'));
+    if (moveType==constPathE && getLine(y,x,'E')==constPathNE) preClearPathNeighbors(y,x+1,getLine(y,x,'E'));
+    if (moveType==constPathE && getLine(y,x,'E')==constPathNS) preClearPathNeighbors(y,x+1,getLine(y,x,'E'));
+  } else {
+    // for the others, we always need to clear any existing state ("unmerge")
+    // and its neighboring effects
+    preClearPathNeighbors(y,x,lineSelf);
+  }
+}
+
+function mergeLinePaths (moveType,y,x) {
+  // now merge in the new half-segments in the neighbors
+  switch (moveType) {
+    case constPathClear:
+      setLine(y,x,'.',constPathNone);
       break;
-    case PATH_NS:
-      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
-      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+    case constPathDot:
+      setLine(y,x,'.',constPathDot);
       break;
-    case PATH_SE:
-      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
-      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+    case constPathN:
+      setLine(y,x,'.',mergePathLines(getLine(y,x,'.'),constPathN));
+      setLine(y,x,'N',mergePathLines(getLine(y,x,'N'),constPathS));
+      break
+    case constPathS:
+      setLine(y,x,'.',mergePathLines(getLine(y,x,'.'),constPathS));
+      setLine(y,x,'S',mergePathLines(getLine(y,x,'S'),constPathN));
+      break
+    case constPathW:
+      setLine(y,x,'.',mergePathLines(getLine(y,x,'.'),constPathW));
+      setLine(y,x,'W',mergePathLines(getLine(y,x,'W'),constPathE));
+      break
+    case constPathE:
+      setLine(y,x,'.',mergePathLines(getLine(y,x,'.'),constPathE));
+      setLine(y,x,'E',mergePathLines(getLine(y,x,'E'),constPathW));
+      break
+    case constPathWE:
+      setLine(y,x,'.',constPathWE);
+      setLine(y,x,'W',mergePathLines(getLine(y,x,'W'),constPathE));
+      setLine(y,x,'E',mergePathLines(getLine(y,x,'E'),constPathW));
       break;
-    case PATH_NE:
-      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
-      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+    case constPathNS:
+      setLine(y,x,'.',constPathNS);
+      setLine(y,x,'N',mergePathLines(getLine(y,x,'N'),constPathS));
+      setLine(y,x,'S',mergePathLines(getLine(y,x,'S'),constPathN));
       break;
-    case PATH_NW:
-      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
+    case constPathNE:
+      setLine(y,x,'.',constPathNE);
+      setLine(y,x,'N',mergePathLines(getLine(y,x,'N'),constPathS));
+      setLine(y,x,'E',mergePathLines(getLine(y,x,'E'),constPathW));
       break;
-    case PATH_SW:
-      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
-      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+    case constPathSE:
+      setLine(y,x,'.',constPathSE);
+      setLine(y,x,'S',mergePathLines(getLine(y,x,'S'),constPathN));
+      setLine(y,x,'E',mergePathLines(getLine(y,x,'E'),constPathW));
       break;
-    case PATH_W:
-      globalLineStates[y][x-1] = unmergePathLines(globalLineStates[y][x-1],PATH_E);
+    case constPathSW:
+      setLine(y,x,'.',constPathSW);
+      setLine(y,x,'S',mergePathLines(getLine(y,x,'S'),constPathN));
+      setLine(y,x,'W',mergePathLines(getLine(y,x,'W'),constPathE));
       break;
-    case PATH_E:
-      globalLineStates[y][x+1] = unmergePathLines(globalLineStates[y][x+1],PATH_W);
-      break;
-    case PATH_N:
-      globalLineStates[y-1][x] = unmergePathLines(globalLineStates[y-1][x],PATH_S);
-      break;
-    case PATH_S:
-      globalLineStates[y+1][x] = unmergePathLines(globalLineStates[y+1][x],PATH_N);
+    case constPathNW:
+      setLine(y,x,'.',constPathNW);
+      setLine(y,x,'N',mergePathLines(getLine(y,x,'N'),constPathS));
+      setLine(y,x,'W',mergePathLines(getLine(y,x,'W'),constPathE));
       break;
   }
 }
 
 function convertPathCharToCode (pathChar) {
   switch (pathChar) {
-    case '.': return PATH_DOT;
-    case '_': return PATH_WE;
-    case '-': return PATH_WE;
-    case '|': return PATH_NS;
-    case 'N': return PATH_N;
-    case 'S': return PATH_S;
-    case 'E': return PATH_E;
-    case 'W': return PATH_W;
-    case 'F': return PATH_SE;
-    case '7': return PATH_SW;
-    case 'J': return PATH_NW;
-    case 'L': return PATH_NE;
+    case '.': return constPathDot;
+    case '_': return constPathWE;
+    case '-': return constPathWE;
+    case '|': return constPathNS;
+    case 'N': return constPathN;
+    case 'S': return constPathS;
+    case 'E': return constPathE;
+    case 'W': return constPathW;
+    case 'F': return constPathSE;
+    case '7': return constPathSW;
+    case 'J': return constPathNW;
+    case 'L': return constPathNE;
   }
-  return PATH_NONE;
+  return constPathNone;
 }
 
 // shapeSort sorts first by y coordinate, then x coordinate
@@ -1730,7 +2069,7 @@ function str2shape (shapestr) {
 // "canonical" form, which is first normalized to the 0,0
 // axis, and then the reflected and/or rotated version of itself
 // that "sorts first", an arbitrary sorting but the same each
-// time. This can then be used to compare against another 
+// time. This can then be used to compare against another
 // canonicalized shape to see if they are the same under some
 // form of reflection or rotation
 function canonicalizeShape (cellArray) {
@@ -1790,9 +2129,9 @@ function updateDemoFunction(demoNum,initFunc,stepFunc,postFunc=null) {
   let dmoves = demoMoves[which];
   if (demoStepNum < dtext.length) {
     if (demoStepNum) {
-      assistState = 2;
+      playState.assistState = 2;
     } else {
-      assistState = 0;
+      playState.assistState = 0;
     }
     updateHtmlText('demotext', dtext[demoStepNum]);
     initFunc();
@@ -1811,12 +2150,17 @@ function updateDemoFunction(demoNum,initFunc,stepFunc,postFunc=null) {
 }
 
 function initRibbons(gamename) {
-  let gameStorage = localStorage.getItem("OPSaved" + gamename);
+  let gameStorage;
+  try {
+    gameStorage = localStorage.getItem("OPSaved" + gamename);
+  } catch (e) {
+    console.warn("couldn't read from localStorage: " + e);
+  }
   if (gameStorage) {
     const ribbonBar = document.getElementById("ribbonbar");
     let gamesWon = gameStorage.split(",");
     if (gamesWon.length) {
-      $("#clearButton").show();
+      elemStruct.clearButton.style.display = 'inline';
     }
     for (let game of gamesWon) {
       if (game) {

@@ -1,196 +1,44 @@
-const emptyCellColor = "white";         // not-filled
-
-const stdFontColor = "black";
-const errorFontColor = "red";
-const correctFontColor = "green";
-
 const gameName = 'hashiwokakero';
 
-const MOVE_TOGGLE_N   = 1;
-const MOVE_TOGGLE_W   = 2;
-const MOVE_TOGGLE_S   = 3;
-const MOVE_TOGGLE_E   = 4;
-const MOVE_UNTOGGLE_N = 5;
-const MOVE_UNTOGGLE_W = 6;
-const MOVE_UNTOGGLE_S = 7;
-const MOVE_UNTOGGLE_E = 8;
-const MOVE_TOGGLE_BRIDGE = 9;
-const MOVE_ERASE_BRIDGE = 10;
+const constMoveToggleN   = 1;
+const constMoveToggleW   = 2;
+const constMoveToggleS   = 3;
+const constMoveToggleE   = 4;
+const constMoveUntoggleN = 5;
+const constMoveUntoggleW = 6;
+const constMoveUntoggleS = 7;
+const constMoveUntoggleE = 8;
+const constMoveToggleBridge = 9;
+const constMoveEraseBridge = 10;
 
-const STATE_BLANK  = 0b000000000;
-const STATE_CIRCLE = 0b100000000;
-const STATE_NORTH1 = 0b000000001;
-const STATE_NORTH2 = 0b000000010;
-const STATE_WEST1  = 0b000000100;
-const STATE_WEST2  = 0b000001000;
-const STATE_SOUTH1 = 0b000010000;
-const STATE_SOUTH2 = 0b000100000;
-const STATE_EAST1  = 0b001000000;
-const STATE_EAST2  = 0b010000000;
+const constStateBlank  = 0b000000000;
+const constStateCircle = 0b100000000;
+const constStateNorth1 = 0b000000001;
+const constStateNorth2 = 0b000000010;
+const constStateWest1  = 0b000000100;
+const constStateWest2  = 0b000001000;
+const constStateSouth1 = 0b000010000;
+const constStateSouth2 = 0b000100000;
+const constStateEast1  = 0b001000000;
+const constStateEast2  = 0b010000000;
 
-let clicking = false;
-let dragging = false;
-let bridgeBuilt = false;
-let shifting = false;
-let errorCount = 0;
 let incompleteDigits = 0;
 let disjointedPaths = true;
-let assistState = 0;
-let curClickType = CLICK_UNKNOWN;
-let isDemo = false;
+let curClickType = constClickUnknown;
 
 // which keys are handled
-let handledKeys = [ KEY_CR, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_N, KEY_S, KEY_E, KEY_W ];
+let handledKeys = [ constKeyCR, constKeyEsc, constKeyLeft, constKeyUp,
+  constKeyRight, constKeyDown, constKeyN, constKeyS, constKeyE, constKeyW ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
+let moveHistory, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = true;
   globalLineFirst = true;   // lines are underneath circles
+  initElements();
   initRibbons(gameName);
-
-  // any key anywhere as long as canvas is in focus
-  $(document).keydown(function(evnt) {
-    $("#resetButton").blur();
-    $("#clearButton").blur();
-    $("#undoButton").blur();
-    $("#assistButton").blur();
-    if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which == KEY_SHIFT) {
-      shifting = true;
-    } else if (handledKeys.find(element => element == evnt.which)) {
-      handleKey(evnt.which);
-    }
-  });
-
-  $(document).keyup(function(evnt) {
-    if (evnt.which == KEY_SHIFT) {
-      shifting = false;
-    }
-  });
-
-  // a click (except right-click i.e. ctrl-click) on tabs.
-  // hide old, show new
-  $("#tabs li").click(function() {
-    $("#tabs li").removeClass('active');
-    $(this).addClass("active");
-    $(".tab_content").hide();
-    $($(this).find("a").attr("href")).show();
-    clicking = false;
-    return false;
-  });
-
-  $("#tab1").show();
-  $("#demotab").hide();
-
-  $("#displayButton").click(function() {
-    let pval = $("#userPuzzle").val();
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          $("#demotab").show();
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          $("#demotab").hide();
-        }
-      }
-    } else {
-      $("#demotab").hide();
-      initPuzzle = pval;
-      puzzle = removeDot(pval);
-      puzzleChoice = 0;
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
-  });
-
-  $("#nextDemoButton").click(function() {
-    isDemo = true;
-    demoStepNum++;
-    updateDemoRegion(puzzleChoice);
-  });
-
-  $("#prevDemoButton").click(function() {
-    if (demoStepNum) {
-      demoStepNum--;
-    }
-    updateDemoRegion(puzzleChoice);
-  });
-
-  // click (down) within puzzle number entry, remove clicking
-  // effect on canvas
-  $("#userPuzzle").mousedown(function(evnt) {
-    clicking = false;
-  });
-
-  // click (down) within puzzle frame
-  $("#puzzleCanvas").mousedown(function(evnt) {
-    clicking = true;
-    bridgeBuilt = false;
-    $("#puzzleCanvas").css("border-color", "black");
-    handleClick(evnt);
-  });
-
-  // moving mouse within puzzle area (clicking is true if already moused down => dragging)
-  $("#puzzleCanvas").mousemove(function(evnt) {
-    if (clicking == false) return;
-    evnt.preventDefault();
-    dragging = true;
-    handleClick(evnt);
-  });
-
-  // releasing mouse within puzzle or not within puzzle
-  $(document).mouseup(function() {
-    clicking = false;
-    dragging = false;
-  });
-
-  // undo click, remove the last move
-  $("#undoButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    undoMove();
-  });
-
-  // click on reset, brings up confirmation, then resets puzzle
-  $("#resetButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    let resetDialog = confirm("Reset puzzle?");
-    if (resetDialog == true) {
-      resetBoard();
-    }
-  });
-
-  // click on clear ribbons, brings up confirmation, then resets puzzle
-  $("#clearButton").click(function() {
-    let resetDialog = confirm("Clear Ribbons Shelf?");
-    if (resetDialog == true) {
-      localStorage.setItem("OPSaved" + gameName,'');
-      const ribbonBar = document.getElementById("ribbonbar");
-      ribbonBar.innerHTML = '';
-      $("#clearButton").hide();
-    }
-  });
-
-  // click on show errors, converts to show how many errors remain
-  $("#assistButton").click(function() {
-    assistState = (assistState+1)%4;
-    updateBoardStatus();
-    drawBoard();
-  });
-
-  $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
-
-  canvas = document.getElementById('puzzleCanvas');
-  globalContext = canvas.getContext('2d');
+  listenKeys(handledKeys,handleKey);
+  listenClick(handleClick,initStructures,undoMove);
 
   if(cannedPuzzles[puzzleChoice]) {
     initPuzzle = cannedPuzzles[puzzleChoice];
@@ -212,16 +60,16 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) {
-    if (errorCount && incompleteDigits && disjointedPaths) {
+  if (playState.assistState == 0) {
+    if (playState.errorCount && incompleteDigits && disjointedPaths) {
       etext = "there are errors and incomplete numbers and more than one bridge path";
     } else if (incompleteDigits && disjointedPaths) {
       etext = "there are incomplete numbers and more than one bridge path";
-    } else if (errorCount && incompleteDigits) {
+    } else if (playState.errorCount && incompleteDigits) {
       etext = "there are errors and incomplete numbers";
-    } else if (errorCount && disjointedPaths) {
+    } else if (playState.errorCount && disjointedPaths) {
       etext = "there are errors and more than one bridge path";
-    } else if (errorCount) {
+    } else if (playState.errorCount) {
       etext = "there are errors";
     } else if (incompleteDigits) {
       etext = "there are incomplete numbers";
@@ -231,11 +79,11 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!!";
     }
   } else {
-    if ((errorCount || incompleteDigits) && disjointedPaths) {
-      etext = "there are " + errorCount  + " errors and " +
+    if ((playState.errorCount || incompleteDigits) && disjointedPaths) {
+      etext = "there are " + playState.errorCount  + " errors and " +
                         incompleteDigits + " incomplete numbers and more than one bridge path";
-    } else if (errorCount || incompleteDigits) {
-      etext = "there are " + errorCount  + " errors and " +
+    } else if (playState.errorCount || incompleteDigits) {
+      etext = "there are " + playState.errorCount  + " errors and " +
                         incompleteDigits + " incomplete numbers";
     } else if (disjointedPaths) {
       etext = "there is more than one bridge path";
@@ -243,7 +91,7 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!!";
     }
   }
-  updateDynamicHtmlEntries(etext,assistState);
+  updateDynamicHtmlEntries(etext,playState.assistState);
 }
 
 function addHistory(y,x,movetype) {
@@ -263,15 +111,15 @@ function contains(state,list) {
 function addMove(moveType,y,x,noHistory=false) {
   let targetX, targetY;
   let found = false;
-  let isMoveType = (moveType <= MOVE_UNTOGGLE_E) ? true : false;
-  let isToggleType = (moveType <= MOVE_TOGGLE_E) ? true : false;
-  let moveDirN = (moveType==MOVE_TOGGLE_N) || (moveType==MOVE_UNTOGGLE_N);
-  let moveDirW = (moveType==MOVE_TOGGLE_W) || (moveType==MOVE_UNTOGGLE_W);
-  let moveDirS = (moveType==MOVE_TOGGLE_S) || (moveType==MOVE_UNTOGGLE_S);
-  let moveDirE = (moveType==MOVE_TOGGLE_E) || (moveType==MOVE_UNTOGGLE_E);
+  let isMoveType = (moveType <= constMoveUntoggleE) ? true : false;
+  let isToggleType = (moveType <= constMoveToggleE) ? true : false;
+  let moveDirN = (moveType==constMoveToggleN) || (moveType==constMoveUntoggleN);
+  let moveDirW = (moveType==constMoveToggleW) || (moveType==constMoveUntoggleW);
+  let moveDirS = (moveType==constMoveToggleS) || (moveType==constMoveUntoggleS);
+  let moveDirE = (moveType==constMoveToggleE) || (moveType==constMoveUntoggleE);
   if (isMoveType) {
     // make sure it is on a circle, else ignore
-    if ((puzzleBoardStates[y][x] & STATE_CIRCLE) != STATE_CIRCLE) {
+    if ((puzzleBoardStates[y][x] & constStateCircle) != constStateCircle) {
       return;
     }
     // check the legality of any move type
@@ -301,7 +149,7 @@ function addMove(moveType,y,x,noHistory=false) {
         done = true;
       } else if ((ix>=globalPuzzleW) || (iy>=globalPuzzleH)) {
         done = true;
-      } else if ((puzzleBoardStates[iy][ix] & STATE_CIRCLE) != 0) {
+      } else if ((puzzleBoardStates[iy][ix] & constStateCircle) != 0) {
         done = true;
         found = true;
         targetX = ix;
@@ -324,7 +172,7 @@ function addMove(moveType,y,x,noHistory=false) {
     if (curStateSelf != curStateTarget) {
       throw("ERROR: expected the bridge status to be the same for " + y + "," + x +
             " and " + targetY + "," + targetX + ", got " + curStateSelf + " vs " + curStateTarget +
-            " from " + puzzleBoardStates[y][x] + " and " + puzzleBoardStates[targetY][targetX] + 
+            " from " + puzzleBoardStates[y][x] + " and " + puzzleBoardStates[targetY][targetX] +
             " using masks " + maskShiftSelf + " and " + maskShiftTarget);
     }
 
@@ -336,12 +184,12 @@ function addMove(moveType,y,x,noHistory=false) {
     puzzleBoardStates[targetY][targetX] &= ~(0b11<<maskShiftTarget);
     globalLineStates[targetY][targetX]  &= ~(0b11<<maskShiftTarget);
     // make sure this is designated as a line
-    globalLineStates[y][x]              |= PATH_LINE;
-    globalLineStates[targetY][targetX]  |= PATH_LINE;
+    globalLineStates[y][x]              |= constPathLine;
+    globalLineStates[targetY][targetX]  |= constPathLine;
 
     //   toggle goes 00 -> 01 -> 10 -> 00
     // untoggle goes 00 -> 10 -> 01 -> 00
-    if (( isToggleType && (curStateSelf == 0b00)) || 
+    if (( isToggleType && (curStateSelf == 0b00)) ||
         (!isToggleType && (curStateSelf == 0b10))) {
       lineState = 0b01;
     } else if (( isToggleType && (curStateSelf == 0b01)) ||
@@ -355,7 +203,7 @@ function addMove(moveType,y,x,noHistory=false) {
     puzzleBoardStates[targetY][targetX] |= (lineState<<maskShiftTarget);
     globalLineStates[targetY][targetX]  |= (lineState<<maskShiftTarget);
 
-    // finally change the line state for all empty cells 
+    // finally change the line state for all empty cells
     // between here and target to the new value
     done = false;
     iy = y+yincr;
@@ -369,7 +217,7 @@ function addMove(moveType,y,x,noHistory=false) {
         globalLineStates[iy][ix] &= ~pathMask;
         globalLineStates[iy][ix] |= (lineState<<lineShift);
         globalLineStates[iy][ix] |= (lineState<<(lineShift+4));
-        globalLineStates[iy][ix] |= PATH_LINE;
+        globalLineStates[iy][ix] |= constPathLine;
         ix += xincr;
         iy += yincr;
       }
@@ -387,12 +235,12 @@ function addMove(moveType,y,x,noHistory=false) {
 
   // make sure this is a non circle type, those can't be toggled
   // this way nor erased this way
-  if ((puzzleBoardStates[y][x] & STATE_CIRCLE) == STATE_CIRCLE) {
+  if ((puzzleBoardStates[y][x] & constStateCircle) == constStateCircle) {
     return;
   }
   // make sure there is actually a bridge here already, ele
   // nothing to do
-  if ((globalLineStates[y][x] & PATH_LINE) != PATH_LINE) {
+  if ((globalLineStates[y][x] & constPathLine) != constPathLine) {
     return;
   }
   if ((globalLineStates[y][x] & 0b11111111) == 0) {
@@ -402,15 +250,15 @@ function addMove(moveType,y,x,noHistory=false) {
   let isNS = false;
   let isWE = false;
   let isSingle = false;
-  if (globalLineStates[y][x] == (PATH_N | PATH_S)) {
+  if (globalLineStates[y][x] == (constPathN | constPathS)) {
     isNS = true;
     isSingle = true;
-  } else if (globalLineStates[y][x] == (PATH_2N | PATH_2S)) {
+  } else if (globalLineStates[y][x] == (constPath2N | constPath2S)) {
     isNS = true;
-  } else if (globalLineStates[y][x] == (PATH_W  | PATH_E)) {
+  } else if (globalLineStates[y][x] == (constPathW  | constPathE)) {
     isWE = true;
     isSingle = true;
-  } else if (globalLineStates[y][x] == (PATH_2W | PATH_2E)) {
+  } else if (globalLineStates[y][x] == (constPath2W | constPath2E)) {
     isWE = true;
   } else {
     throw("toggling a bridge of unknown type " + globalLineStates[y][x]);
@@ -428,12 +276,12 @@ function addMove(moveType,y,x,noHistory=false) {
   // a move toggle if double (effectively erasing it), or
   // an untoggle if single (also erasing it)
   let thisMoveType =
-    isNS ? ((moveType == MOVE_TOGGLE_BRIDGE) ? MOVE_TOGGLE_S :
-            (isSingle ? MOVE_UNTOGGLE_S : MOVE_TOGGLE_S)) :
-           ((moveType == MOVE_TOGGLE_BRIDGE) ? MOVE_TOGGLE_E :
-            (isSingle ? MOVE_UNTOGGLE_E : MOVE_TOGGLE_E));
+    isNS ? ((moveType == constMoveToggleBridge) ? constMoveToggleS   :
+                 (isSingle ? constMoveUntoggleS : constMoveToggleS)) :
+           ((moveType == constMoveToggleBridge) ? constMoveToggleE   :
+                 (isSingle ? constMoveUntoggleE : constMoveToggleE));
   while (!done) {
-    if ((puzzleBoardStates[iy][ix] & STATE_CIRCLE) == STATE_CIRCLE) {
+    if ((puzzleBoardStates[iy][ix] & constStateCircle) == constStateCircle) {
       done = true;
       addMove(thisMoveType,iy,ix,noHistory);
     } else {
@@ -446,8 +294,8 @@ function addMove(moveType,y,x,noHistory=false) {
 function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
-  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = $("#userPuzzle").val();
+  if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
+    let pval = elemStruct.userPuzzle.value;
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
@@ -457,15 +305,15 @@ function handleKey(keynum) {
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
-          $("#demotab").show();
+          elemStruct.demotab.style.display = 'block';
           demoStepNum = 0;
           updateDemoRegion(pval);
         } else {
-          $("#demotab").hide();
+          elemStruct.demotab.style.display = 'none';
         }
       }
     } else {
-      $("#demotab").hide();
+      elemStruct.demotab.style.display = 'none';
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
       updateHtmlDescr(initPuzzle);
@@ -474,60 +322,52 @@ function handleKey(keynum) {
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
-      case KEY_ESC:
+      case constKeyEsc:
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalLineStates);
         break;
-      case KEY_UP:
+      case constKeyUp:
         if (globalCursorY) {
-          if (shifting) {
-            addMove(MOVE_TOGGLE_N,globalCursorY,globalCursorX);
+          if (playState.shifting) {
+            addMove(constMoveToggleN,globalCursorY,globalCursorX);
           } else {
             globalCursorY--;
           }
         }
         break;
-      case KEY_DOWN:
+      case constKeyDown:
         if (globalCursorY < (globalPuzzleH-1)) {
-          if (shifting) {
-            addMove(MOVE_TOGGLE_S,globalCursorY,globalCursorX);
+          if (playState.shifting) {
+            addMove(constMoveToggleS,globalCursorY,globalCursorX);
           } else {
             globalCursorY++;
           }
         }
         break;
-      case KEY_LEFT:
+      case constKeyLeft:
         if (globalCursorX) {
-          if (shifting) {
-            addMove(MOVE_TOGGLE_W,globalCursorY,globalCursorX);
+          if (playState.shifting) {
+            addMove(constMoveToggleW,globalCursorY,globalCursorX);
           } else {
             globalCursorX--;
           }
         }
         break;
-      case KEY_RIGHT:
+      case constKeyRight:
         if (globalCursorX < (globalPuzzleW-1)) {
-          if (shifting) {
-            addMove(MOVE_TOGGLE_E,globalCursorY,globalCursorX);
+          if (playState.shifting) {
+            addMove(constMoveToggleE,globalCursorY,globalCursorX);
           } else {
             globalCursorX++;
           }
         }
         break;
       // toggle bridges in that direction
-      case KEY_N:
-        addMove(MOVE_TOGGLE_N,globalCursorY,globalCursorX);
-        break;
-      case KEY_S:
-        addMove(MOVE_TOGGLE_S,globalCursorY,globalCursorX);
-        break;
-      case KEY_E:
-        addMove(MOVE_TOGGLE_E,globalCursorY,globalCursorX);
-        break;
-      case KEY_W:
-        addMove(MOVE_TOGGLE_W,globalCursorY,globalCursorX);
-        break;
+      case constKeyN: addMove(constMoveToggleN,globalCursorY,globalCursorX); break;
+      case constKeyS: addMove(constMoveToggleS,globalCursorY,globalCursorX); break;
+      case constKeyE: addMove(constMoveToggleE,globalCursorY,globalCursorX); break;
+      case constKeyW: addMove(constMoveToggleW,globalCursorY,globalCursorX); break;
       }
     updateBoardStatus();
     drawBoard();
@@ -535,7 +375,7 @@ function handleKey(keynum) {
 }
 
 function initStructures(puzzle) {
-  $("#canvasDiv").css("border-color", "black");
+  elemStruct.canvasDiv.style.borderColor = "black";
   moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
@@ -548,14 +388,14 @@ function initStructures(puzzle) {
 
   globalBoardValues = initBoardValuesFromParams(numParams);
   globalLineStates  = initLineValuesFromParams(numParams,true);
-  puzzleBoardStates = initYXFromValue(STATE_BLANK);
+  puzzleBoardStates = initYXFromValue(constStateBlank);
 
   let numParamsExp = expandNumParams(numParams);
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (numParamsExp[y*globalPuzzleW+x].search(/[1-8]/) != -1) {
-        globalCircleStates[y][x] = CIRCLE_WHITE;
-        puzzleBoardStates[y][x] =  STATE_CIRCLE;
+        globalCircleStates[y][x] = constCircleWhite;
+        puzzleBoardStates[y][x] =  constStateCircle;
       }
     }
   }
@@ -565,18 +405,18 @@ function initStructures(puzzle) {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (numParamsExp[y*globalPuzzleW+x] == '_') {
-        addMove(MOVE_TOGGLE_E,y,x-1,true);
+        addMove(constMoveToggleE,y,x-1,true);
       }
       if (numParamsExp[y*globalPuzzleW+x] == '=') {
-        addMove(MOVE_TOGGLE_E,y,x-1,true);
-        addMove(MOVE_TOGGLE_E,y,x-1,true);
+        addMove(constMoveToggleE,y,x-1,true);
+        addMove(constMoveToggleE,y,x-1,true);
       }
       if (numParamsExp[y*globalPuzzleW+x] == '|') {
-        addMove(MOVE_TOGGLE_S,y-1,x,true);
+        addMove(constMoveToggleS,y-1,x,true);
       }
       if (numParamsExp[y*globalPuzzleW+x] == '#') {
-        addMove(MOVE_TOGGLE_S,y-1,x,true);
-        addMove(MOVE_TOGGLE_S,y-1,x,true);
+        addMove(constMoveToggleS,y-1,x,true);
+        addMove(constMoveToggleS,y-1,x,true);
       }
     }
   }
@@ -585,46 +425,41 @@ function initStructures(puzzle) {
   drawBoard();
 }
 
-function removeDot(strval) {
-  return strval.replace(/\./gi, "");
-}
-
 function handleClick(evnt) {
-  if (!dragging) {
+  if (!playState.dragging) {
     curClickType = clickType(evnt);
   }
-  $("#userPuzzleField").blur();
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
   // dragging, but no move yet
-  if (dragging && (yCell == globalCursorY) && (xCell == globalCursorX)) {
+  if (playState.dragging && (yCell == globalCursorY) && (xCell == globalCursorX)) {
     return;
   }
   // dragging, but the bridge was already built
-  if (dragging && bridgeBuilt) {
+  if (playState.dragging && playState.bridgeBuilt) {
     return;
   }
   // skip dragging with anything but left click
-  if (dragging && curClickType!=CLICK_LEFT) {
+  if (playState.dragging && curClickType!=constClickLeft) {
     return;
   }
 
   // if dragging, toggle the bridge to the given direction, then turn off dragging
-  if (dragging) {
+  if (playState.dragging) {
     if (yCell==(globalCursorY+1)) { // moving S
-      addMove(MOVE_TOGGLE_S,globalCursorY,globalCursorX);
+      addMove(constMoveToggleS,globalCursorY,globalCursorX);
     }
     if (yCell==(globalCursorY-1)) { // moving N
-      addMove(MOVE_TOGGLE_N,globalCursorY,globalCursorX);
+      addMove(constMoveToggleN,globalCursorY,globalCursorX);
     }
     if (xCell==(globalCursorX+1)) { // moving E
-      addMove(MOVE_TOGGLE_E,globalCursorY,globalCursorX);
+      addMove(constMoveToggleE,globalCursorY,globalCursorX);
     }
     if (xCell==(globalCursorX-1)) { // moving W
-      addMove(MOVE_TOGGLE_W,globalCursorY,globalCursorX);
+      addMove(constMoveToggleW,globalCursorY,globalCursorX);
     }
-    bridgeBuilt = true;
+    playState.bridgeBuilt = true;
   } else {
     globalCursorY = yCell;
     globalCursorX = xCell;
@@ -633,10 +468,10 @@ function handleClick(evnt) {
     // but if no bridge then just move the cursor.
     // right can be used to delete an existing bridge.
     if ((globalLineStates[yCell][xCell] & 0b11111111) != 0) {
-      if (curClickType == CLICK_LEFT) {
-        addMove(MOVE_TOGGLE_BRIDGE,yCell,xCell);
-      } else if (curClickType == CLICK_RIGHT) {
-        addMove(MOVE_ERASE_BRIDGE,yCell,xCell);
+      if (curClickType == constClickLeft) {
+        addMove(constMoveToggleBridge,yCell,xCell);
+      } else if (curClickType == constClickRight) {
+        addMove(constMoveEraseBridge,yCell,xCell);
       }
     }
   }
@@ -648,7 +483,7 @@ function handleClick(evnt) {
 function updateBoardStatus() {
   // accounting the errors:
   //  1) number cells with more paths out of it than the digit
-  errorCount = 0;
+  playState.errorCount = 0;
 
   // also count how many numbers haven't been completed yet, and how
   // many different bridge paths there are (any more than one is
@@ -669,7 +504,7 @@ function updateBoardStatus() {
   // than the number, they are in error, else just indeterminate
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if ((puzzleBoardStates[y][x] & STATE_CIRCLE) != 0) {
+      if ((puzzleBoardStates[y][x] & constStateCircle) != 0) {
         let circleValue = globalBoardValues[y][x];
         let bridgeCount = 0;
         for (let i=0;i<4;i++) {
@@ -681,12 +516,12 @@ function updateBoardStatus() {
           }
         }
         if (bridgeCount > circleValue) {
-          errorCount++;
-          if (assistState >= 2) {
+          playState.errorCount++;
+          if (playState.assistState >= 2) {
             globalBoardTextColors[y][x] = errorFontColor;
           }
         } else if (bridgeCount == circleValue) {
-          if (assistState >= 2) {
+          if (playState.assistState >= 2) {
             globalBoardTextColors[y][x] = correctFontColor;
           }
         } else {
@@ -703,8 +538,8 @@ function updateBoardStatus() {
   let paths = new Array();
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (((puzzleBoardStates[y][x] & STATE_CIRCLE) != 0) &&
-          ((globalLineStates[y][x]  & PATH_LINE)  == PATH_LINE) &&
+      if (((puzzleBoardStates[y][x] & constStateCircle) != 0) &&
+          ((globalLineStates[y][x]  & constPathLine)  == constPathLine) &&
           ((globalLineStates[y][x]  & 0b11111111) != 0) &&
           (checkedLineCells.indexOf(y+","+x)==-1)) {
         let pathArray = travelPathNetwork(globalLineStates,y,x);
@@ -719,7 +554,7 @@ function updateBoardStatus() {
   }
 
   // for fun in assistState 3 color the different segments so far
-  if (disjointedPaths && assistState==3) {
+  if (disjointedPaths && playState.assistState==3) {
     for (let i=0;i<paths.length;i++) {
       let thisPath = paths[i];
       for (let cc of thisPath) {
@@ -732,7 +567,7 @@ function updateBoardStatus() {
   }
 
   updateDynTextFields();
-  if ((errorCount==0) && (incompleteDigits==0) && (disjointedPaths==false)) {
+  if ((playState.errorCount==0) && (incompleteDigits==0) && (disjointedPaths==false)) {
     canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
@@ -743,7 +578,7 @@ function undoMove() {
   if (moveHistory.length > 0) {
     let lastMove = moveHistory.pop();
     // convert from toggle to untoggle
-    if (lastMove[2] < MOVE_UNTOGGLE_N) {
+    if (lastMove[2] < constMoveUntoggleN) {
       addMove(lastMove[2]+4,lastMove[0],lastMove[1],true);
     } else {
       addMove(lastMove[2]-4,lastMove[0],lastMove[1],true);
@@ -753,29 +588,22 @@ function undoMove() {
   }
 }
 
-function resetBoard() {
-  $("#resetButton").blur();
-  $("#clearButton").blur();
-  $("#assistButton").blur();
-  initStructures(puzzle);
-}
-
 function updateDemoRegion(demoNum) {
   updateDemoFunction(demoNum,function () {
     // start by reseting all non-number cells to indeterminate
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
-        if ((puzzleBoardStates[y][x] & STATE_CIRCLE) == STATE_CIRCLE) {
-          puzzleBoardStates[y][x] = STATE_CIRCLE;
+        if ((puzzleBoardStates[y][x] & constStateCircle) == constStateCircle) {
+          puzzleBoardStates[y][x] = constStateCircle;
         }
-        globalLineStates[y][x] = PATH_NONE;
+        globalLineStates[y][x] = constPathNone;
       }
     }
   }, function (steps) {
     let s0 =
-        (steps[0] == 'N') ? MOVE_TOGGLE_N :
-        (steps[0] == 'W') ? MOVE_TOGGLE_W :
-        (steps[0] == 'S') ? MOVE_TOGGLE_S : MOVE_TOGGLE_E;
+        (steps[0] == 'N') ? constMoveToggleN :
+        (steps[0] == 'W') ? constMoveToggleW :
+        (steps[0] == 'S') ? constMoveToggleS : constMoveToggleE;
     addMove(s0,parseInt(steps[1]),parseInt(steps[2]));
   });
 }

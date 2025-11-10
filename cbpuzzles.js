@@ -9,31 +9,50 @@ const cannedPuzzles = [
   // example completed one
   "5x5:e.d2.b6a2.a4c.1a1b:00.e8.e8.10.a0",
   "5x5:e.d2.b6a2.a4c.1a1b",
-  // pencil 2024 easy ones
-  "6x6:24d.2e.c6b.e4.3a3c.a1d",
-  "6x6:1b2b.d2a.b4c.f.c3b.b7c",
-  "6x6:3b4b.f.a1d.16b1a.e3.e2",
-  "6x6:a5c3.c1b.b2c.2e.2a4a4a.b4c",
-  "10x10:a1f13.b3c8c.22g4.j.f1c.4a8f3.j.a2a3b4c.a2g2.1d223a2",
-  "10x10:1b23e.c5b8c.8e8c.j.j.j.8c9e.c9f.d2a6c.2a2b1d",
-  "10x10:a4a4a4c1.1a1a6c4a.a3a4a6c4.h4a.i6.5a2a8e.a6a7f.j.e2a8b.f2c",
-  "10x10:24b2d2.d4a1c.a2e3b.j.d23c1.d31d.j.j.f3a6a.82a1c1a1",
-  "10x10:d3a22a1.b6e5a.j.2g7a.i4.j.b4a2b4a1.2i.a22e4a.c4f",
-  "10x10:b3d25a.a2e2b.a2h.i2.4d4a1a2.1a9d91a.j.j.a64g.a18g",
-  "10x10:a223f.4f2a3.j.d9b3a3.e8d.i2.9b6e2.c6b3b5.i6.3a3c6b6",
+  // D1
+  "6x6:24d.2e.c6b.e4.3a3c.a1d",                                       // 2024 #1
+  "6x6:1b2b.d2a.b4c.f.c3b.b7c",                                       // 2024 #2
+  "6x6:3b4b.f.a1d.16b1a.e3.e2",                                       // 2024 #3
+  "6x6:a5c3.c1b.b2c.2e.2a4a4a.b4c",                                   // 2024 #4
+  "10x10:a1f13.b3c8c.22g4.j.f1c.4a8f3.j.a2a3b4c.a2g2.1d223a2",        // 2024 #5
+  "10x10:2b3c1a1.a5d2a4a.2f9b.b46b9c.26h.j.b4a2e.a6c8a8b.b4a2e.c1e7", // 2023 #5
+  "10x10:1b23e.c5b8c.8e8c.j.j.j.8c9e.c9f.d2a6c.2a2b1d",               // 2024 #6
+  "10x10:a1b4b1a1.b2e4a.3i.j.f17b.d2e.b4a5e.j.a2b4d5.c1b1b2",         // 2023 #6
+  "10x10:a4a4a4c1.1a1a6c4a.a3a4a6c4.h4a.i6.5a2a8e.a6a7f.j.e2a8b.f2c", // 2024 #7
+  "10x10:a1g2.b2c223a.14a6a2d.a4e3b.d2e.i5.f4a6a.b9g.j.2i",           // 2023 #7
+  "10x10:24b2d2.d4a1c.a2e3b.j.d23c1.d31d.j.j.f3a6a.82a1c1a1",         // 2024 #8
+  "10x10:1i.4a9b5d.1h2.e6b5a.j.e4d.c6f.h5a.a6a4a1a2b.1d3a2b",         // 2023 #8
+  "10x10:d3a22a1.b6e5a.j.2g7a.i4.j.b4a2b4a1.2i.a22e4a.c4f",           // 2024 #9
+  "10x10:b3d25a.a2e2b.a2h.i2.4d4a1a2.1a9d91a.j.j.a64g.a18g",          // 2024 #10
+  "10x10:a223f.4f2a3.j.d9b3a3.e8d.i2.9b6e2.c6b3b5.i6.3a3c6b6",        // 2024 #11
   // D2
-  "10x10:e3b73.a4f7a.h7a.h98.j.c6f.4a2g.b2b4d.22b2c1a.j",
-  "10x10:61h.d6226b.g6b.b22f.g8b.a6h.e4d.f1c.j.23b5d6",           // two solutions?
-  "10x10:f7c.h6a.3a6g.92e3b.a2h.h4a.6f3b.i3.c7e1.f4c",
-  "10x10:1a4e22.3d31c.2f666.j.c7f.5a3g.h41.44c6b25.f2c.d4a2a22",  // easy + fun
-  "10x10:2c4a1b3.3i.h5a.1b6a6d.j.j.a2g3.j.22b5c2a.99b1d1",
-  "10x10:gBBB.88e999.j.j.a887bBc.c2f.c2a4d.a6e8b.66h.6i",
-  "10x10:j.j.b9Cb27b.b92bC5b.j.j.j.b6CbC5b.b48b85b.j",
+  "10x10:23f31.i5.c5b5c.3h1.f3c.i4.j.a5a4f.i1.b5f8",                  // 2023 #9
+  "10x10:b1c4c.a5h.1d3c3.c3d4a.3i.d6e.3i.b3g.b1f5.b3c3b1",            // 2023 #10
+  "10x10:e3b73.a4f7a.h7a.h98.j.c6f.4a2g.b2b4d.22b2c1a.j",             // 2024 #12
+  "10x10:a25c5b3.b3g.h1a.i2.3i.e33c.3i.f1a44.j.13d3c",                // 2023 #11
+  "10x10:61h.d6226b.g6b.b22f.g8b.a6h.e4d.f1c.j.23b5d6",               // 2024 #13
+  "10x10:55f6a.4a5g.b5g.663d3b.j.c8c45a.b3g.h4a.j.6c8e",              // 2023 #12
+  "10x10:f7c.h6a.3a6g.92e3b.a2h.h4a.6f3b.i3.c7e1.f4c",                // 2024 #14
+  "10x10:558d3a3.358e1a.i3.j.c66a8c.3i.4g3a.d5e.a3e444.g333",         // 2023 #13
+  "10x10:727g.j.c9f.6eAc.j.j.1e242a.f4a4a.f242a.2a2a1e",              // 2023 #14
+  "10x10:1a4e22.3d31c.2f666.j.c7f.5a3g.h41.44c6b25.f2c.d4a2a22",      // 2024 #15 easy + fun
+  "10x10:2c4a1b3.3i.h5a.1b6a6d.j.j.a2g3.j.22b5c2a.99b1d1",            // 2024 #16
+  "10x10:BBBBb7c.Bi.Bi.Bd5d.BBBBf.f6666.d7d6.i6.i4.c3b4224",          // 2023 #15
+  "10x10:gBBB.88e999.j.j.a887bBc.c2f.c2a4d.a6e8b.66h.6i",             // 2024 #17
+  "10x10:j.j.b9Cb27b.b92bC5b.j.j.j.b6CbC5b.b48b85b.j",                // 2024 #18
   // D3
-  "10x10:h6a.b6g.a714c1b.b3g.j.j.g5b.b1c713a.g4b.a6h",
-  "10x10:h2a.b2g.a2c3d.g3b.c3d4a.h4a.3e65b.b2g.b2g.41d522a",
+  "10x10:j.a23a32a2Ba.j.e2a6b.b5g.j.a2h.j.b3a365a9a.j",               // 2023 #16
+  "10x10:h6a.b6g.a714c1b.b3g.j.j.g5b.b1c713a.g4b.a6h",                // 2024 #19
+  "10x10:2c31d.j.1aEf1.b3f9.i6.j.j.d3e.j.fA381",                      // 2023 #17
+  "10x10:FaF571a9a9.aFf9a.FaFd9a9.aFc2a3a3.FaFb2d.3a3c4c." +
+        "d5c8a.g8a8.f8a8a.a5e8a8",                                    // 2023 #18
+  "10x10:h2a.b2g.a2c3d.g3b.c3d4a.h4a.3e65b.b2g.b2g.41d522a",          // 2024 #20
+  "10x10:i2.4c6e.a2e4b.a2b4e.b3c3c.j.d1e.4g5a.b3c3b1.22e1b",          // 2023 #19
+  "10x10:2d9c3.a3b4e.b31f.a2b1e.e3d.2e5b2.i3.j.e6d.c62d2",            // 2023 #20
   "17x17:a1aAj4b.3a6hAd2.2n2a.6d8cBe4a.q.g331g.p5.c6a8k.2h55f.q." +
-        "42bDf3e.b2n.6d6i7a.b6h4d6.b6b444i.a4a44c3f2a.f1b44c2a4",
+        "42bDf3e.b2n.6d6i7a.b6h4d6.b6b444i.a4a44c3f2a.f1b44c2a4",     // 2024 #21
+  "17x17:4g6a1f.a2b6a6d4e.15m5a.4j4e.j1c4b.3b4d7h.4p.q.q.e7i6a." +
+        "c4i5c.a8e7c2e.f1i1.4c2j4a.b4m3.4b1d32e4a.4a3d41c5c1",        // 2023 #21
 ];
 let puzzleChoice = 2;
 let puzzleCount = cannedPuzzles.length;
@@ -41,7 +60,7 @@ let puzzleCount = cannedPuzzles.length;
 // which puzzles have demos
 const demoPuzzles  = [1,2];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,13,20,99];
+const puzzleLevels = [1,17,31,99];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

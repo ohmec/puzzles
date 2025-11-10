@@ -1,165 +1,24 @@
-const emptyCellColor = "white";         // default
-const fillCellColor = "black";          // default
-const incorrectCellColor = "#802020";   // dark reddish
+const gameName = 'hitori';
+
+const incorrectCellColor  = "#802020";  // dark reddish
 const duplicateStateColor = "#FFC0C0";  // light reddish
 const incorrectRiverColor = "#C0C040";  // light brown
 
-const stdFontColor = "black";
-const offFontColor = "white";
+const constMoveToggle = 1;
+const constMoveSet    = 2;
+const constMoveReset  = 3;
 
-const gameName = 'hitori';
+const handledKeys = [ constKeyCR, constKeySpace, constKeyLeft,
+  constKeyUp, constKeyRight, constKeyDown, constKey0, constKey1,
+  constKeyAlt0, constKeyAlt1 ];
 
-let clicking = false;
-let dragging = false;
-let errorCount = 0;
-let assistState = 0;
-let isDemo = false;
-
-const MOVE_TOGGLE = 1;
-const MOVE_SET    = 2;
-const MOVE_RESET  = 3;
-
-const handledKeys = [ KEY_CR, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_0, KEY_1, ALT_0, ALT_1 ];
-
-let initPuzzle, puzzle, moveHistory, puzzleBoardStates, demoStepNum;
+let moveHistory, puzzleBoardStates;
 
 function puzzleInit() {
+  initElements();
   initRibbons(gameName);
-  // any key anywhere as long as canvas is in focus
-  $(document).keydown(function(evnt) {
-    $("#resetButton").blur();
-    $("#clearButton").blur();
-    $("#undoButton").blur();
-    $("#assistButton").blur();
-    if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
-      evnt.preventDefault();
-    }
-    if (handledKeys.find(element => element == evnt.which)) {
-      handleKey(evnt.which);
-    }
-  });
-
-  // a click (except right-click i.e. ctrl-click) on tabs.
-  // hide old, show new
-  $("#tabs li").click(function() {      
-    $("#tabs li").removeClass('active');    
-    $(this).addClass("active");     
-    $(".tab_content").hide();
-    $($(this).find("a").attr("href")).show();
-    clicking = false;
-    return false;
-  });
-  
-  $("#tab1").show();
-  $("#demotab").hide();
-
-  $("#displayButton").click(function() {
-    let pval = $("#userPuzzle").val();
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        updateHtmlDescr(initPuzzle);
-        puzzle = removeDot(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          $("#demotab").show();
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          $("#demotab").hide();
-        }
-      }
-    } else {
-      $("#demotab").hide();
-      initPuzzle = pval;
-      puzzle = removeDot(pval);
-      puzzleChoice = 0;
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
-  });
-
-  $("#nextDemoButton").click(function() {
-    isDemo = true;
-    demoStepNum++;
-    updateDemoRegion(puzzleChoice);
-  });
-
-  $("#prevDemoButton").click(function() {
-    if (demoStepNum) {
-      demoStepNum--;
-    }
-    updateDemoRegion(puzzleChoice);
-  });
-
-  // click (down) within puzzle number entry, remove clicking
-  // effect on canvas
-  $("#userPuzzle").mousedown(function(evnt) {
-    clicking = false;
-  });
-
-  // click (down) within puzzle frame
-  $("#puzzleCanvas").mousedown(function(evnt) {
-    clicking = true;
-    $("#puzzleCanvas").css("border-color", "black");
-    handleClick(evnt);
-  });
-
-  // moving mouse within puzzle area (clicking is true if already moused down => dragging)
-  $("#puzzleCanvas").mousemove(function(evnt) {
-    if (clicking == false) return;
-    evnt.preventDefault();
-    dragging = true;
-  });
-
-  // releasing mouse within puzzle or not within puzzle
-  $(document).mouseup(function() {
-    clicking = false;
-    dragging = false;
-  });
-
-  // undo click, remove the last move
-  $("#undoButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    undoMove();
-  });
-
-  // click on reset, brings up confirmation, then resets puzzle
-  $("#resetButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    let resetDialog = confirm("Reset puzzle?");
-    if (resetDialog == true) {
-      resetBoard();
-    }
-  });
-
-  // click on clear ribbons, brings up confirmation, then resets puzzle
-  $("#clearButton").click(function() {
-    let resetDialog = confirm("Clear Ribbons Shelf?");
-    if (resetDialog == true) {
-      localStorage.setItem("OPSaved" + gameName,'');
-      const ribbonBar = document.getElementById("ribbonbar");
-      ribbonBar.innerHTML = '';
-      $("#clearButton").hide();
-    }
-  });
-
-  // click on show errors, converts to show how many errors remain
-  $("#assistButton").click(function() {
-    assistState = (assistState+1)%3;
-    updateBoardStatus();
-    drawBoard();
-  });
-
-  $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
-
-  canvas = document.getElementById('puzzleCanvas');  
-  globalContext = canvas.getContext('2d');
+  listenKeys(handledKeys,handleKey);
+  listenClick(handleClick,initStructures,undoMove);
 
   if(cannedPuzzles[puzzleChoice]) {
     initPuzzle = cannedPuzzles[puzzleChoice];
@@ -179,16 +38,16 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) { 
-    if (errorCount) {
+  if (playState.assistState == 0) {
+    if (playState.errorCount) {
       etext = "there are errors";
     } else {
       etext = "there are no errors";
     }
   } else {
-    etext = "there are " + errorCount + " errors";
+    etext = "there are " + playState.errorCount + " errors";
   }
-  updateDynamicHtmlEntries(etext,assistState);
+  updateDynamicHtmlEntries(etext,playState.assistState);
 }
 
 function addHistory(setOrReset,y,x) {
@@ -197,15 +56,15 @@ function addHistory(setOrReset,y,x) {
 
 function addMove(move,y,x) {
   switch (move) {
-    case MOVE_TOGGLE:
+    case constMoveToggle:
       puzzleBoardStates[y][x] = puzzleBoardStates[y][x] ? false : true;
       addHistory(puzzleBoardStates[y][x],y,x);
       break;
-    case MOVE_SET:
+    case constMoveSet:
       puzzleBoardStates[y][x] = true;
       addHistory(true,y,x);
       break;
-    case MOVE_RESET:
+    case constMoveReset:
       puzzleBoardStates[y][x] = false;
       addHistory(false,y,x);
       break;
@@ -215,8 +74,8 @@ function addMove(move,y,x) {
 function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
-  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = $("#userPuzzle").val();
+  if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
+    let pval = elemStruct.userPuzzle.value;
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
@@ -226,15 +85,15 @@ function handleKey(keynum) {
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
-          $("#demotab").show();
+          elemStruct.demotab.style.display = 'block';
           demoStepNum = 0;
           updateDemoRegion(pval);
         } else {
-          $("#demotab").hide();
+          elemStruct.demotab.style.display = 'none';
         }
       }
     } else {
-      $("#demotab").hide();
+      elemStruct.demotab.style.display = 'none';
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
       updateHtmlDescr(initPuzzle);
@@ -243,43 +102,26 @@ function handleKey(keynum) {
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
-      case KEY_UP:
+      case constKeyUp:
+      case constKeyDown:
+      case constKeyLeft:
+      case constKeyRight:
         globalCursorOn = true;
-        if (globalCursorY) {
-          globalCursorY--;
-        }
+        moveGlobalCursor(keynum);
         break;
-      case KEY_DOWN:
+      case constKeySpace: // toggle on/off under cursor
         globalCursorOn = true;
-        if (globalCursorY < (globalPuzzleH-1)) {
-          globalCursorY++;
-        }
+        addMove(constMoveToggle,globalCursorY,globalCursorX);
         break;
-      case KEY_LEFT:
+      case constKey0: // set off
+      case constKeyAlt0:
         globalCursorOn = true;
-        if (globalCursorX) {
-          globalCursorX--;
-        }
+        addMove(constMoveReset,globalCursorY,globalCursorX);
         break;
-      case KEY_RIGHT:
+      case constKey1: // set on
+      case constKeyAlt1:
         globalCursorOn = true;
-        if (globalCursorX < (globalPuzzleW-1)) {
-          globalCursorX++;
-        }
-        break;
-      case KEY_SP: // toggle on/off under cursor
-        globalCursorOn = true;
-        addMove(MOVE_TOGGLE,globalCursorY,globalCursorX);
-        break;
-      case KEY_0: // set off
-      case ALT_0:
-        globalCursorOn = true;
-        addMove(MOVE_RESET,globalCursorY,globalCursorX);
-        break;
-      case KEY_1: // set on
-      case ALT_1:
-        globalCursorOn = true;
-        addMove(MOVE_SET,globalCursorY,globalCursorX);
+        addMove(constMoveSet,globalCursorY,globalCursorX);
         break;
       }
     updateBoardStatus();
@@ -288,7 +130,7 @@ function handleKey(keynum) {
 }
 
 function initStructures(puzzle) {
-  $("#canvasDiv").css("border-color", "black");
+  elemStruct.canvasDiv.style.borderColor = "black";
   moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
@@ -316,20 +158,18 @@ function initStructures(puzzle) {
   updateDynTextFields();
 }
 
-function removeDot(strval) {
-  return strval.replace(/\./gi, "");
-}
-
 function handleClick(evnt) {
-  $("#userPuzzleField").blur();
+  // don't allow dragging
+  if (playState.dragging) return;
+
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
-  
+
   globalCursorY = yCell;
   globalCursorX = xCell;
 
   // click toggles state
-  addMove(MOVE_TOGGLE,yCell,xCell);
+  addMove(constMoveToggle,yCell,xCell);
 
   // update status
   updateBoardStatus();
@@ -350,7 +190,7 @@ function updateBoardStatus() {
   // figure out how many illegal rows and columns there are,
   // determined by the repeated values found. don't count the
   // same cell twice
-  errorCount = 0;
+  playState.errorCount = 0;
   for (let y=0;y<globalPuzzleH;y++) {
     let count = new Array(globalPuzzleW);
     for (let c=0;c<=globalPuzzleW;c++) {
@@ -363,9 +203,9 @@ function updateBoardStatus() {
     }
     for (let c=0;c<=globalPuzzleW;c++) {
       if (count[c] > 1) {
-        errorCount += (count[c]-1);
+        playState.errorCount += (count[c]-1);
         // if in assistState==2 then color these light red
-        if (assistState==2) {
+        if (playState.assistState==2) {
           for (let x=0;x<globalPuzzleW;x++) {
             if (!puzzleBoardStates[y][x] && globalBoardValues[y][x]==c) {
               globalBoardColors[y][x] = duplicateStateColor;
@@ -387,9 +227,9 @@ function updateBoardStatus() {
     }
     for (let c=0;c<=globalPuzzleH;c++) {
       if (count[c] > 1) {
-        errorCount += (count[c]-1);
+        playState.errorCount += (count[c]-1);
         // if in assistState==2 then color these light red
-        if (assistState==2) {
+        if (playState.assistState==2) {
           for (let y=0;y<globalPuzzleH;y++) {
             if (!puzzleBoardStates[y][x] && globalBoardValues[y][x]==c) {
               globalBoardColors[y][x] = duplicateStateColor;
@@ -408,9 +248,9 @@ function updateBoardStatus() {
       if (puzzleBoardStates[y][x] && (filledCells.indexOf(y+","+x) == -1)) {
         let visitedCells = travelRiver(puzzleBoardStates,y,x,true,true);
         if (visitedCells.length != 1) {
-          errorCount++;
+          playState.errorCount++;
           // color them if in assistState==2
-          if (assistState==2) {
+          if (playState.assistState==2) {
             for (let cc of visitedCells) {
               let curCell = cc.split(",");
               let iy = curCell[0];
@@ -432,10 +272,10 @@ function updateBoardStatus() {
       if (!puzzleBoardStates[y][x] && (whiteCells.indexOf(y+","+x) == -1)) {
         let visitedCells = travelRiver(puzzleBoardStates,y,x,true,false);
         if (riverCount) {
-          errorCount++;
+          playState.errorCount++;
           // if in assistState==2 then color these second river
           // cells differently
-          if (assistState==2) {
+          if (playState.assistState==2) {
             for (let cc of visitedCells) {
               let curCell = cc.split(",");
               let iy = curCell[0];
@@ -451,7 +291,7 @@ function updateBoardStatus() {
   }
 
   updateDynTextFields();
-  if (errorCount == 0) {
+  if (playState.errorCount == 0) {
     canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
@@ -467,17 +307,10 @@ function undoMove() {
   }
 }
 
-function resetBoard() {
-  $("#resetButton").blur();
-  $("#clearButton").blur();
-  $("#assistButton").blur();
-  initStructures(puzzle);
-}
-
 function updateDemoRegion(demoNum) {
   updateDemoFunction(demoNum,function () {
     puzzleBoardStates = initYXFromValue(false);
   }, function (steps) {
-    addMove(MOVE_SET,steps[0],steps[1]);
+    addMove(constMoveSet,steps[0],steps[1]);
   });
 }

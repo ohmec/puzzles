@@ -98,7 +98,7 @@ let puzzleChoice = 11;
 let puzzleCount = cannedPuzzles.length;
 
 // which puzzles have demos
-const demoPuzzles =  [1,4];
+const demoPuzzles =  [1,6];
 // which puzzles are at which level [D1,D2,D3,D4]
 const puzzleLevels = [1,7,20,35];
 

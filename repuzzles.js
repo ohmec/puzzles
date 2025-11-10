@@ -24,6 +24,9 @@ const cannedPuzzles = [
   "8x8:d1b6.c2a43a.b2c2a.a2e3.2e6a.a3c3b.a21a1c.3b1d:" +
       "68.f2.fe.64.c4.72.6c.46:" +
       "b4.cc.9a.7e.da.7c.4e.a4",                        // Godzilla 239
+  "8x8:b1b3b.3f4.h.h.h.h.4f2.b4b1b:" +
+      "38.b2.e6.fc.7c.cc.62.8c:" +
+      "88.5e.4c.6e.ee.e4.be.58",                        // Godzilla 240
   "8x8:h.h.h.h.h.h.h.h:" +
       "f6.fe.36.36.68.6e.68.ee:" +
       "b6.74.70.14.54.9e.98.3e",                        // Godzilla 244
@@ -69,9 +72,10 @@ const cannedPuzzles = [
         "c3a2b28.j.7a6e4a.3b2c4b.a2b4b8b.41d5c.5b67b5a3.j.b54a67c:" +
         "330.9e0.f38.920.998.ff0.998.360.a68.fe0.278.ea0.398.cf0.790.498.6f0.998:" +
         "c64d0.93f98.ff498.932f0.31f98.f3320.3edf8.92920.fcf78.939e0", // Godzilla 248 Medium
-  "10x18:j.j.a3b2e.2a4g.a2h.6a5g.j.j.j.d1e.j.j.j.e5b2a.g5a6.h1a.g6a3.j:" +
-        "7a8.e38.998.f58.ed8.2e0.590.b60.af8.a68.f60.b38.df0.e88.cb8.5e8.f20.890:" +
-        "8b128.72f78.9edf0.772f8.b5568.e7d78.e92d8.ef6c8.4ffa8.26618",  // Godzilla 250 Medium
+  "10x18:1c4c5a.b3c6c.3a1c1a2a.j.2a1c1a4a.b3c5c.3c2c1a.j.b5c2c.c1c2b." +
+        "j.a3c1c4.c3c4b.a5a1c2a1.j.a3a4c1a3.c2c5b.a2c5c4:880.968.ed0." +
+        "758.5e0.5d8.670.cb8.fb8.cc8.b50.ac8.1f0.558.250.bd0.260.650:" +
+        "2a2b8.c95a8.955e8.d6bd0.fb670.972d0.6db30.b8ab8.d4f50.ea290",  // Godzilla 251 Medium
   "10x18:c4f.d2e.j.j.d5e.j.h4a.e1d.b6g.g4b.d4e.a3h.j.e4d.j.j.e1d.f6c:" +
         "958.558.5d8.d50.558.350.5c8.aa0.d50.d50.4a0.5a8.4f0.d90.540.6a8.ea8.558:" +
         "7e948.dd5d0.5eb98.55ba0.37668.73768.a66e8.a7560.6bda8.37fa0",  // Godzilla 252 Hard
