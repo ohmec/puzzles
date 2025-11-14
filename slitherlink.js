@@ -1,13 +1,8 @@
-const emptyCellColor   = "white";         // not-filled
-const stdFontColor     = "black";
-const errorFontColor   = "red";
-const correctFontColor = "#20c020";
-const grayFillColor    = "#e0e0e0";
+const gameName         = "slitherlink";
+
 const correctFillColor = "#e0ffe0";
 const errorFillColor   = "#ffe0e0";
-const correctWallColor = "#20ff20";
 const errorWallColor   = "#ff2020";
-const gameName         = "slitherlink";
 
 const constMoveNone =       0;
 const constMoveEraseWall =  1;
@@ -16,183 +11,28 @@ const constMoveXWall =      3;
 const constMoveShadeCell =  4;
 const constMoveClearCell =  5;
 
-let clicking = false;
-let dragging = false;
-let shifting = false;
-let ctrling = false;
-let errorCount = 0;
 let incompleteCount = 0;
 let incompleteLoop = true;
-let assistState = 0;
-let curClickType = CLICK_UNKNOWN;
+let curClickType = constClickUnknown;
 let curClickEdge = false;
-let curShiftMove = constMoveNone;
-let isDemo = false;
 
 // which keys are handled
-let handledKeys =
-  [ KEY_BS, KEY_CR, KEY_SP, KEY_X, KEY_0, KEY_1, ALT_0, ALT_1,
-    KEY_N, KEY_S, KEY_Z, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
+let handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,
+  constKeyX, constKey0, constKey1, constKeyAlt0, constKeyAlt1,
+  constKeyN, constKeyS, constKeyZ, constKeyEsc, constKeyLeft, constKeyUp,
+  constKeyRight, constKeyDown ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
+let moveHistory, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = false;
   globalWallCursorOn = false;
   globalBorderMargin = 8;
   globalDrawDots = true;
+  initElements();
   initRibbons(gameName);
-
-  // any key anywhere as long as canvas is in focus
-  $(document).keydown(function(evnt) {
-    $("#resetButton").blur();
-    $("#clearButton").blur();
-    $("#undoButton").blur();
-    $("#assistButton").blur();
-    if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which == KEY_SHIFT) {
-      shifting = true;
-      curShiftMove = puzzleBoardStates[globalCursorY][globalCursorX] ?
-        constMoveShadeCell : constMoveClearCell;
-    } else if ((evnt.which == KEY_CTLL) || (evnt.which == KEY_CTLR)) {
-      ctrling = true;
-    } else if (!ctrling && (handledKeys.find(element => element == evnt.which))) {
-      handleKey(evnt.which);
-    }
-  });
-
-  $(document).keyup(function(evnt) {
-    if (evnt.which == KEY_SHIFT) {
-      shifting = false;
-    } else if ((evnt.which == KEY_CTLL) || (evnt.which == KEY_CTLR)) {
-      ctrling = false;
-    }
-  });
-
-  // a click (except right-click i.e. ctrl-click) on tabs.
-  // hide old, show new
-  $("#tabs li").click(function() {      
-    $("#tabs li").removeClass('active');    
-    $(this).addClass("active");     
-    $(".tab_content").hide();
-    $($(this).find("a").attr("href")).show();
-    clicking = false;
-    return false;
-  });
-  
-  $("#tab1").show();
-  $("#demotab").hide();
-
-  $("#displayButton").click(function() {
-    let pval = $("#userPuzzle").val();
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          $("#demotab").show();
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          $("#demotab").hide();
-        }
-      }
-    } else {
-      $("#demotab").hide();
-      initPuzzle = pval;
-      puzzle = removeDot(pval);
-      puzzleChoice = 0;
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
-  });
-
-  $("#nextDemoButton").click(function() {
-    isDemo = true;
-    demoStepNum++;
-    updateDemoRegion(puzzleChoice);
-  });
-
-  $("#prevDemoButton").click(function() {
-    if (demoStepNum) {
-      demoStepNum--;
-    }
-    updateDemoRegion(puzzleChoice);
-  });
-
-  // click (down) within puzzle number entry, remove clicking
-  // effect on canvas
-  $("#userPuzzle").mousedown(function(evnt) {
-    clicking = false;
-  });
-
-  // click (down) within puzzle frame
-  $("#puzzleCanvas").mousedown(function(evnt) {
-    clicking = true;
-    $("#puzzleCanvas").css("border-color", "black");
-    handleClick(evnt);
-  });
-
-  // moving mouse within puzzle area (clicking is true if already moused down => dragging)
-  $("#puzzleCanvas").mousemove(function(evnt) {
-    if (clicking == false) return;
-    evnt.preventDefault();
-    dragging = true;
-    handleClick(evnt);
-  });
-
-  // releasing mouse within puzzle or not within puzzle
-  $(document).mouseup(function() {
-    clicking = false;
-    dragging = false;
-  });
-
-  // undo click, remove the last move
-  $("#undoButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    undoMove();
-  });
-
-  // click on reset, brings up confirmation, then resets puzzle
-  $("#resetButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    let resetDialog = confirm("Reset puzzle?");
-    if (resetDialog == true) {
-      resetBoard();
-    }
-  });
-
-  // click on clear ribbons, brings up confirmation, then resets puzzle
-  $("#clearButton").click(function() {
-    let resetDialog = confirm("Clear Ribbons Shelf?");
-    if (resetDialog == true) {
-      localStorage.setItem("OPSaved" + gameName,'');
-      const ribbonBar = document.getElementById("ribbonbar");
-      ribbonBar.innerHTML = '';
-      $("#clearButton").hide();
-    }
-  });
-
-  // click on show errors, converts to show how many errors remain
-  $("#assistButton").click(function() {
-    assistState = (assistState+1)%3;
-    updateBoardStatus();
-    drawBoard();
-  });
-
-  $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
-
-  canvas = document.getElementById('puzzleCanvas');  
-  globalContext = canvas.getContext('2d');
+  listenKeys(handledKeys,handleKey);
+  listenClick(handleClick,initStructures,undoMove);
 
   if(cannedPuzzles[puzzleChoice]) {
     initPuzzle = cannedPuzzles[puzzleChoice];
@@ -214,10 +54,10 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) { 
-    if (errorCount && incompleteCount) {
+  if (playState.assistState == 0) {
+    if (playState.errorCount && incompleteCount) {
       etext = "there are errors and incomplete numbers";
-    } else if (errorCount) {
+    } else if (playState.errorCount) {
       etext = "there are errors";
     } else if (incompleteCount) {
       etext = "there are incomplete numbers";
@@ -227,8 +67,8 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!!";
     }
   } else {
-    if (errorCount || incompleteCount) {
-      etext = "there are " + errorCount + " errors and " +
+    if (playState.errorCount || incompleteCount) {
+      etext = "there are " + playState.errorCount + " errors and " +
                         incompleteCount + " incomplete numbers";
     } else if (incompleteLoop) {
       etext = "the loop is not complete";
@@ -236,7 +76,7 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!!";
     }
   }
-  updateDynamicHtmlEntries(etext,assistState);
+  updateDynamicHtmlEntries(etext,playState.assistState);
 }
 
 function addHistory(movetype,y,x,prevvalue) {
@@ -288,8 +128,8 @@ function addMove(y,x,moveType) {
 function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
-  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = $("#userPuzzle").val();
+  if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
+    let pval = elemStruct.userPuzzle.value;
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
@@ -299,15 +139,15 @@ function handleKey(keynum) {
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
-          $("#demotab").show();
+          elemStruct.demotab.style.display = 'block';
           demoStepNum = 0;
           updateDemoRegion(pval);
         } else {
-          $("#demotab").hide();
+          elemStruct.demotab.style.display = 'none';
         }
       }
     } else {
-      $("#demotab").hide();
+      elemStruct.demotab.style.display = 'none';
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
       updateHtmlDescr(initPuzzle);
@@ -315,91 +155,91 @@ function handleKey(keynum) {
     initStructures(puzzle);
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
-    if (keynum==KEY_ESC) {
+    if (keynum==constKeyEsc) {
       console.log(globalBoardValues);
       console.log(globalWallStates);
       console.log(moveHistory);
     // none of these keys make any sense unless on a wall or in a cell
     } else if (globalWallCursorOn || globalCursorOn) {
       switch (keynum) {
-        case KEY_UP:
+        case constKeyUp:
           // we can only move the wall cursor up if we're already on a vert wall
           // or corner
           if (globalWallCursorOn && ((globalWallCursorX%2)==0) && globalWallCursorY) {
             globalWallCursorY--;
-            if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
+            if (playState.shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
             }
             // if shifting on a corner move up two (to the next corner), else one
-            if (shifting && (globalWallCursorY%2)) {
+            if (playState.shifting && (globalWallCursorY%2)) {
               globalWallCursorY--;
             }
           } else if (globalCursorOn && globalCursorY) {
             globalCursorY--;
-            if (shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftMove);
+            if (playState.shifting) {
+              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
             }
           }
           break;
-        case KEY_DOWN:
+        case constKeyDown:
           // we can only move the wall cursor down if we're already on a vert wall
           // or corner
           if (globalWallCursorOn && ((globalWallCursorX%2)==0) && (globalWallCursorY<=(2*globalPuzzleH))) {
             globalWallCursorY++;
-            if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
+            if (playState.shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
             }
             // if shifting on a corner move down two (to the next corner), else one
-            if (shifting && (globalWallCursorY%2)) {
+            if (playState.shifting && (globalWallCursorY%2)) {
               globalWallCursorY++;
             }
           } else if (globalCursorOn && (globalCursorY<globalPuzzleH)) {
             globalCursorY++;
-            if (shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftMove);
+            if (playState.shifting) {
+              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
             }
           }
           break;
-        case KEY_LEFT:
+        case constKeyLeft:
           // we can only move the wall cursor left if we're already on a horz wall
           // or corner
           if (globalWallCursorOn && ((globalWallCursorY%2)==0) && globalWallCursorX) {
             globalWallCursorX--;
-            if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
+            if (playState.shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
             }
             // if shifting on a corner move left two (to the next corner), else one
-            if (shifting && (globalWallCursorX%2)) {
+            if (playState.shifting && (globalWallCursorX%2)) {
               globalWallCursorX--;
             }
           } else if (globalCursorOn && (globalCursorX>0)) {
             globalCursorX--;
-            if (shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftMove);
+            if (playState.shifting) {
+              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
             }
           }
           break;
-        case KEY_RIGHT:
+        case constKeyRight:
           // we can only move the wall cursor right if we're already on a horz wall
           // or corner
           if (globalWallCursorOn && ((globalWallCursorY%2)==0) && (globalWallCursorX<=(2*globalPuzzleW))) {
             globalWallCursorX++;
-            if (shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
+            if (playState.shifting && ((globalWallCursorX%2) || (globalWallCursorY%2))) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
             }
             // if shifting on a corner move right two (to the next corner), else one
-            if (shifting && (globalWallCursorX%2)) {
+            if (playState.shifting && (globalWallCursorX%2)) {
               globalWallCursorX++;
             }
           } else if (globalCursorOn && (globalCursorX<globalPuzzleW)) {
             globalCursorX++;
-            if (shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftMove);
+            if (playState.shifting) {
+              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
             }
           }
           break;
         // if on wall, toggle wall value
-        case KEY_SP:
+        case constKeySpace:
           if (globalWallCursorOn) {
             if (globalWallStates[globalWallCursorY][globalWallCursorX] & constWallX) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveEraseWall);
@@ -417,9 +257,9 @@ function handleKey(keynum) {
           }
           break;
         // if on wall, clear wall, else clear cell
-        case KEY_0:
-        case ALT_0:
-        case KEY_BS:
+        case constKey0:
+        case constKeyAlt0:
+        case constKeyBackspace:
           if (globalWallCursorOn) {
             addMove(globalWallCursorY,globalWallCursorX,constMoveEraseWall);
           } else {
@@ -427,8 +267,8 @@ function handleKey(keynum) {
           }
           break;
         // if on wall, set wall, else shade cell
-        case KEY_1:
-        case ALT_1:
+        case constKey1:
+        case constKeyAlt1:
           if (globalWallCursorOn) {
             addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
           } else {
@@ -436,19 +276,19 @@ function handleKey(keynum) {
           }
           break;
         // if on wall, set wall to X
-        case KEY_X:
+        case constKeyX:
           if (globalWallCursorOn) {
             addMove(globalWallCursorY,globalWallCursorX,constMoveXWall);
           }
           break;
         // secret solve button for some "easy progress" solves
-        case KEY_S:
+        case constKeyS:
           initSolve();
           break;
-        case KEY_N:
+        case constKeyN:
           nowhereElse();
           break;
-        case KEY_Z:
+        case constKeyZ:
           initX();
       }
     }
@@ -458,7 +298,7 @@ function handleKey(keynum) {
 }
 
 function initStructures(puzzle) {
-  $("#canvasDiv").css("border-color", "black");
+  elemStruct.canvasDiv.style.borderColor = "black";
   moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
@@ -483,34 +323,29 @@ function initStructures(puzzle) {
   drawBoard();
 }
 
-function removeDot(strval) {
-  return strval.replace(/\./gi, "");
-}
-
 function handleClick(evnt) {
-  $("#userPuzzleField").blur();
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
   // set click type
-  if (!dragging) {
+  if (!playState.dragging) {
     curClickType = clickType(evnt);
     curClickEdge = (isEdge | isCorner);
   }
 
   // dragging clicks only work on same type
-  if (dragging && curClickEdge && !isEdge) {
+  if (playState.dragging && curClickEdge && !isEdge) {
     return;
   }
-  if (dragging && !curClickEdge && (isEdge || isCorner)) {
+  if (playState.dragging && !curClickEdge && (isEdge || isCorner)) {
     return;
   }
   // dragging wall, but no move yet
-  if (dragging && curClickEdge && (yEdge == globalWallCursorY) && (xEdge == globalWallCursorX)) {
+  if (playState.dragging && curClickEdge && (yEdge == globalWallCursorY) && (xEdge == globalWallCursorX)) {
     return;
   }
   // dragging cell, but no move yet
-  if (dragging && !curClickEdge && (yCell == globalCursorY) && (xCell == globalCursorX)) {
+  if (playState.dragging && !curClickEdge && (yCell == globalCursorY) && (xCell == globalCursorX)) {
     return;
   }
 
@@ -527,19 +362,19 @@ function handleClick(evnt) {
   }
 
   // left click or drag on edge sets the edge
-  if (isEdge && (curClickType==CLICK_LEFT)) {
+  if (isEdge && (curClickType==constClickLeft)) {
     addMove(yEdge,xEdge,constMoveAddWall);
   // right click or drag on edge clears the edge
-  } else if (isEdge && (curClickType==CLICK_RIGHT)) {
+  } else if (isEdge && (curClickType==constClickRight)) {
     addMove(yEdge,xEdge,constMoveEraseWall);
   // middle drag or click on edge sets to X
-  } else if (isEdge && (curClickType==CLICK_MIDDLE)) {
+  } else if (isEdge && (curClickType==constClickMiddle)) {
     addMove(yEdge,xEdge,constMoveXWall);
   } else if (!isEdge && !isCorner) {
     // left-click on cell shades color
-    if (curClickType==CLICK_LEFT) {
+    if (curClickType==constClickLeft) {
       addMove(yCell,xCell,constMoveShadeCell);
-    } else if (curClickType==CLICK_RIGHT) {
+    } else if (curClickType==constClickRight) {
       addMove(yCell,xCell,constMoveClearCell);
     }
   }
@@ -552,7 +387,7 @@ function updateBoardStatus() {
   // error checks
   //  1) nodes with more than 2 segments coming out
   //  2) digits with more than n segments around them
-  errorCount = 0;
+  playState.errorCount = 0;
 
   // also count how many numbers haven't been completed yet
   incompleteCount = 0;
@@ -564,7 +399,7 @@ function updateBoardStatus() {
   // for their state (gray for 'true' and white for 'false')
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      globalBoardColors[y][x] = puzzleBoardStates[y][x] ? grayFillColor : emptyCellColor;
+      globalBoardColors[y][x] = puzzleBoardStates[y][x] ? indetCellColor : emptyCellColor;
       globalBoardTextColors[y][x] = stdFontColor;
     }
   }
@@ -589,8 +424,8 @@ function updateBoardStatus() {
       if (wtrue) segcount++;
       if (etrue) segcount++;
       if (segcount > 2) {
-        errorCount++;
-        if (assistState == 2) {
+        playState.errorCount++;
+        if (playState.assistState == 2) {
           if (ntrue) globalWallColors[y-1][x] = errorWallColor;
           if (strue) globalWallColors[y+1][x] = errorWallColor;
           if (wtrue) globalWallColors[y][x-1] = errorWallColor;
@@ -614,14 +449,14 @@ function updateBoardStatus() {
         if (wtrue) segcount++;
         if (etrue) segcount++;
         if (segcount > parseInt(globalBoardValues[y][x])) {
-          errorCount++;
-          if (assistState==2) {
+          playState.errorCount++;
+          if (playState.assistState==2) {
             globalBoardTextColors[y][x] = errorFontColor;
           }
         } else if (segcount < parseInt(globalBoardValues[y][x])) {
           incompleteCount++;
-        } else if (assistState==2) {
-          globalBoardTextColors[y][x] = correctFontColor;
+        } else if (playState.assistState==2) {
+          globalBoardTextColors[y][x] = correctFontColorDr;
         }
       }
     }
@@ -651,9 +486,9 @@ function updateBoardStatus() {
     }
   }
   if (hasLoop && allSegments.length > 1) {
-    errorCount++;
+    playState.errorCount++;
     // color any false loop red
-    if (assistState==2) {
+    if (playState.assistState==2) {
       // the easiest algorithm for this is to keep track left-to-right how many
       // walls have been seen. if odd, then we're inside a wall, color green.
       // we have to take one loop at a time and ignore other segments
@@ -685,7 +520,7 @@ function updateBoardStatus() {
       }
     }
   // color the correct loop green
-  } else if (hasLoop && allSegments.length==1 && (assistState==2) && !errorCount && !incompleteCount) {
+  } else if (hasLoop && allSegments.length==1 && (playState.assistState==2) && !playState.errorCount && !incompleteCount) {
     // the easiest algorithm for this is to keep track left-to-right how many
     // walls have been seen. if odd, then we're inside a wall, color green
     for (let y=0;y<globalPuzzleH;y++) {
@@ -704,7 +539,7 @@ function updateBoardStatus() {
   }
 
   updateDynTextFields();
-  if ((errorCount == 0) && (incompleteCount == 0) && !incompleteLoop) {
+  if ((playState.errorCount == 0) && (incompleteCount == 0) && !incompleteLoop) {
     canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
@@ -722,13 +557,6 @@ function undoMove() {
     updateBoardStatus();
     drawBoard();
   }
-}
-
-function resetBoard() {
-  $("#resetButton").blur();
-  $("#clearButton").blur();
-  $("#assistButton").blur();
-  initStructures(puzzle);
 }
 
 function updateDemoRegion(demoNum) {

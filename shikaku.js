@@ -1,5 +1,5 @@
-const emptyCellColor     = "white";         // not-filled
-const stdFontColor       = "white";
+const gameName = 'shikaku';
+
 const dragRoomLineColor  = "#c080c0";
 const dragRoomCellColor  = "#ffb0ff80";
 const correctRoomColor   = "#c0ffc0";
@@ -8,185 +8,28 @@ const incorrectRoomColor = "#ffc0c0";
 const constMoveAddRoom = 1;
 const constMoveDelRoom = 2;
 
-const gameName = 'shikaku';
-
-let clicking = false;
-let dragging = false;
-let shifting = false;
-let errorCount = 0;
 let incompleteCount = 0;
-let assistState = 0;
-let curClickType = CLICK_UNKNOWN;
-let curPinCellY = 0;
-let curPinCellX = 0;
-let isDemo = false;
+let curClickType = constClickUnknown;
 
 // which keys are handled, letters and numbers handled algorithmically afterwards
-let handledKeys =
-  [ KEY_BS, KEY_CR, KEY_ESC, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN ];
+let handledKeys = [ constKeyBackspace, constKeyCR, constKeyEsc,
+  constKeyLeft, constKeyUp, constKeyRight, constKeyDown ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleRoomList;
+let moveHistory, puzzleRoomList;
+
+// if have created a rectangle, convert it to a room
+function submitRoom() {
+  addRoom(playState.pinCellY,playState.pinCellX,globalCursorY,globalCursorX);
+  updateBoardStatus();
+  drawBoard();
+}
 
 function puzzleInit() {
   globalCursorOn = true;
+  initElements();
   initRibbons(gameName);
-
-  // any key anywhere as long as canvas is in focus
-  $(document).keydown(function(evnt) {
-    $("#resetButton").blur();
-    $("#clearButton").blur();
-    $("#undoButton").blur();
-    $("#assistButton").blur();
-    if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which == KEY_SHIFT) {
-      shifting = true;
-      curPinCellY = globalCursorY;
-      curPinCellX = globalCursorX;
-    } else if (handledKeys.find(element => element == evnt.which)) {
-      handleKey(evnt.which);
-    }
-  });
-
-  $(document).keyup(function(evnt) {
-    if (evnt.which == KEY_SHIFT) {
-      shifting = false;
-      // if have created a rectangle, convert it to a room
-      addRoom(curPinCellY,curPinCellX,globalCursorY,globalCursorX);
-      updateBoardStatus();
-      drawBoard();
-    }
-  });
-
-  // a click (except right-click i.e. ctrl-click) on tabs.
-  // hide old, show new
-  $("#tabs li").click(function() {      
-    $("#tabs li").removeClass('active');    
-    $(this).addClass("active");     
-    $(".tab_content").hide();
-    $($(this).find("a").attr("href")).show();
-    clicking = false;
-    return false;
-  });
-  
-  $("#tab1").show();
-  $("#demotab").hide();
-
-  $("#displayButton").click(function() {
-    let pval = $("#userPuzzle").val();
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          $("#demotab").show();
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          $("#demotab").hide();
-        }
-      }
-    } else {
-      $("#demotab").hide();
-      initPuzzle = pval;
-      puzzleChoice = 0;
-      puzzle = removeDot(pval);
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
-  });
-
-  $("#nextDemoButton").click(function() {
-    isDemo = true;
-    demoStepNum++;
-    updateDemoRegion(puzzleChoice);
-  });
-
-  $("#prevDemoButton").click(function() {
-    if (demoStepNum) {
-      demoStepNum--;
-    }
-    updateDemoRegion(puzzleChoice);
-  });
-
-  // click (down) within puzzle number entry, remove clicking
-  // effect on canvas
-  $("#userPuzzle").mousedown(function(evnt) {
-    clicking = false;
-  });
-
-  // click (down) within puzzle frame
-  $("#puzzleCanvas").mousedown(function(evnt) {
-    clicking = true;
-    $("#puzzleCanvas").css("border-color", "black");
-    handleClick(evnt);
-  });
-
-  // moving mouse within puzzle area (clicking is true if already moused down => dragging)
-  $("#puzzleCanvas").mousemove(function(evnt) {
-    if (clicking == false) return;
-    evnt.preventDefault();
-    dragging = true;
-    handleClick(evnt);
-  });
-
-  // releasing mouse within puzzle or not within puzzle
-  $(document).mouseup(function() {
-    // if have created a rectangle, convert it to a room
-    if (dragging && (curClickType==CLICK_LEFT)) {
-      addRoom(curPinCellY,curPinCellX,globalCursorY,globalCursorX);
-      updateBoardStatus();
-      drawBoard();
-    }
-    clicking = false;
-    dragging = false;
-  });
-
-  // undo click, remove the last move
-  $("#undoButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    undoMove();
-  });
-
-  // click on reset, brings up confirmation, then resets puzzle
-  $("#resetButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    let resetDialog = confirm("Reset puzzle?");
-    if (resetDialog == true) {
-      resetBoard();
-    }
-  });
-
-  // click on clear ribbons, brings up confirmation, then resets puzzle
-  $("#clearButton").click(function() {
-    let resetDialog = confirm("Clear Ribbons Shelf?");
-    if (resetDialog == true) {
-      localStorage.setItem("OPSaved" + gameName,'');
-      const ribbonBar = document.getElementById("ribbonbar");
-      ribbonBar.innerHTML = '';
-      $("#clearButton").hide();
-    }
-  });
-
-  // click on show errors, converts to show how many errors remain
-  $("#assistButton").click(function() {
-    assistState = (assistState+1)%3;
-    updateBoardStatus();
-    drawBoard();
-  });
-
-  $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
-
-  canvas = document.getElementById('puzzleCanvas');  
-  globalContext = canvas.getContext('2d');
+  listenKeys(handledKeys,handleKey,null,submitRoom);
+  listenClick(handleClick,initStructures,undoMove,submitRoom);
 
   if(cannedPuzzles[puzzleChoice]) {
     initPuzzle = cannedPuzzles[puzzleChoice];
@@ -208,10 +51,10 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) { 
-    if (errorCount && incompleteCount) {
+  if (playState.assistState == 0) {
+    if (playState.errorCount && incompleteCount) {
       etext = "there are errors and incomplete numbers";
-    } else if (errorCount) {
+    } else if (playState.errorCount) {
       etext = "there are errors";
     } else if (incompleteCount) {
       etext = "there are incomplete numbers";
@@ -219,14 +62,14 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!!";
     }
   } else {
-    if (errorCount || incompleteCount) {
-      etext = "there are " + errorCount + " errors and " +
+    if (playState.errorCount || incompleteCount) {
+      etext = "there are " + playState.errorCount + " errors and " +
                         incompleteCount + " incomplete numbers";
     } else {
       etext = "the puzzle is complete!!";
     }
   }
-  updateDynamicHtmlEntries(etext,assistState);
+  updateDynamicHtmlEntries(etext,playState.assistState);
 }
 
 function addHistory(movetype,y,x,h,w) {
@@ -284,8 +127,8 @@ function addRoom (y0,x0,y1,x1,noHistory=false) {
 function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
-  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = $("#userPuzzle").val();
+  if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
+    let pval = elemStruct.userPuzzle.value;
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
@@ -295,15 +138,15 @@ function handleKey(keynum) {
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
-          $("#demotab").show();
+          elemStruct.demotab.style.display = 'block';
           demoStepNum = 0;
           updateDemoRegion(pval);
         } else {
-          $("#demotab").hide();
+          elemStruct.demotab.style.display = 'none';
         }
       }
     } else {
-      $("#demotab").hide();
+      elemStruct.demotab.style.display = 'none';
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
       updateHtmlDescr(initPuzzle);
@@ -311,30 +154,32 @@ function handleKey(keynum) {
     initStructures(puzzle);
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
-      case KEY_ESC:
+      case constKeyEsc:
         console.log(globalBoardValues);
         console.log(globalWallStates);
         console.log(puzzleRoomList);
         break;
-      case KEY_UP:    if (globalCursorY)                        globalCursorY--; break;
-      case KEY_DOWN:  if (globalCursorY < (globalPuzzleH-1))    globalCursorY++; break;
-      case KEY_LEFT:  if (globalCursorX)                        globalCursorX--; break;
-      case KEY_RIGHT: if (globalCursorX < (globalPuzzleW-1))    globalCursorX++; break;
-      case KEY_BS:
+      case constKeyUp:
+      case constKeyDown:
+      case constKeyLeft:
+      case constKeyRight:
+        moveGlobalCursor(keynum);
+        break;
+      case constKeyBackspace:
         deleteRoom(globalCursorY,globalCursorX);
         break;
     }
     updateBoardStatus();
     drawBoard();
     // if shifting, draw this room afterwards as pink rectangle
-    if (shifting && (keynum >= KEY_LEFT) && (keynum <= KEY_DOWN)) {
+    if (playState.shifting && (keynum >= constKeyLeft) && (keynum <= constKeyDown)) {
       drawDragRoom(globalCursorY,globalCursorX);
     }
   }
 }
 
 function initStructures(puzzle) {
-  $("#canvasDiv").css("border-color", "black");
+  elemStruct.canvasDiv.style.borderColor = "black";
   moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
@@ -344,7 +189,7 @@ function initStructures(puzzle) {
   // reset to non-demo
   isDemo = false;
 
-  basicInitStructures(size,emptyCellColor,constWallDash,constWallStandard,stdFontColor);
+  basicInitStructures(size,emptyCellColor,constWallDash,constWallStandard,offFontColor);
 
   globalBoardValues = initBoardValuesFromParams(numParams);
   puzzleRoomList = new Array();
@@ -359,7 +204,7 @@ function initStructures(puzzle) {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       if (globalBoardValues[y][x] != "") {
-        globalCircleStates[y][x] = CIRCLE_BLACK;
+        globalCircleStates[y][x] = constCircleBlack;
         sum += globalBoardValues[y][x];
       }
     }
@@ -373,36 +218,32 @@ function initStructures(puzzle) {
   drawBoard();
 }
 
-function removeDot(strval) {
-  return strval.replace(/\./gi, "");
-}
-
 function handleClick(evnt) {
   globalCursorOn = true;
-  $("#userPuzzleField").blur();
+
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
-  if (!dragging) {
+  if (!playState.dragging) {
     curClickType = clickType(evnt);
-    curPinCellY = yCell;
-    curPinCellX = xCell;
+    playState.pinCellY = yCell;
+    playState.pinCellX = xCell;
   }
 
   // ignoring middle click
-  if (curClickType == CLICK_MIDDLE) return;
-  // dragging room, but no move yet 
-  if (dragging && (yCell == globalCursorY) && (xCell == globalCursorX)) return;
+  if (curClickType == constClickMiddle) return;
+  // dragging room, but no move yet
+  if (playState.dragging && (yCell == globalCursorY) && (xCell == globalCursorX)) return;
   // dragging room, but on a wall or corner
-  if (dragging && (isEdge || isCorner)) return;
+  if (playState.dragging && (isEdge || isCorner)) return;
   // ignore dragging right clicks
-  if (dragging && (curClickType == CLICK_RIGHT)) return;
-  
+  if (playState.dragging && (curClickType == constClickRight)) return;
+
   globalCursorY = yCell;
   globalCursorX = xCell;
 
   // if right-clicking, remove any pre-existing room
-  if (curClickType == CLICK_RIGHT) {
+  if (curClickType == constClickRight) {
     deleteRoom(yCell,xCell);
   }
 
@@ -418,7 +259,7 @@ function updateBoardStatus() {
   // accounting the errors:
   //  1) rooms with a digit that are larger than digit value
   //  2) rooms with a digit and no room to grow that are smaller than digit value
-  errorCount = 0;
+  playState.errorCount = 0;
 
   // also count how many numbers haven't been completed yet
   incompleteCount = 0;
@@ -448,7 +289,7 @@ function updateBoardStatus() {
     }
     if (ncount==1 && (roomsize==numfound)) {
       completeCount++;
-      if (assistState==2) {
+      if (playState.assistState==2) {
         // color as correct
         for (let iy=room[0];iy<(room[0]+room[2]);iy++) {
           for (let ix=room[1];ix<(room[1]+room[3]);ix++) {
@@ -457,8 +298,8 @@ function updateBoardStatus() {
         }
       }
     } else {
-      errorCount++;
-      if (assistState==2) {
+      playState.errorCount++;
+      if (playState.assistState==2) {
         // color as incorrect
         for (let iy=room[0];iy<(room[0]+room[2]);iy++) {
           for (let ix=room[1];ix<(room[1]+room[3]);ix++) {
@@ -479,7 +320,7 @@ function updateBoardStatus() {
   incompleteCount = totalCount-completeCount;
 
   updateDynTextFields();
-  if ((errorCount == 0) && (incompleteCount == 0)) {
+  if ((playState.errorCount == 0) && (incompleteCount == 0)) {
     canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
@@ -499,15 +340,8 @@ function undoMove() {
   }
 }
 
-function resetBoard() {
-  $("#resetButton").blur();
-  $("#clearButton").blur();
-  $("#assistButton").blur();
-  initStructures(puzzle);
-}
-
 function drawDragRoom(y,x) {
-  let dragRoom = getRoom(y,x,curPinCellY,curPinCellX);
+  let dragRoom = getRoom(y,x,playState.pinCellY,playState.pinCellX);
   // draw all tiles with dragRoomCell color
   for (let iy=dragRoom[0];iy<(dragRoom[0]+dragRoom[2]);iy++) {
     for (let ix=dragRoom[1];ix<(dragRoom[1]+dragRoom[3]);ix++) {

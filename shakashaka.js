@@ -1,176 +1,46 @@
-const offFontColor = "white";
-const errorFontColor = "red";
-const correctFontColor = "#a0ffa0";     // bright green
-const completeRectColor = "#d8ffff";    // light teal
 const gameName = 'shakashaka';
 
-let clicking = false;
-let ctrling = false;
-let errorCount = 0;
-let incompleteDigits = 0;
-let assistState = 0;
-let curClickType = CLICK_UNKNOWN;
-let isDemo = false;
+const completeRectColor = "#d8ffff";      // light teal
 
-const CELL_WHITE =       0;
-const CELL_DIAGONAL_NE = 1;
-const CELL_DIAGONAL_SE = 2;
-const CELL_DIAGONAL_SW = 3;
-const CELL_DIAGONAL_NW = 4;
-const CELL_DOT =         9;
-const CELL_BLACK =       10;
-const CELL_BLACK_0 =     20;
-const CELL_BLACK_1 =     21;
-const CELL_BLACK_2 =     22;
-const CELL_BLACK_3 =     23;
-const CELL_BLACK_4 =     24;
+let incompleteDigits = 0;
+let curClickType = constClickUnknown;
+
+const constCellWhite =      0;
+const constCellDiagonalNE = 1;
+const constCellDiagonalSE = 2;
+const constCellDiagonalSW = 3;
+const constCellDiagonalNW = 4;
+const constCellDot =        9;
+const constCellBlack =      10;
+const constCellBlack0 =     20;
+const constCellBlack1 =     21;
+const constCellBlack2 =     22;
+const constCellBlack3 =     23;
+const constCellBlack4 =     24;
 
 // which keys are handled; 1-4 added below
-let handledKeys =
-  [ KEY_BS, KEY_CR, KEY_ESC, KEY_SP, KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_DOT ];
+let handledKeys = [ constKeyBackspace, constKeyCR, constKeyEsc,
+  constKeySpace, constKeyLeft, constKeyUp, constKeyRight, constKeyDown,
+  constKeyDot ];
 
-let initPuzzle, puzzle, moveHistory, demoStepNum, puzzleBoardStates;
+let moveHistory, puzzleBoardStates;
 
 function puzzleInit() {
   globalCursorOn = true;
   globalCircleRadius = 0.3; // slightly smaller circle for light bulbs
-  initRibbons(gameName);
 
   // add digits to handled key list
-  for (let key=KEY_0;key<=KEY_4;key++) {
+  for (let key=constKey0;key<=constKey4;key++) {
     handledKeys.push(key);
   }
-  for (let key=ALT_0;key<=ALT_4;key++) {
+  for (let key=constKeyAlt0;key<=constKeyAlt4;key++) {
     handledKeys.push(key);
   }
 
-  // any key anywhere as long as canvas is in focus
-  $(document).keydown(function(evnt) {
-    $("#resetButton").blur();
-    $("#clearButton").blur();
-    $("#undoButton").blur();
-    $("#assistButton").blur();
-    if (evnt.which === KEY_SP && !$(evnt.target).is("input")) {
-      evnt.preventDefault();
-    }
-    if (evnt.which >= KEY_LEFT && evnt.which <= KEY_DOWN && !$(evnt.target).is("input, textarea")) {
-      evnt.preventDefault();
-    }
-    if (handledKeys.find(element => element == evnt.which)) {
-      handleKey(evnt.which);
-    }
-  });
-
-  // a click (except right-click i.e. ctrl-click) on tabs.
-  // hide old, show new
-  $("#tabs li").click(function() {
-    $("#tabs li").removeClass('active');
-    $(this).addClass("active");
-    $(".tab_content").hide();
-    $($(this).find("a").attr("href")).show();
-    clicking = false;
-    return false;
-  });
-
-  $("#tab1").show();
-  $("#demotab").hide();
-
-  $("#displayButton").click(function() {
-    let pval = $("#userPuzzle").val();
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          $("#demotab").show();
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          $("#demotab").hide();
-        }
-      }
-    } else {
-      $("#demotab").hide();
-      initPuzzle = pval;
-      puzzle = removeDot(pval);
-      puzzleChoice = 0;
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
-  });
-
-  $("#nextDemoButton").click(function() {
-    isDemo = true;
-    demoStepNum++;
-    updateDemoRegion(puzzleChoice);
-  });
-
-  $("#prevDemoButton").click(function() {
-    if (demoStepNum) {
-      demoStepNum--;
-    }
-    updateDemoRegion(puzzleChoice);
-  });
-
-  // click (down) within puzzle number entry, remove clicking
-  // effect on canvas
-  $("#userPuzzle").mousedown(function(evnt) {
-    clicking = false;
-  });
-
-  // click (down) within puzzle frame
-  $("#puzzleCanvas").mousedown(function(evnt) {
-    clicking = true;
-    $("#puzzleCanvas").css("border-color", "black");
-    handleClick(evnt);
-  });
-
-  // releasing mouse within puzzle or not within puzzle
-  $(document).mouseup(function() {
-    clicking = false;
-  });
-
-  // undo click, remove the last move
-  $("#undoButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    undoMove();
-  });
-
-  // click on reset, brings up confirmation, then resets puzzle
-  $("#resetButton").click(function() {
-    $("#canvasDiv").css("border-color", "black");
-    let resetDialog = confirm("Reset puzzle?");
-    if (resetDialog == true) {
-      resetBoard();
-    }
-  });
-
-  // click on clear ribbons, brings up confirmation, then resets puzzle
-  $("#clearButton").click(function() {
-    let resetDialog = confirm("Clear Ribbons Shelf?");
-    if (resetDialog == true) {
-      localStorage.setItem("OPSaved" + gameName,'');
-      const ribbonBar = document.getElementById("ribbonbar");
-      ribbonBar.innerHTML = '';
-      $("#clearButton").hide();
-    }
-  });
-
-  // click on show errors, converts to show how many errors remain
-  $("#assistButton").click(function() {
-    assistState = (assistState+1)%3;
-    updateBoardStatus();
-    drawBoard();
-  });
-
-  $("#puzzleCanvas").bind("contextmenu", function(evnt) { evnt.preventDefault(); });
-
-  canvas = document.getElementById('puzzleCanvas');
-  globalContext = canvas.getContext('2d');
+  initElements();
+  initRibbons(gameName);
+  listenKeys(handledKeys,handleKey);
+  listenClick(handleClick,initStructures,undoMove);
 
   if(cannedPuzzles[puzzleChoice]) {
     initPuzzle = cannedPuzzles[puzzleChoice];
@@ -192,10 +62,10 @@ function puzzleInit() {
 
 function updateDynTextFields() {
   let etext = '';
-  if (assistState == 0) {
-    if (errorCount && incompleteDigits) {
+  if (playState.assistState == 0) {
+    if (playState.errorCount && incompleteDigits) {
       etext = "there are errors and incomplete digits";
-    } else if (errorCount) {
+    } else if (playState.errorCount) {
       etext = "there are errors";
     } else if (incompleteDigits) {
       etext = "there are incomplete rectangles";
@@ -203,14 +73,14 @@ function updateDynTextFields() {
       etext = "the puzzle is complete!";
     }
   } else {
-    if (errorCount || incompleteDigits) {
-      etext = "there are " + errorCount  + " errors and " +
+    if (playState.errorCount || incompleteDigits) {
+      etext = "there are " + playState.errorCount  + " errors and " +
                         incompleteDigits + " incomplete digits";
     } else {
       etext = "the puzzle is complete!";
     }
   }
-  updateDynamicHtmlEntries(etext,assistState);
+  updateDynamicHtmlEntries(etext,playState.assistState);
 }
 
 function addHistory(y,x,prevvalue) {
@@ -219,30 +89,30 @@ function addHistory(y,x,prevvalue) {
 
 function addMove(moveType,y,x,noHistory=false) {
   // don't try and change a black cell
-  if (puzzleBoardStates[y][x] >= CELL_BLACK) {
+  if (puzzleBoardStates[y][x] >= constCellBlack) {
     return;
   }
   if (!noHistory) {
     addHistory(y,x,puzzleBoardStates[y][x]);
   }
   puzzleBoardStates[y][x] = moveType;
-  if ((moveType >= CELL_DIAGONAL_NE) && (moveType != CELL_DOT)) {
-    globalCircleStates[y][x] = CIRCLE_TRI_NE + moveType - CELL_DIAGONAL_NE;
+  if ((moveType >= constCellDiagonalNE) && (moveType != constCellDot)) {
+    globalCircleStates[y][x] = constCircleTriNE + moveType - constCellDiagonalNE;
   } else {
-    globalCircleStates[y][x] = CIRCLE_NONE;
+    globalCircleStates[y][x] = constCircleNone;
   }
-  if (moveType == CELL_DOT) {
-    globalLineStates[y][x] = PATH_DOT;
+  if (moveType == constCellDot) {
+    globalLineStates[y][x] = constPathDot;
   } else {
-    globalLineStates[y][x] = PATH_NONE;
+    globalLineStates[y][x] = constPathNone;
   }
 }
 
 function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
-  if ((keynum == KEY_CR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = $("#userPuzzle").val();
+  if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
+    let pval = elemStruct.userPuzzle.value;
     if (pval.search(/:/) == -1) {
       if (pval < cannedPuzzles.length) {
         puzzleChoice = pval;
@@ -252,15 +122,15 @@ function handleKey(keynum) {
         // check to see if this is a demo puzzle
         let search = demoPuzzles.find(element => element == pval);
         if (search !== undefined) {
-          $("#demotab").show();
+          elemStruct.demotab.style.display = 'block';
           demoStepNum = 0;
           updateDemoRegion(pval);
         } else {
-          $("#demotab").hide();
+          elemStruct.demotab.style.display = 'none';
         }
       }
     } else {
-      $("#demotab").hide();
+      elemStruct.demotab.style.display = 'none';
       initPuzzle = pval;
       puzzle = removeDot(initPuzzle);
       updateHtmlDescr(initPuzzle);
@@ -269,64 +139,50 @@ function handleKey(keynum) {
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
-      case KEY_ESC:
+      case constKeyEsc:
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalCircleStates);
         break;
-      case KEY_UP:
-        if (globalCursorY) {
-          globalCursorY--;
-        }
+      case constKeyUp:
+      case constKeyDown:
+      case constKeyLeft:
+      case constKeyRight:
+        moveGlobalCursor(keynum);
         break;
-      case KEY_DOWN:
-        if (globalCursorY < (globalPuzzleH-1)) {
-          globalCursorY++;
-        }
-        break;
-      case KEY_LEFT:
-        if (globalCursorX) {
-          globalCursorX--;
-        }
-        break;
-      case KEY_RIGHT:
-        if (globalCursorX < (globalPuzzleW-1)) {
-          globalCursorX++;
-        }
-        break;
-      case KEY_SP: // toggle through white -> NE -> SE -> SW -> NW -> white
-        if ((puzzleBoardStates[globalCursorY][globalCursorX] == CELL_WHITE) ||
-            (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DOT)) {
-          addMove(CELL_DIAGONAL_NE,globalCursorY,globalCursorX);
-        } else if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DIAGONAL_NW) {
-          addMove(CELL_WHITE,globalCursorY,globalCursorX);
+      case constKeySpace: // toggle through white -> NE -> SE -> SW -> NW -> white
+        if ((puzzleBoardStates[globalCursorY][globalCursorX] == constCellWhite) ||
+            (puzzleBoardStates[globalCursorY][globalCursorX] == constCellDot)) {
+          addMove(constCellDiagonalNE,globalCursorY,globalCursorX);
+        } else if (puzzleBoardStates[globalCursorY][globalCursorX] == constCellDiagonalNW) {
+          addMove(constCellWhite,globalCursorY,globalCursorX);
         } else {
           addMove(puzzleBoardStates[globalCursorY][globalCursorX]+1,globalCursorY,globalCursorX);
         }
         break;
-      case KEY_0:
-      case ALT_0:
-      case KEY_BS:
-        addMove(CELL_WHITE,globalCursorY,globalCursorX);
+      case constKey0:
+      case constKeyAlt0:
+      case constKeyBackspace:
+        addMove(constCellWhite,globalCursorY,globalCursorX);
         break;
-      case KEY_1:
-      case ALT_1:
-        addMove(CELL_DIAGONAL_NE,globalCursorY,globalCursorX);
+      case constKey1:
+      case constKeyAlt1:
+        addMove(constCellDiagonalNE,globalCursorY,globalCursorX);
         break;
-      case KEY_2:
-      case ALT_2:
-        addMove(CELL_DIAGONAL_SE,globalCursorY,globalCursorX);
+      case constKey2:
+      case constKeyAlt2:
+        addMove(constCellDiagonalSE,globalCursorY,globalCursorX);
         break;
-      case KEY_3:
-      case ALT_3:
-        addMove(CELL_DIAGONAL_SW,globalCursorY,globalCursorX);
+      case constKey3:
+      case constKeyAlt3:
+        addMove(constCellDiagonalSW,globalCursorY,globalCursorX);
         break;
-      case KEY_4:
-      case ALT_4:
-        addMove(CELL_DIAGONAL_NW,globalCursorY,globalCursorX);
+      case constKey4:
+      case constKeyAlt4:
+        addMove(constCellDiagonalNW,globalCursorY,globalCursorX);
         break;
-      case KEY_DOT:
-        addMove(CELL_DOT,globalCursorY,globalCursorX);
+      case constKeyDot:
+        addMove(constCellDot,globalCursorY,globalCursorX);
         break;
       }
     updateBoardStatus();
@@ -335,7 +191,7 @@ function handleKey(keynum) {
 }
 
 function initStructures(puzzle) {
-  $("#canvasDiv").css("border-color", "black");
+  elemStruct.canvasDiv.style.borderColor = "black";
   moveHistory = new Array();
   // get the size and the digits out of the puzzle entry
   let puzzleSplit = puzzle.split(":");
@@ -345,7 +201,7 @@ function initStructures(puzzle) {
   isDemo = false;
 
   basicInitStructures(size,"white",constWallLight,constWallBorder,offFontColor);
-  puzzleBoardStates = initYXFromValue(CELL_WHITE);
+  puzzleBoardStates = initYXFromValue(constCellWhite);
 
   // add triangles if numParams includes solution, and
   // use num params to set board state
@@ -359,17 +215,17 @@ function initStructures(puzzle) {
       let ptr = y*globalPuzzleW+x;
       let param = numParams[ptr];
       if (numParamsExt[ptr] == '*') {
-        puzzleBoardStates[y][x] = CELL_BLACK;
+        puzzleBoardStates[y][x] = constCellBlack;
         globalBoardColors[y][x] = "black";
       } else if (numParamsExt[ptr].search(/[01234]/) != -1) {
-        puzzleBoardStates[y][x] = CELL_BLACK_0 + parseInt(numParamsExt[ptr]);
+        puzzleBoardStates[y][x] = constCellBlack0 + parseInt(numParamsExt[ptr]);
         globalBoardValues[y][x] = parseInt(numParamsExt[ptr]);
         globalBoardColors[y][x] = "black";
       } else if (numParamsExt[ptr].search(/[ABCD]/) != -1) {
         globalBoardValues[y][x] = "";
         globalBoardColors[y][x] = "white";
-        puzzleBoardStates[y][x] = CELL_DIAGONAL_NE + parseInt(numParamsExt[ptr],16) - 10;
-        globalCircleStates[y][x] = CIRCLE_TRI_NE + parseInt(numParamsExt[ptr],16) - 10;
+        puzzleBoardStates[y][x] = constCellDiagonalNE + parseInt(numParamsExt[ptr],16) - 10;
+        globalCircleStates[y][x] = constCircleTriNE + parseInt(numParamsExt[ptr],16) - 10;
         globalCircleColors[y][x] = "black";
       } else if (numParamsExt[ptr] != '-') {
         throw "ERROR: what is this in descriptor: " + numParamsExt[ptr];
@@ -381,13 +237,12 @@ function initStructures(puzzle) {
   drawBoard();
 }
 
-function removeDot(strval) {
-  return strval.replace(/\./gi, "");
-}
-
 function handleClick(evnt) {
+  // don't allow dragging
+  if (playState.dragging) return;
+
   curClickType = clickType(evnt);
-  $("#userPuzzleField").blur();
+
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
@@ -395,23 +250,23 @@ function handleClick(evnt) {
   globalCursorX = xCell;
 
   // left toggles between triangle shapes
-  if (curClickType == CLICK_LEFT) {
-    if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_WHITE) {
-      addMove(CELL_DIAGONAL_NE,globalCursorY,globalCursorX);
-    } else if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DOT) {
-      addMove(CELL_DIAGONAL_NE,globalCursorY,globalCursorX);
-    } else if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DIAGONAL_NW) {
-      addMove(CELL_WHITE,globalCursorY,globalCursorX);
+  if (curClickType == constClickLeft) {
+    if (puzzleBoardStates[globalCursorY][globalCursorX] == constCellWhite) {
+      addMove(constCellDiagonalNE,globalCursorY,globalCursorX);
+    } else if (puzzleBoardStates[globalCursorY][globalCursorX] == constCellDot) {
+      addMove(constCellDiagonalNE,globalCursorY,globalCursorX);
+    } else if (puzzleBoardStates[globalCursorY][globalCursorX] == constCellDiagonalNW) {
+      addMove(constCellWhite,globalCursorY,globalCursorX);
     } else {
       addMove(puzzleBoardStates[globalCursorY][globalCursorX]+1,globalCursorY,globalCursorX);
     }
   }
   // right toggles between dot and no dot
-  if (curClickType == CLICK_RIGHT) {
-    if (puzzleBoardStates[globalCursorY][globalCursorX] == CELL_DOT) {
-      addMove(CELL_WHITE,globalCursorY,globalCursorX);
+  if (curClickType == constClickRight) {
+    if (puzzleBoardStates[globalCursorY][globalCursorX] == constCellDot) {
+      addMove(constCellWhite,globalCursorY,globalCursorX);
     } else {
-      addMove(CELL_DOT,globalCursorY,globalCursorX);
+      addMove(constCellDot,globalCursorY,globalCursorX);
     }
   }
   updateBoardStatus();
@@ -422,10 +277,10 @@ function handleClick(evnt) {
 function nOpen (y,x) {
   let pbs = puzzleBoardStates[y][x];
   switch (pbs) {
-    case CELL_WHITE:
-    case CELL_DOT:
-    case CELL_DIAGONAL_SW:
-    case CELL_DIAGONAL_SE:
+    case constCellWhite:
+    case constCellDot:
+    case constCellDiagonalSW:
+    case constCellDiagonalSE:
       return true;
     }
   return false;
@@ -435,10 +290,10 @@ function nOpen (y,x) {
 function sOpen (y,x) {
   let pbs = puzzleBoardStates[y][x];
   switch (pbs) {
-    case CELL_WHITE:
-    case CELL_DOT:
-    case CELL_DIAGONAL_NW:
-    case CELL_DIAGONAL_NE:
+    case constCellWhite:
+    case constCellDot:
+    case constCellDiagonalNW:
+    case constCellDiagonalNE:
       return true;
     }
   return false;
@@ -448,10 +303,10 @@ function sOpen (y,x) {
 function eOpen (y,x) {
   let pbs = puzzleBoardStates[y][x];
   switch (pbs) {
-    case CELL_WHITE:
-    case CELL_DOT:
-    case CELL_DIAGONAL_NW:
-    case CELL_DIAGONAL_SW:
+    case constCellWhite:
+    case constCellDot:
+    case constCellDiagonalNW:
+    case constCellDiagonalSW:
       return true;
     }
   return false;
@@ -461,10 +316,10 @@ function eOpen (y,x) {
 function wOpen (y,x) {
   let pbs = puzzleBoardStates[y][x];
   switch (pbs) {
-    case CELL_WHITE:
-    case CELL_DOT:
-    case CELL_DIAGONAL_NE:
-    case CELL_DIAGONAL_SE:
+    case constCellWhite:
+    case constCellDot:
+    case constCellDiagonalNE:
+    case constCellDiagonalSE:
       return true;
     }
   return false;
@@ -534,7 +389,7 @@ function updateBoardStatus() {
   // accounting the errors:
   //  1) number cells with more bulbs than accounted for
   //  2) two bulbs facing each other
-  errorCount = 0;
+  playState.errorCount = 0;
 
   // also count how many cells haven't been illuminated yet
   // and how many digits are incomplete
@@ -545,7 +400,7 @@ function updateBoardStatus() {
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
       globalBoardTextColors[y][x] = offFontColor;
-      if (puzzleBoardStates[y][x] < CELL_BLACK) {
+      if (puzzleBoardStates[y][x] < constCellBlack) {
         globalBoardColors[y][x] = "white";
       }
     }
@@ -556,36 +411,36 @@ function updateBoardStatus() {
   // in error, else just indeterminate
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if (puzzleBoardStates[y][x] > CELL_BLACK) {
+      if (puzzleBoardStates[y][x] > constCellBlack) {
         let cellValue = globalBoardValues[y][x];
         let diagCount = 0;
         if ((y<(globalPuzzleH-1)) &&
-            (puzzleBoardStates[y+1][x] >= CELL_DIAGONAL_NE) &&
-            (puzzleBoardStates[y+1][x] <= CELL_DIAGONAL_NW)) {
+            (puzzleBoardStates[y+1][x] >= constCellDiagonalNE) &&
+            (puzzleBoardStates[y+1][x] <= constCellDiagonalNW)) {
           diagCount++;
         }
         if ((y>0)                 &&
-            (puzzleBoardStates[y-1][x] >= CELL_DIAGONAL_NE) &&
-            (puzzleBoardStates[y-1][x] <= CELL_DIAGONAL_NW)) {
+            (puzzleBoardStates[y-1][x] >= constCellDiagonalNE) &&
+            (puzzleBoardStates[y-1][x] <= constCellDiagonalNW)) {
           diagCount++;
         }
         if ((x<(globalPuzzleW-1)) &&
-            (puzzleBoardStates[y][x+1] >= CELL_DIAGONAL_NE) &&
-            (puzzleBoardStates[y][x+1] <= CELL_DIAGONAL_NW)) {
+            (puzzleBoardStates[y][x+1] >= constCellDiagonalNE) &&
+            (puzzleBoardStates[y][x+1] <= constCellDiagonalNW)) {
           diagCount++;
         }
         if ((x>0)                 &&
-            (puzzleBoardStates[y][x-1] >= CELL_DIAGONAL_NE) &&
-            (puzzleBoardStates[y][x-1] <= CELL_DIAGONAL_NW)) {
+            (puzzleBoardStates[y][x-1] >= constCellDiagonalNE) &&
+            (puzzleBoardStates[y][x-1] <= constCellDiagonalNW)) {
           diagCount++;
         }
         if (diagCount==cellValue) {
-          if (assistState==2) {
-            globalBoardTextColors[y][x] = correctFontColor;
+          if (playState.assistState==2) {
+            globalBoardTextColors[y][x] = correctFontColorBr;
           }
         } else if (diagCount>cellValue) {
-          errorCount++;
-          if (assistState==2) {
+          playState.errorCount++;
+          if (playState.assistState==2) {
             globalBoardTextColors[y][x] = errorFontColor;
           }
         } else {
@@ -594,7 +449,7 @@ function updateBoardStatus() {
       }
     }
   }
-  
+
   // now go through each non-black cell and search for rectangles.
   // since most of the search will be early in the solve, it is
   // not worth coloring them differently. Only color correct ones
@@ -616,13 +471,13 @@ function updateBoardStatus() {
   let traveledCells = new Array();
   for (let y=0;y<globalPuzzleH;y++) {
     for (let x=0;x<globalPuzzleW;x++) {
-      if ((puzzleBoardStates[y][x] < CELL_BLACK) &&
+      if ((puzzleBoardStates[y][x] < constCellBlack) &&
           (traveledCells.indexOf(y+","+x) == -1)) {
         let legal;
         let shapeCells = shapeSearch(y,x);
         let shapeMinY, shapeMaxY, shapeMinX, shapeMaxX;
         [shapeMinY, shapeMinX, shapeMaxY, shapeMaxX] = getShapeExtremes(shapeCells);
-        if ((puzzleBoardStates[y][x] == CELL_WHITE) || (puzzleBoardStates[y][x] == CELL_DOT)) {
+        if ((puzzleBoardStates[y][x] == constCellWhite) || (puzzleBoardStates[y][x] == constCellDot)) {
           // the algorithm here is easy: if number of cells equals the
           // W*H product, and all are pure white, then good.
           let shapeW = shapeMaxX-shapeMinX+1;
@@ -635,8 +490,8 @@ function updateBoardStatus() {
               let cyx = c.split(",");
               let cy = parseInt(cyx[0]);
               let cx = parseInt(cyx[1]);
-              if ((puzzleBoardStates[cy][cx] != CELL_WHITE) &&
-                  (puzzleBoardStates[cy][cx] != CELL_DOT)) {
+              if ((puzzleBoardStates[cy][cx] != constCellWhite) &&
+                  (puzzleBoardStates[cy][cx] != constCellDot)) {
                 legal = false;
                 break;
               }
@@ -661,36 +516,36 @@ function updateBoardStatus() {
             let wExists = (shapeCells.indexOf( cy   +","+(cx-1))!=-1);
             let tested = false;
             if (!nExists && !eExists) {
-              if (puzzleBoardStates[cy][cx] != CELL_DIAGONAL_NE) {
+              if (puzzleBoardStates[cy][cx] != constCellDiagonalNE) {
                 legal = false;
                 break;
               }
               tested = true;
             }
             if (!nExists && !wExists) {
-              if (puzzleBoardStates[cy][cx] != CELL_DIAGONAL_NW) {
+              if (puzzleBoardStates[cy][cx] != constCellDiagonalNW) {
                 legal = false;
                 break;
               }
               tested = true;
             }
             if (!sExists && !eExists) {
-              if (puzzleBoardStates[cy][cx] != CELL_DIAGONAL_SE) {
+              if (puzzleBoardStates[cy][cx] != constCellDiagonalSE) {
                 legal = false;
                 break;
               }
               tested = true;
             }
             if (!sExists && !wExists) {
-              if (puzzleBoardStates[cy][cx] != CELL_DIAGONAL_SW) {
+              if (puzzleBoardStates[cy][cx] != constCellDiagonalSW) {
                 legal = false;
                 break;
               }
               tested = true;
             }
             if (nExists && sExists && wExists && eExists) {
-              if ((puzzleBoardStates[cy][cx] != CELL_WHITE) &&
-                  (puzzleBoardStates[cy][cx] != CELL_DOT)) {
+              if ((puzzleBoardStates[cy][cx] != constCellWhite) &&
+                  (puzzleBoardStates[cy][cx] != constCellDot)) {
                 legal = false;
                 break;
               }
@@ -707,7 +562,7 @@ function updateBoardStatus() {
         }
         traveledCells.push.apply(traveledCells, shapeCells);
         if (legal) {
-          if (assistState == 2) {
+          if (playState.assistState == 2) {
             for (let c of shapeCells) {
               let cyx = c.split(",");
               let cy = parseInt(cyx[0]);
@@ -716,14 +571,14 @@ function updateBoardStatus() {
             }
           }
         } else {
-          errorCount++;
+          playState.errorCount++;
         }
       }
     }
   }
 
   updateDynTextFields();
-  if ((errorCount==0) && (incompleteDigits==0)) {
+  if ((playState.errorCount==0) && (incompleteDigits==0)) {
     canvasSuccess(isDemo,gameName,puzzleChoice);
   } else {
     canvasIncomplete();
@@ -739,27 +594,20 @@ function undoMove() {
   }
 }
 
-function resetBoard() {
-  $("#resetButton").blur();
-  $("#clearButton").blur();
-  $("#assistButton").blur();
-  initStructures(puzzle);
-}
-
 function updateDemoRegion(demoNum) {
   updateDemoFunction(demoNum,function () {
     // start by reseting all non-black cells to cleared
     for (let y=0;y<globalPuzzleH;y++) {
       for (let x=0;x<globalPuzzleW;x++) {
-        if (puzzleBoardStates[y][x] < CELL_BLACK) {
-          puzzleBoardStates[y][x] = CELL_WHITE;
-          globalCircleStates[y][x] = CIRCLE_NONE;
-          globalLineStates[y][x] = PATH_NONE;
+        if (puzzleBoardStates[y][x] < constCellBlack) {
+          puzzleBoardStates[y][x] = constCellWhite;
+          globalCircleStates[y][x] = constCircleNone;
+          globalLineStates[y][x] = constPathNone;
         }
       }
     }
   }, function (steps) {
-    let s0 = (steps[0] == '.') ? CELL_DOT : (CELL_DIAGONAL_NE + parseInt(steps[0]) - 1);
+    let s0 = (steps[0] == '.') ? constCellDot : (constCellDiagonalNE + parseInt(steps[0]) - 1);
     addMove(s0,parseInt(steps[1],36),parseInt(steps[2],36));
   });
 }

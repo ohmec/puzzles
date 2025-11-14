@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./puzzles.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
-    <script type="application/javascript" src="./fastclick.js"></script>
     <script type="text/javascript" src="./render.js"></script>
     <script type="text/javascript" src="./ripple.js"></script>
     <script type="text/javascript" src="./repuzzles.js"></script>
-    <script src="./jquery.js"></script>
     <title>Ripple Effect Player</title>
   </head>
   <body>
@@ -34,7 +32,7 @@
           <b>1-9</b>.  If needed, digit values greater than '9' can be
           entered by pressing the corresponding letter, eg. <b>'A'</b>
           (10), <b>'B'</b> (11), etc. Digit values greater than the largest
-          polyomino ("room") on the board will be ignored. Once on a cell,
+          room ("polyomino") on the board will be ignored. Once on a cell,
           you can use the <b>arrow keys</b> to move around the board.
           Press the <b>space bar</b> to remove an entry (except those
           defined by the puzzle itself).
@@ -44,8 +42,10 @@
           or incomplete rooms is indicated.  In Assist Mode (1), the
           number of errors and incomplete rooms is indicated, see game rules.
           In Assist Mode (2), errors are highlighted with digit colors, and
-          completed rules are highlighted with cell colors. In some cases
-          the solve difficulty will greatly decrease in Assist Mode (2),
+          completed rules are highlighted with cell colors.  Note that the
+          change in color does not guarantee that the entries are correct,
+          only that the room has been filled up.  In some cases the
+          solve difficulty will greatly decrease in Assist Mode (2),
           so select depending upon the level of challenge desired. The
           canvas border will turn green if the grid is completed without
           error.  You can click the "undo" button on the bottom of the
@@ -72,15 +72,16 @@
         around these shapes are listed below.
         <ol>
           <li>
-            For an <i>n</i>-cell polyomino, each of the digits from 1
+            For an <i>n</i>-cell room, each of the digits from 1
             to <i>n</i> must be represented.
           </li>
           <li>
             In any of the 4 directions (up, down, left, right), there can
-            not be any two numbered digits <i>d</i> within <i>d</i> cells.
-            For example, there can not be two <i>3</i> digits within
-            a 3-cell span. In this way the effects of a number "ripple"
-            out a distance equivalent to the digit's value.
+            not be any two numbered digits <i>d</i> in any cell <i>d</i> 
+            or fewer cells away.  For example, there can not be two
+            '1' digits adjacent to each other, or '3' digits within 3
+            cells of that '3'. In this way the blocking effects of a
+            number "ripple" out a distance equivalent to the digit's value.
           </li>
           <li>
             All blank cells must be filled in with their appropriate 1-<i>n</i>
@@ -153,12 +154,11 @@
     <br />
     <div id="puzzleInterface">
       <div id="canvasDiv" style="border-color: black;">
-        <canvas id="puzzleCanvas" class="fastclick" height="270" width="270" style="border-color: black;"></canvas>
+        <canvas id="puzzleCanvas" class="pcanvas" height="270" width="270" style="border-color: black;"></canvas>
       </div>    
       <br />
       <script type="text/javascript">
-        let canvas = document.querySelector(".fastclick");
-        new FastClick(canvas);
+        let canvas = document.querySelector(".pcanvas");
       </script>
       <br />
       <div id="buttonsDiv">
@@ -181,7 +181,7 @@
     <!-- some space to avoid the canvas from shrinking on demo mode -->
     <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
     <script type="text/javascript">
-      $(document).ready(function(){ puzzleInit(); });
+      puzzleInit();
     </script>
   </body>
 </html>
