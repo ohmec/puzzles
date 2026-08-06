@@ -246,6 +246,34 @@ function listenKeys(keyList,handleFunc,shiftFunc=null,unshiftFunc=null) {
   });
 }
 
+function selectPuzzleFromInput(pval) {
+  // Load a canned puzzle id or a raw descriptor from the Display field.
+  if (pval.search(/:/) == -1) {
+    if (pval < cannedPuzzles.length) {
+      puzzleChoice = pval;
+      initPuzzle = cannedPuzzles[pval];
+      puzzle = removeDot(initPuzzle);
+      updateHtmlDescr(initPuzzle);
+      // check to see if this is a demo puzzle
+      let search = demoPuzzles.find(element => element == pval);
+      if (search !== undefined) {
+        elemStruct.demotab.style.display = 'block';
+        demoStepNum = 0;
+        updateDemoRegion(pval);
+      } else {
+        elemStruct.demotab.style.display = 'none';
+      }
+    }
+  } else {
+    elemStruct.demotab.style.display = 'none';
+    initPuzzle = pval;
+    puzzle = removeDot(initPuzzle);
+    puzzleChoice = 0;
+    updateHtmlDescr(initPuzzle);
+  }
+  initStructures(puzzle);
+}
+
 function listenClick(handleClick,initStructures,undoMove,mouseupFunc=null) {
   // a click (except right-click i.e. ctrl-click) on tabs.
   // hide old, show new
@@ -275,31 +303,7 @@ function listenClick(handleClick,initStructures,undoMove,mouseupFunc=null) {
   });
 
   elemStruct.displayButton.addEventListener('click', function() {
-    let pval = elemStruct.userPuzzle.value;
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          elemStruct.demotab.style.display = 'block';
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          elemStruct.demotab.style.display = 'none';
-        }
-      }
-    } else {
-      elemStruct.demotab.style.display = 'none';
-      initPuzzle = pval;
-      puzzle = removeDot(pval);
-      puzzleChoice = 0;
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
+    selectPuzzleFromInput(elemStruct.userPuzzle.value);
   });
 
   elemStruct.nextDemoButton.addEventListener('click', function() {
