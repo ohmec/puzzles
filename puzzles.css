@@ -58,7 +58,7 @@ html,body {
 #buttonsDiv {
   font-family: 'Open Sans', sans-serif;
 }
-#jpfont {
+#jpfont, .jpfont {
   font-family: 'Hina Mincho', sans-serif;
 }
 .ttd span {

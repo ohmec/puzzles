@@ -10,22 +10,13 @@
     <script type="text/javascript" src="./akari.js"></script>
     <title>Akari Player</title>
   </head>
-  <body>
-    <div id="banner">
-      <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Akari <span id="jpfont">&#x660E;&#x304B;&#x308A;</span>
-    </div>
-    <div id="tabContainer">
-      <ul id="tabs">
-        <li class="active"><a href="#tab1">Game Play   </a></li>
-        <li>               <a href="#tab2">Rules       </a></li>
-        <li>               <a href="#tab3">Puzzles     </a></li>
-        <li>               <a href="#tab4">About       </a></li>
-      </ul>
-    </div>
-    <div id="tabsContent">
-      <div id="tab1" class="tab_content" style="display: block;">
-        <p>
+  <body
+    data-display-name="Akari"
+    data-jp-html="&#x660E;&#x304B;&#x308A;"
+  >
+    <div id="puzzleTabSources" hidden>
+      <div data-tab="1">
+<p>
           The goal of the game is to set light bulbs on the board
           to illuminate all white cells (see rules). There are several
           ways to set elements on the board:
@@ -71,9 +62,9 @@
           on the path to mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
-      <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://www.nikoli.co.jp/en/puzzles/akari" target="_blank">Akari</a>
-        (<span id="jpfont">&#x660E;&#x304B;&#x308A;</span> or "Light"),
+      <div data-tab="2">
+<a href="https://www.nikoli.co.jp/en/puzzles/akari" target="_blank">Akari</a>
+        (<span class="jpfont">&#x660E;&#x304B;&#x308A;</span> or "Light"),
         is a Japanese logic puzzle published by 
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
         In Akari, the board begins with a collection of black squares,
@@ -104,8 +95,8 @@
           </li>
         </ol>
       </div>
-      <div id="tab3" class="tab_content" style="display: none;">
-        <p>
+      <div data-tab="3">
+<p>
           Puzzles can be invoked by either a numerical entry from
           <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
@@ -135,51 +126,10 @@
           will be added a demo panel to help with the solve.
         </p>
       </div>
-      <div id="tab4" class="tab_content" style="display: none;">
-        This playground was written using javascript and is available open
-        source. All code is checked into the github repo at
-        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
-        Feel free to file bugs there!
-      </div>
     </div>
-    <div id="puzzleEntry">
-      <center>
-      <input type="text"                          id="userPuzzle"    size="40" />
-      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
-      </center>
-    </div>
-    <br />
-    <div id="puzzleInterface">
-      <div id="canvasDiv" style="border-color: black;">
-        <canvas id="puzzleCanvas" class="pcanvas" height="270" width="270" style="border-color: black;"></canvas>
-      </div>    
-      <br />
-      <script type="text/javascript">
-        let canvas = document.querySelector(".pcanvas");
-      </script>
-      <br />
-      <div id="buttonsDiv">
-        <input class="button small" type="button" value="Undo"  id="undoButton"  />
-        <input class="button small" type="button" value="Reset" id="resetButton" />
-        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
-        <input class="button small" type="button" value="Clear Ribbons" id="clearButton" style="display: none" />
-        <p><span id='puzzledescr'></span></p>
-        <p><span id='errortext'></span></p>
-      </div>
-    </div>
-    <div id="demotab" style="display: none;">
-      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
-      <input class="button small" type="button" value="next" id="nextDemoButton" />
-      <p id='demop'><span id='demotext'></span></p>
-    </div>
-    <div id="ribbonbar">
-      &nbsp;
-    </div>
-    <!-- some space to avoid the canvas from shrinking on demo mode -->
-    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript" src="./puzzle-shell.js"></script>
     <script type="text/javascript">
       puzzleInit();
     </script>
   </body>
 </html>
-
