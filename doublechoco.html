@@ -10,22 +10,13 @@
     <script type="text/javascript" src="./doublechoco.js"></script>
     <title>Double Choco Player</title>
   </head>
-  <body>
-    <div id="banner">
-      <a href="index.html">Ohmec Puzzles</a><br/>
-      Player for Double Choco <span id="jpfont">&#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;</span>
-    </div>
-    <div id="tabContainer">
-      <ul id="tabs">
-        <li class="active"><a href="#tab1">Game Play   </a></li>
-        <li>               <a href="#tab2">Rules       </a></li>
-        <li>               <a href="#tab3">Puzzles     </a></li>
-        <li>               <a href="#tab4">About       </a></li>
-      </ul>
-    </div>
-    <div id="tabsContent">
-      <div id="tab1" class="tab_content" style="display: block;">
-        <p>
+  <body
+    data-display-name="Double Choco"
+    data-jp-html="&#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;"
+  >
+    <div id="puzzleTabSources" hidden>
+      <div data-tab="1">
+<p>
           In Double Choco, the goal is to draw border walls around cells
           to satisfy the goals of the game (see rules tab). To draw
           borders, you can use the mouse or arrow and button keys:
@@ -78,9 +69,9 @@
           mastery: <span id='demolist1'>[]</span>).
         </p>
       </div>
-      <div id="tab2" class="tab_content" style="display: none;">
-        <a href="https://www.nikoli.co.jp/en/puzzles/double_choco" target="_blank">Double Choco</a>
-        (<span id="jpfont">&#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;</span>)
+      <div data-tab="2">
+<a href="https://www.nikoli.co.jp/en/puzzles/double_choco" target="_blank">Double Choco</a>
+        (<span class="jpfont">&#x30C0;&#x30D6;&#x30EB;&#x30C1;&#x30E7;&#x30B3;</span>)
         is a newer Japanese logic puzzle published by 
         <a href="https://www.nikoli.co.jp/en" target="_blank">Nikoli</a>.
         In Double Choco, the board begins with half of the cells grayed out, and
@@ -110,8 +101,8 @@
           </li>
         </ol>
       </div>
-      <div id="tab3" class="tab_content" style="display: none;">
-        <p>
+      <div data-tab="3">
+<p>
           Puzzles can be invoked by either a numerical entry from
           <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
           description of the puzzle itself, entered into the Display
@@ -143,51 +134,10 @@
           will be added a demo panel to help with the solve.
         </p>
       </div>
-      <div id="tab4" class="tab_content" style="display: none;">
-        This playground was written using javascript and is available open
-        source. All code is checked into the github repo at
-        <a href="https://github.com/ohmec/puzzles">ohmec/puzzles</a>.
-        Feel free to file bugs there!
-      </div>
     </div>
-    <div id="puzzleEntry">
-      <center>
-      <input type="text"                          id="userPuzzle"    size="40" />
-      <input type="button" value="Display Puzzle" id="displayButton" class="button small" />
-      </center>
-    </div>
-    <br />
-    <div id="puzzleInterface">
-      <div id="canvasDiv" style="border-color: black;">
-        <canvas id="puzzleCanvas" class="pcanvas" height="270" width="270" style="border-color: black;"></canvas>
-      </div>    
-      <br />
-      <script type="text/javascript">
-        let canvas = document.querySelector(".pcanvas");
-      </script>
-      <br />
-      <div id="buttonsDiv">
-        <input class="button small" type="button" value="Undo"  id="undoButton"  />
-        <input class="button small" type="button" value="Reset" id="resetButton" />
-        <input class="button small" type="button" value="Current Assist Mode (0)" id="assistButton" />
-        <input class="button small" type="button" value="Clear Ribbons" id="clearButton" style="display: none" />
-        <p><span id='puzzledescr'></span></p>
-        <p><span id='errortext'></span></p>
-      </div>
-    </div>
-    <div id="demotab" style="display: none;">
-      <input class="button small" type="button" value="prev" id="prevDemoButton"  />
-      <input class="button small" type="button" value="next" id="nextDemoButton" />
-      <p id='demop'><span id='demotext'></span></p>
-    </div>
-    <div id="ribbonbar">
-      &nbsp;
-    </div>
-    <!-- some space to avoid the canvas from shrinking on demo mode -->
-    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+    <script type="text/javascript" src="./puzzle-shell.js"></script>
     <script type="text/javascript">
       puzzleInit();
     </script>
   </body>
 </html>
-
