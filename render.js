@@ -147,7 +147,7 @@ const elemStruct = {
 const playState = {
   clicking: false, dragging: false, shifting: false, ctrling: false,
   shiftState: 0, shiftNumber: 0, clickNumber: 0, pinCellY: 0, pinCellX: 0,
-  assistState: 0, bridgeBuilt: false, errorCount: 0
+  assistState: 0, maxAssistState: 2, bridgeBuilt: false, errorCount: 0
 };
 
 let initPuzzle, puzzle;
@@ -197,7 +197,7 @@ function initElements () {
 }
 
 function moveGlobalCursor(keydir) {
-  switch (keynum) {
+  switch (keydir) {
     case constKeyUp:    if (globalCursorY)                     globalCursorY--; break;
     case constKeyDown:  if (globalCursorY < (globalPuzzleH-1)) globalCursorY++; break;
     case constKeyLeft:  if (globalCursorX)                     globalCursorX--; break;
@@ -379,7 +379,8 @@ function listenClick(handleClick,initStructures,undoMove,mouseupFunc=null) {
 
   // click on show errors, converts to show how many errors remain
   elemStruct.assistButton.addEventListener('click', function() {
-    playState.assistState = (playState.assistState+1)%3;
+    playState.assistState =
+      (playState.assistState + 1) % (playState.maxAssistState + 1);
     updateBoardStatus();
     drawBoard();
   });

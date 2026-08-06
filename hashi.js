@@ -35,6 +35,7 @@ let moveHistory, puzzleBoardStates;
 function puzzleInit() {
   globalCursorOn = true;
   globalLineFirst = true;   // lines are underneath circles
+  playState.maxAssistState = 3;  // mode 3 colors disjoint bridge paths
   initElements();
   initRibbons(gameName);
   listenKeys(handledKeys,handleKey);
