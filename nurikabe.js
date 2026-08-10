@@ -117,6 +117,7 @@ function handleKey(keynum) {
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
       case constKeyEsc:
+        globalCursorOn = false;
         console.log(puzzleBoardStates);
         break;
       case constKeyUp:
@@ -215,6 +216,7 @@ function handleClick(evnt) {
     return;
   }
 
+  globalCursorOn = true;
   globalCursorY = yCell;
   globalCursorX = xCell;
   // left sets to black, right sets to white, middle sets to indet

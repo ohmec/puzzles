@@ -117,6 +117,7 @@ function handleKey(keynum) {
       case constKeyEsc:
         console.log(globalBoardValues);
         console.log(globalLineStates);
+        globalCursorOn = false;
         break;
       case constKeyUp:
         if (globalCursorY) {
@@ -198,6 +199,7 @@ function initStructures(puzzle) {
 }
 
 function handleClick(evnt) {
+  globalCursorOn = true;
   if (!playState.dragging) {
     curClickType = clickType(evnt);
   }

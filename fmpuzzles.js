@@ -7,6 +7,7 @@ let cannedPuzzles = [
   // example completed one
   "6x6:444663466633AAA677A5AA77555A7715AAA7",
   // D1
+  "5x5:22f3b4a24b352e",
   "10x10:c7a37d187a2b8c3b2a22a5g87577n33573g5a73a8b1c6b3a398d69a9c",            // book1 #1
   "10x10:2a5a3e3a2a4c1a2c3c53d75c2134d7d1d2322c37d42c5c4a3c2a3a2e4a5a5",        // book1 #2
   "10x10:a65d55a.a34d26a.j.c3b3a41.3d3c3.5c3d2.32a3b3c.j.a72d21a.a27d75a",      // book1 #3
@@ -14,7 +15,6 @@ let cannedPuzzles = [
   "10x10:6b55e.5c6c65.4h2.b52c2b.a4c46b6.4b26c6a.b6c42b.6h6.61c6c4.e32b6",      // book1 #5
   "10x10:a53b31c.a1c6b46.i1.4b53e.61b2e.e5b42.e44b6.3i.42b6c2a.c24b26a",        // book1 #6
   // from original js
-  "5x5:22f3b4a24b352e",
   "5x5:c451f44a33445a1c",
   "6x6:a13b1b4c2a4a33445a53d2a1b33a",
   "6x6:2d6c2b6b62a4c3a2a5b3c45a",
@@ -113,6 +113,14 @@ let cannedPuzzles = [
         "b7b7b32b25.b2b1a4b4c.a3a67b6b5c.7g21a1b.4k65.35k5.b1a22h.c5b4b46a1a." +
         "c5b2a6b5b.31b34b5b2b.12g25c.c53g12.b2b4b45b53.b1b3a4b1c.a3a44b3b5c." +
         "4g41a2b.3b2442e53",                                                  // book1 77
+  "17x17:a563b1b271e.a6a7a1a1f723.a629f1a1a7a4.f742b1b314.b1a1a1a8a1a1d." +
+        "4b1b241f1a.3a1a1f122b1.8f1a1a8a8a1a.c121b1b422c.a1a8a3a1a1f3." +
+        "1b821f1a1a6.a1f199b1b5.d1a1a9a6a1a1b.544b1b361f.4a8a1a1f435a." +
+        "218f1a1a3a3a.e856b1b444a",                                           // 2026 #21 fun and interesting
+  "17x17:b31b21b44b4b.b77b14b65b3b.73b34b77b93a34.72b21b62d3b.b77b17b6c1b." +
+        "b71b7d1c99.62b27f9b19.61b3h69b.b63i99b.b64h3b14.63b9f91b94." +
+        "69c5d5b91b.b3c3b94b19b.b4d33b14b44.94a45b59b92b92.b4b22b12b92b." +
+        "b9b99b99b99b",                                                       // 2026 #22 fun, tough and pretty brilliant
   // puzzle 80 "Casty"
   "20x36:7d73a3d437c7.5a71d2a34e2a1.2a52a7a2b37a36a14b.e5g66d4." +
         "a5a23b72a3b54a3a3a.a6d57b3e1a1a.a5a65a7b1b14a4c7.c65c7b5e2b." +

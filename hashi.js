@@ -324,6 +324,7 @@ function handleKey(keynum) {
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
       case constKeyEsc:
+        globalCursorOn = false;
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalLineStates);
@@ -462,6 +463,7 @@ function handleClick(evnt) {
     }
     playState.bridgeBuilt = true;
   } else {
+    globalCursorOn = true;
     globalCursorY = yCell;
     globalCursorX = xCell;
 

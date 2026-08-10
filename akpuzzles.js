@@ -15,7 +15,7 @@ let cannedPuzzles = [
   // D1
   "10x10:10b1a*b1.d2a2b1.c1c*b.a2a*a*a*a*.a*c1c*.*c*c*a.*a1a2a*a1a.b*c*c.2b*a0d.*b2a1b2*",  // 18 18 Marugoto 1
   "10x10:f1c.b4g.f*a*a.*a**2a*c.f*c.c*f.c*a**0a2.a3a*f.g2b.c*f",                            // 13  7 Marugoto 2
-  "10x10:g0**.a*2*f.e*a*b.a1**a*a1b.e3a*b.b1a3e.b*a*a*1*a.b1a*e.f**2a.**1g",                //       Godillza 2
+  "10x10:g0**.a*2*f.e*a*b.a1**a*a1b.e3a*b.b1a3e.b*a*a*1*a.b1a*e.f**2a.**1g",                //       Godzilla 2
   "10x10:h*a.1f1b.c4a2d.a1f1a.b*c3c.c1c4b.a*f*a.d1a*c.b*f1.a3h",                            //  6 12 Marugoto 3
   "10x10:e*c*.a2h.c*c2b.b1c*c.d0d3.*d*d.c*c2b.b4c*c.h*a.*c1e",                              // 10  8 Marugoto 4
   "10x10:h*a.3c*2d.b1d*b.d*e.a*d0a2a.a*a3d*a.e*d.b*d*b.d*1c1.a2h",                          // 11  9 Marugoto 5
@@ -36,6 +36,10 @@ let cannedPuzzles = [
   "10x10:i2.c1d2a.b*d2b.a2d2c.d0e.e2d.c*d1a.b4d2b.a*d1c.0i",                                //  3 13 Marugoto 19
   "10x10:**b1d*.1d0b*a.b**f.b*2f.2d1b1a.a*b1d*.f*2b.f**b.a0b2d*.*d2b**",                    // 16 12 Marugoto 20
   "10x10:j.f*a*a.d2b1b.b4b*d.a2a4d*a.a0d0a*a.d*b2b.b2b1d.a2a1f.j",                          //  6 12 Marugoto 21
+  "10x18:j.b1d0b.a1d*c.b2a4b*a*.c*d2a.j.a*b***c.1i.a1a0c1b.b*c1a1a.i1.c**3b*a.j." +
+        "a*d*c.1a*b*a2b.c4d3a.b3d*b.j",                                                     // Godzilla 13
+  "10x18:2c**c1.g1b.a**d1b.a**a1d1.f**b.b1a*a1*b.1h1.*1e*b.1c*1d.d**c1." +
+        "b1e**.*h1.b1*a*a*b.b*1f.1d*a1*a.b*d*1a.b*g.*c1*c0",                                // Godzilla 16
   "17x17:f1d**b1a.c1d*1b*d.1d*1b*f1.b*2b*f2b*.0b*f*b*1b.*f*b*1e.d2b*1e*b.a2b**e3e." +
         "a*1e1e*2a.e1e**b0a.b*e**b1d.e11b*f*.b**b2f1b2.1b*f*b**b.*f*b*1d1.d1b02d0c." +
         "a1b**d1f",                                                                         // 39 36 2020 17
@@ -44,8 +48,6 @@ let cannedPuzzles = [
   "10x10:0a*g.d2c*a.d1b*b.a01f2.f*c.c*f.*f0*a.b0b1d.a2c1d.g*a1",                            //  8 12 2020 14
   "10x10:j.a1*a*1*a*1.j.c*1a1a*a.1a0g.g*a*.a*a0a*1c.j.*0a**0a*0a.j",                        // 14 12 2020 15
   "10x10:a0f*a.d11d.10d*2b.b*1d*1.f10b.b1*f.1*d11b.b*0d**.d**d.a1f1a",                      // 11 17 2020 16
-  "10x18:j.b1d0b.a1d*c.b2a4b*a*.c*d2a.j.a*b***c.1i.a1a0c1b.b*c1a1a.i1.c**3b*a.j." +
-        "a*d*c.1a*b*a2b.c4d3a.b3d*b.j",                                                     //       Godzilla 13
   "17x17:e1***1g.***c1*1d*c.**e2e**b.*b*a*g**3a.d2e1*1d.c4a*b*b**d.b2i*a*b.a1*d*a1d**a." +
         "1**b*e2b***.a1*d0a1d00a.b1a*i*b.d**b1b1a*c.d***e*d.a2**g2a1b1.b1*e2e**.c*d**1c**1." +
         "g1***1e",                                                                          // 57 33 2020 18
@@ -73,9 +75,9 @@ let puzzleChoice = 1;
 let puzzleCount = cannedPuzzles.length;
 
 // which puzzles have demos
-const demoPuzzles  = [1,2,31];
+const demoPuzzles  = [1,2,26];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,20,27,99];
+const puzzleLevels = [1,20,29,99];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

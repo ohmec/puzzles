@@ -13,7 +13,7 @@ let curClickType = constClickUnknown;
 
 // which keys are handled, letters and numbers handled algorithmically afterwards
 let handledKeys = [ constKeyBackspace, constKeyCR, constKeyEsc,
-  constKeyLeft, constKeyUp, constKeyRight, constKeyDown ];
+  constKeyLeft, constKeyUp, constKeyRight, constKeyDown, constKeyW ];
 
 let moveHistory, puzzleRoomList;
 
@@ -156,7 +156,7 @@ function handleKey(keynum) {
     switch (keynum) {
       case constKeyEsc:
         console.log(globalBoardValues);
-        console.log(globalWallStates);
+        console.log(globalBoardTextColors);
         console.log(puzzleRoomList);
         break;
       case constKeyUp:
@@ -164,6 +164,23 @@ function handleKey(keynum) {
       case constKeyLeft:
       case constKeyRight:
         moveGlobalCursor(keynum);
+        break;
+      case constKeyW:
+        globalBoardValues[6][7] = "δ";
+        globalBoardValues[7][11] = "ε";
+        globalBoardValues[21][2] = "ζ";
+        globalBoardValues[0][10] = "η";
+        globalBoardValues[10][0] = "θ";
+        globalBoardValues[11][7] = "λ";
+        globalBoardValues[15][1] = "μ";
+        globalBoardValues[17][11] = "π";
+        globalBoardTextColors[0][10] = "black";
+        globalBoardTextColors[10][0] = "black";
+        globalBoardTextColors[11][7] = "black";
+        globalBoardTextColors[15][1] = "black";
+        globalBoardTextColors[17][11] = "black";
+        globalCursorOn = false;
+        drawBoard();
         break;
       case constKeyBackspace:
         deleteRoom(globalCursorY,globalCursorX);

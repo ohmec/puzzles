@@ -48,6 +48,9 @@ let cannedPuzzles = [
   "14x24:c3b42b4c.b3h2b.a6c6b6c6a.d9d6d.a3j8a.6e54e6.c3f3c.b2h4b.a3d6a9c4a." +
         "d6a4b4d.c9j.9h82b2.3b26h4.j2c.d6b2a4d.a4c6a6d6a.b8h8b.c6f4c.6e66e6." +
         "a4j8a.d9d6d.a3c4b2c6a.b8h4b.c4b33b4c",                                 // godzilla 275
+  "14x24:c2e8d.5f6b4c.f4d3b.a8c6b6c8a.d4d2c6.6bAc4f.l4a.g4c6b.Ae6c6c." +
+        "a6c6c9b6a.b4k.c6j.jEc.kCb.a6b6c8c4a.c6c4eA.b3c4g.a4l.f5c8b2.4c4d6d." +
+        "a6c6b8c4a.b8d3f.c2b2f8.dAe4c",                                         // godzilla 277
   // D4
 ];
 
