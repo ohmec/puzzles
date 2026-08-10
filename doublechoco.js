@@ -127,6 +127,7 @@ function handleKey(keynum) {
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     if (keynum==constKeyEsc) {
+      globalWallCursorOn = false;
       console.log(globalWallStates);
       console.log(puzzleBoardStates);
       console.log(moveHistory);

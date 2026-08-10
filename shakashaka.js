@@ -109,6 +109,7 @@ function addMove(moveType,y,x,noHistory=false) {
 }
 
 function handleKey(keynum) {
+  console.log("handleKey(" + keynum + ")");
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
   if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
@@ -140,6 +141,7 @@ function handleKey(keynum) {
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
       case constKeyEsc:
+        globalCursorOn = false;
         console.log(puzzleBoardStates);
         console.log(globalBoardValues);
         console.log(globalCircleStates);
@@ -246,6 +248,7 @@ function handleClick(evnt) {
   let yCell, xCell, isCorner, isEdge, yEdge, xEdge;
   [ yCell, xCell, isCorner, isEdge, yEdge, xEdge ] = getClickCellInfo(evnt, "puzzleCanvas");
 
+  globalCursorOn = true;
   globalCursorY = yCell;
   globalCursorX = xCell;
 

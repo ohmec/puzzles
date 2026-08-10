@@ -12,7 +12,7 @@ const constStateIndet = 3;
 
 // which keys are handled
 let handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,
-  constKeyLeft, constKeyUp, constKeyRight, constKeyDown,
+  constKeyEsc, constKeyLeft, constKeyUp, constKeyRight, constKeyDown,
   constKey0, constKey1, constKeyAlt0, constKeyAlt1 ];
 
 let moveHistory, puzzleRoomList, puzzleBoardStates;
@@ -109,6 +109,10 @@ function handleKey(keynum) {
 
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
+      case constKeyEsc:
+        globalCursorOn = false;
+        console.log(puzzleBoardStates);
+        break;
       case constKeyUp:
       case constKeyDown:
       case constKeyLeft:
@@ -187,6 +191,7 @@ function handleClick(evnt) {
     return;
   }
 
+  globalCursorOn = true;
   globalCursorY = yCell;
   globalCursorX = xCell;
 
@@ -223,7 +228,7 @@ function updateBoardStatus() {
     for (let x=0;x<globalPuzzleW;x++) {
       if (puzzleBoardStates[y][x] == constStateBlack) {
         globalBoardColors[y][x] = fillCellColorDB;
-        globalBoardTextColors[y][x] = offFontColor;
+        globalBoardTextColors[y][x] = (playState.assistState==2) ? offFontColor : stdFontColor;
       } else if (puzzleBoardStates[y][x] == constStateWhite) {
         globalBoardColors[y][x] = emptyCellColor;
         globalBoardTextColors[y][x] = stdFontColor;

@@ -157,6 +157,7 @@ function handleKey(keynum) {
     } else {
       switch (keynum) {
         case constKeyEsc:
+          globalCursorOn = false;
           console.log(globalBoardValues);
           console.log(globalWallStates);
           break;

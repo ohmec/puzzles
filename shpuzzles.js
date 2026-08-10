@@ -11,6 +11,9 @@ let cannedPuzzles = [
   "6x6:DA2DA-.CB*CB*.-*-DA2.DA-C-A.C-A*CB.2CB-*1", 
   // demos
   "6x6:b2c.b*b*.a*c2.f.c*b.2c*1",
+  "6x6:2e.f.d3a.3e.b3b1.b1b0",                                        // 2011 #1
+  "6x6:e2.f.2a0c.e3.f.c3b",                                           // 2011 #2
+  "6x6:e2.f.2b4b.b2c.f.b12b",                                         // 2011 #3
   // D1
   "8x8:2f0.c*d.d4c.1d3b.e*b.1g.c*c2.1b*b2*",                          // v189 #1
   "10x10:1b**b2b.2c3b*b.e4d.j.c*c*b.c*d3*.3c4d*.j.j.2e3b2",           // box2014 #1
@@ -23,6 +26,7 @@ let cannedPuzzles = [
   "10x10:2b3d0*.h21.e*d.j.d2d1.3d3d.j.d4e.12h.*1d2b0",                // 2018 #4
   "10x10:2b*1e.d3e.h*1.f4c.b4b*d.c3f.i3.e*d.d3b3b.0c2b1b",            // v189 #4
   "10x10:b3d3b.j.i*.*d2d.d4e.c2d30.3i.j.j.b0c3b2",                    // 2018 #5
+  "10x10:g3b.j.2*3g.j.f3b2.3b33e.h31.e4d.2e2*b.1b3f",                 // 2011 #4
 
   // D2
   "10x10:2d3c*.i2.d4e.e4d.j.0c3b4b.j.i3.c2f.c2b1c",                   // v189 #5
@@ -106,6 +110,8 @@ let cannedPuzzles = [
   "17x17:d1l.g3i.f2c1b13b.2*j3d.b13m.g11**b*b2.m*b*.c32h2c." +
         "q.1j*e.b2h*d3.b2b2*1*11f.b0n.k2c*a.g12e4b.j2b*c." +
         "1c1e2f",                                                     // 2022 #26
+  "17x17:2b1c3c2b3b.q.i4f1.m2c.2d1g2c.c4b3j.b*m2.1p.f3b0g.l3d." +
+        "i3f3.1b3a2a1e2c.g2d3d.o2a.0a2n.i3g.c1c2e2b0",                // 2011 #20
   // D4
   "31x45:c1a0e2b2d2g2c.w3g.13h1h2k.2f4c2c11d1f2b.za4b1." +
         "r2f4e.k0f*b*i.a3p0l.2n*k1b0.c3i3a*h*f.ze.d1o4b2c0b*." +
@@ -130,9 +136,9 @@ let puzzleChoice = 1;
 let puzzleCount = cannedPuzzles.length;
 
 // which puzzles have demos
-const demoPuzzles =  [1,2,13];
+const demoPuzzles =  [1,5,17];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,13,31,57];
+const puzzleLevels = [1,17,35,62];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

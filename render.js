@@ -1044,6 +1044,8 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
           vstr = valueArray[0] + '\u2193';
           break;
       }
+    } else {
+      vstr = value;
     }
   }
   if (globalTextOutline) {

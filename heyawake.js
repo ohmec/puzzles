@@ -12,8 +12,8 @@ const constStateIndet = 3;
 
 // which keys are handled
 let handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,
-  constKeyLeft, constKeyUp, constKeyRight, constKeyDown, constKey0,
-  constKey1, constKeyAlt0, constKeyAlt1 ];
+  constKeyEsc, constKeyLeft, constKeyUp, constKeyRight, constKeyDown,
+  constKey0, constKey1, constKeyAlt0, constKeyAlt1 ];
 
 let moveHistory, puzzleRoomList, puzzleBoardStates;
 
@@ -107,6 +107,10 @@ function handleKey(keynum) {
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
+      case constKeyEsc:
+        globalCursorOn = false;
+        console.log(puzzleBoardStates);
+        break;
       case constKeyUp:
       case constKeyDown:
       case constKeyLeft:
@@ -188,6 +192,7 @@ function handleClick(evnt) {
     return;
   }
 
+  globalCursorOn = true;
   globalCursorY = yCell;
   globalCursorX = xCell;
 
