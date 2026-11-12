@@ -14,7 +14,7 @@ const handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,
 let moveHistory, puzzleInitBoardValues, boardStates, puzzleRoomList, largestPolyo;
 
 function puzzleInit() {
-  globalCursorOn = true;
+  globalCursorOn = false;
 
   // add digits and letters to handled key list
   for (let key=constKey1;key<=constKey9;key++) {
@@ -181,6 +181,7 @@ function initStructures(puzzle) {
 }
 
 function handleClick(evnt) {
+  globalCursorOn = true;
   // don't allow dragging
   if (playState.dragging) return;
 
@@ -216,7 +217,7 @@ function updateBoardStatus() {
       let px = pcell[1];
       let pv = globalBoardValues[py][px];
       if (pv > room.length && (errorCells.indexOf(pcell) == -1)) {
-        errorCells.push(room[i]);
+        errorCells.push(room[r]);
       }
       vcounts[pv]++;
     }
