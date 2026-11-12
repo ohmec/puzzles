@@ -36,11 +36,20 @@ const cannedPuzzles = [
   "10x10:b5c3c.c2c4b.a5c4c1.b1c4c.2c1c2a.a6c3c1.c1c4b." +
         "5c2c2a.b5c4c.c6c3b:8c8.798.740.ee8.de8.2a8.ef8." +
         "ed0.538.4f0:290.ac0.8a0.790.e98.490.d78.f40.f50.638",  // 2019 #1
+  "10x10:1f3b.a1e6b.b2a431254.d2b1a2.41b1b4b.d524123." +
+        "b4a3a2a3a.a5b4b2b.1b4b1a4a.b3b4c6:b58.7d0.fb0.7f8." +
+        "ca0.330.2a8.8d0.328.928:cd0.b78.9f8.1d0.cd0.350.670." +
+        "1e0.a50.160",                                          // 2025 #1
+  "10x10:jjjjjjjjjj:b40.578.da8.df0.6b8.ab8.6e8.fb8.ac8.b48:" +
+        "cf0.5d0.b10.ba0.2b8.520.f78.928.f58.928",              // 2025 #2
   "10x10:jjjjjjjjjj:ec0.db0.fd8.ca8.bb8.fe8.b78.f70." +
         "de8.3f8:918.2a8.558.f30.3b0.de0.b40.f68.ed0.a28",      // 2019 #2
   "10x10:d4e.b2g.h3a.a1h.1h1.2h2.h1a.a5h.g5b.e5d:d28." +
         "7b0.770.768.7f0.a50.f70.958.fe0.6f8:d20.5b8.a70." +
         "320.4d8.dc0.8e8.6d0.d98.ea0",                          // 2019 #3
+  "10x10:g365.d12d.j.j.a1f2a.a4f4a.j.j.d53d.412g:" +
+        "ea0.6a8.670.ae0.d10.6d0.ab0.fe8.ca8.2e8:" +
+        "cd8.6a0.558.590.5b0.758.6e0.dc8.f28.328",              // 2025 #5
   // D2
   "10x10:jjjjjjjjjj:2d0.768.5a8.4e8.fa8.4a0.5f0.e68.bd8.c60:" +
         "d30.da0.ef8.bf8.b48.d78.738.ab0.ac8.370",               // 2019 #4
@@ -103,7 +112,7 @@ let puzzleCount = cannedPuzzles.length;
 // which puzzles have demos
 const demoPuzzles =  [1,2];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,10,13,21];
+const puzzleLevels = [1,11,14,22];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +

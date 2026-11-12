@@ -17,6 +17,7 @@ let cannedPuzzles = [
   "10x10:a11b12b2.j.11a2c1a1.b12c1b.2f11a.a2c11c.b2g.d1c21.11b1a1b1.c1b1c",     //  8 22 2018 #2
   "10x10:c11b1a2.e11c.2h2.2b111b1a.c1d1a.a11g.j.b1a2a1b1.h2a.b1a22d",           //  8 17 box 2014 #2
   "10x10:2a2a1a1c.c1d11.c1b11b.f21a2.1d1c2.b12f.2b1c2a2.a2d2c.a1b1d1.b11b2a1a", // 12 19 2018 #3
+  "10x10:b1a1c1a.f1c.1b1b1c.a2e111.j.d2d2.b2c2c.g2b.a2b1c1a.2d11c",             //       godzilla 163
   // D2
   "10x10:b2e1a.e21c.1f11a.a2b2c2a.1e1c.a1a1b2c.a1a1e2.e11b2.j.a2c11c",          //  9 15 2018 #4
   "10x10:2a1g.j.2d2a2a1.e1c1.a112b11b.1b11e.f22b.1b11e.g11a.c22c1a",            //  9 17 box 2014 #3
@@ -101,13 +102,13 @@ let cannedPuzzles = [
         "a1b2a21a1211c2a21a1c2e.1u11f2.b2a211a1a2a2a2k11c.i1g1c1c1a1b2." +
         "b2a1a11e1a1a1e11f.h2b11b11a112a2a21a11b.a2d1c1a1h1i.b1a2i2b2i11b",     // 128 254 2024 #27
 ];
-let puzzleChoice = 11;
+let puzzleChoice = 12;
 let puzzleCount = cannedPuzzles.length;
 
 // which puzzles have demos
 const demoPuzzles =  [1,6];
 // which puzzles are at which level [D1,D2,D3,D4]
-const puzzleLevels = [1,7,21,38];
+const puzzleLevels = [1,8,21,36];
 
 const demoText = [
  ["<p>In this demo we will walk through the steps of solving this puzzle. " +
