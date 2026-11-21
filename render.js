@@ -12,7 +12,7 @@ const constCircleTriNE    = 5;
 const constCircleTriSE    = 6;
 const constCircleTriSW    = 7;
 const constCircleTriNW    = 8;
-const constCircleDotWhite = 9;  // small hollow center (Tentai Show etc.)
+const constCircleDotWhite = 9;  // small hollow center (Tentai Show)
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
