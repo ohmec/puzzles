@@ -113,30 +113,7 @@ function handleKey(keynum) {
   const focusedElement = document.activeElement;
   // look for CR within puzzle display field
   if ((keynum == constKeyCR) && focusedElement && focusedElement.id == "userPuzzle") {
-    let pval = elemStruct.userPuzzle.value;
-    if (pval.search(/:/) == -1) {
-      if (pval < cannedPuzzles.length) {
-        puzzleChoice = pval;
-        initPuzzle = cannedPuzzles[pval];
-        puzzle = removeDot(initPuzzle);
-        updateHtmlDescr(initPuzzle);
-        // check to see if this is a demo puzzle
-        let search = demoPuzzles.find(element => element == pval);
-        if (search !== undefined) {
-          elemStruct.demotab.style.display = 'block';
-          demoStepNum = 0;
-          updateDemoRegion(pval);
-        } else {
-          elemStruct.demotab.style.display = 'none';
-        }
-      }
-    } else {
-      elemStruct.demotab.style.display = 'none';
-      initPuzzle = pval;
-      puzzle = removeDot(initPuzzle);
-      updateHtmlDescr(initPuzzle);
-    }
-    initStructures(puzzle);
+    selectPuzzleFromInput(elemStruct.userPuzzle.value);
   // else look for keys not in puzzle display field
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     switch (keynum) {
