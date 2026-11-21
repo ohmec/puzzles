@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./puzzles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:Bold,400|Hina+Mincho"/>
+    <script type="text/javascript" src="./render.js"></script>
+    <script type="text/javascript" src="./tspuzzles.js"></script>
+    <script type="text/javascript" src="./tentai.js"></script>
+    <title>Tentai Show Player</title>
+  </head>
+  <body
+    data-display-name="Tentai Show"
+    data-jp-html="&#x5929;&#x4F53;&#x30B7;&#x30E7;&#x30FC;"
+  >
+    <div id="puzzleTabSources" hidden>
+      <div data-tab="1">
+        <p>
+          In Tentai Show, the goal is to draw borders that divide the
+          board into galaxies (see Rules tab). To draw borders, use
+          the mouse or arrow keys:
+        </p>
+        <ul>
+          <li>
+            A <b>left-click</b> on a border between cells creates a wall.
+          </li>
+          <li>
+            A <b>right-click</b> on an existing wall removes it.
+          </li>
+          <li>
+            You can <b>mouse drag</b> to continue drawing or erasing walls.
+          </li>
+          <li>
+            Once on a boundary, hold <b>shift</b> and use the <b>arrow keys</b>
+            to extend walls.
+          </li>
+          <li>
+            On a wall, <b>space</b> toggles it; <b>1</b> sets; <b>0</b> or
+            <b>backspace</b> clears.
+          </li>
+        </ul>
+        <p>
+          The board starts light gray. A region only changes color once it
+          is fully enclosed and contains zero or one star: red if empty or
+          asymmetric; white / dark gray (modes 0–1) or light / dark green
+          (mode 2) if it is a valid galaxy around a white / black star.
+          Regions that still share the board or contain two or more stars
+          stay gray. Assist Mode (1) adds counts; mode (2) also highlights
+          unpaired cells inside asymmetric regions. When the puzzle is
+          complete, black-star galaxies go very dark to reveal the picture.
+          Use Undo to reverse moves.
+        </p>
+        <p>
+          Below, enter <b>puzzle code (0-<span id='puzzlecount1'>0</span>)</b>
+          for a pre-defined puzzle, or a puzzle descriptor (see "Puzzles"
+          tab). <b>Puzzle code 0</b> is reserved for a completed example.
+          Demos: <span id='demolist1'>[]</span>).
+        </p>
+      </div>
+      <div data-tab="2">
+        <a href="https://www.nikoli.co.jp/en/puzzles/tentai_show" target="_blank">Tentai Show</a>
+        (<span class="jpfont">&#x5929;&#x4F53;&#x30B7;&#x30E7;&#x30FC;</span>,
+        also called Astronomical Show or Spiral Galaxies) is a Nikoli
+        original. Stars (white or black circles) mark galaxy centers;
+        they may sit in cell centers, on edges, or on vertices. Draw
+        borders along the grid so that:
+        <ol>
+          <li>
+            The board is divided into regions ("galaxies"), each containing
+            exactly one star.
+          </li>
+          <li>
+            Each galaxy has 180&deg; rotational symmetry about its star.
+          </li>
+          <li>
+            When finished, shade every galaxy whose star is black; the
+            shaded regions form a picture (the "show").
+          </li>
+        </ol>
+      </div>
+      <div data-tab="3">
+        <p>
+          Puzzles can be invoked by a numerical entry from
+          <b>0-<span id='puzzlecount2'>0</span></b>, or through a character
+          descriptor in the Display field. Numbered puzzles are roughly
+          easy to hard. <b>Puzzle 0</b> is reserved for a completed example.
+        </p>
+        <p>
+          Descriptors have the form: "WxH:&lt;star-descriptor&gt;" with
+          optional ":&lt;row-walls&gt;:&lt;col-walls&gt;" hex segments for a
+          solved board (same wall encoding as Double Choco). The star
+          stream is left-to-right, top-to-bottom. Glyphs (at most one per
+          cell): <b>*</b>/<b>O</b> black/white center; <b>&gt;</b>/<b>E</b>
+          black/white east edge; <b>V</b>/<b>S</b> black/white south edge;
+          <b>+</b>/<b>@</b> black/white SE vertex. Blanks use <b>-</b> or
+          <b>a–z</b> run lengths; <b>.</b> separates rows. Example for
+          entry 1: '<span id="descr1">descr</span>'.
+        </p>
+        <p>
+          For Tentai Show there are <span id='democount'>0</span> demo
+          puzzles: <span id='demolist2'>[]</span>.
+        </p>
+      </div>
+    </div>
+    <script type="text/javascript" src="./puzzle-shell.js"></script>
+    <script type="text/javascript">
+      puzzleInit();
+    </script>
+  </body>
+</html>
