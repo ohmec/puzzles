@@ -27,6 +27,7 @@ const colorS = "#105010";
 
 let incompleteCount = 0;
 let brokenRiver = true;
+let curClickType = constClickUnknown;
 
 // which keys are handled
 let handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,

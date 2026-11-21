@@ -5,6 +5,7 @@ const incorrectRiverColor = "#FFE0A0";  // light brown
 const gameName = 'heyawake';
 
 let incompleteCount = 0;
+let curClickType = constClickUnknown;
 
 const constStateWhite = 1;
 const constStateBlack = 2;

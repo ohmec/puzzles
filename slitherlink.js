@@ -24,6 +24,12 @@ let handledKeys = [ constKeyBackspace, constKeyCR, constKeySpace,
 
 let moveHistory, puzzleBoardStates;
 
+// On Shift, latch shade-vs-clear from the current cell so Shift+arrows paint a streak.
+function shiftFunc() {
+  playState.shiftState = puzzleBoardStates[globalCursorY][globalCursorX] ?
+    constMoveShadeCell : constMoveClearCell;
+}
+
 function puzzleInit() {
   globalCursorOn = false;
   globalWallCursorOn = false;
@@ -31,7 +37,7 @@ function puzzleInit() {
   globalDrawDots = true;
   initElements();
   initRibbons(gameName);
-  listenKeys(handledKeys,handleKey);
+  listenKeys(handledKeys,handleKey,shiftFunc);
   listenClick(handleClick,initStructures,undoMove);
 
   if(cannedPuzzles[puzzleChoice]) {
@@ -157,7 +163,7 @@ function handleKey(keynum) {
   } else if (focusedElement && focusedElement.id != "userPuzzle") {
     if (keynum==constKeyEsc) {
       globalCursorOn = false;
-      globalCursorWallOn = false;
+      globalWallCursorOn = false;
       console.log(globalBoardValues);
       console.log(globalWallStates);
       console.log(moveHistory);
@@ -179,7 +185,7 @@ function handleKey(keynum) {
           } else if (globalCursorOn && globalCursorY) {
             globalCursorY--;
             if (playState.shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
+              addMove(globalCursorY,globalCursorX,playState.shiftState);
             }
           }
           break;
@@ -198,7 +204,7 @@ function handleKey(keynum) {
           } else if (globalCursorOn && (globalCursorY<globalPuzzleH)) {
             globalCursorY++;
             if (playState.shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
+              addMove(globalCursorY,globalCursorX,playState.shiftState);
             }
           }
           break;
@@ -217,7 +223,7 @@ function handleKey(keynum) {
           } else if (globalCursorOn && (globalCursorX>0)) {
             globalCursorX--;
             if (playState.shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
+              addMove(globalCursorY,globalCursorX,playState.shiftState);
             }
           }
           break;
@@ -236,7 +242,7 @@ function handleKey(keynum) {
           } else if (globalCursorOn && (globalCursorX<globalPuzzleW)) {
             globalCursorX++;
             if (playState.shifting) {
-              addMove(globalCursorY,globalCursorX,curShiftState ? constMoveShadeCell : constMoveClearCell);
+              addMove(globalCursorY,globalCursorX,playState.shiftState);
             }
           }
           break;
@@ -251,7 +257,7 @@ function handleKey(keynum) {
               addMove(globalWallCursorY,globalWallCursorX,constMoveAddWall);
             }
           } else if (globalCursorOn) {
-            if (puzzleBoardStates[y][x]) {
+            if (puzzleBoardStates[globalCursorY][globalCursorX]) {
               addMove(globalCursorY,globalCursorX,constMoveClearCell);
             } else {
               addMove(globalCursorY,globalCursorX,constMoveShadeCell);

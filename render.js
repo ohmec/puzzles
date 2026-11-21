@@ -3,15 +3,16 @@ const constClickMiddle  = 1;
 const constClickRight   = 2;
 const constClickUnknown = 9;
 
-const constCircleNone   = 0;
-const constCircleWhite  = 1;
-const constCircleBlack  = 2;
-const constCircleDot    = 3;
-const constCircleMoon   = 4;
-const constCircleTriNE = 5;
-const constCircleTriSE = 6;
-const constCircleTriSW = 7;
-const constCircleTriNW = 8;
+const constCircleNone     = 0;
+const constCircleWhite    = 1;
+const constCircleBlack    = 2;
+const constCircleDot      = 3;
+const constCircleMoon     = 4;
+const constCircleTriNE    = 5;
+const constCircleTriSE    = 6;
+const constCircleTriSW    = 7;
+const constCircleTriNW    = 8;
+const constCircleDotWhite = 9;  // small hollow center (Tentai Show etc.)
 
 // the paths can be complicated for hashiwokakero, so
 // allow for that but keep the others simplified. This
@@ -122,6 +123,7 @@ const constWallUserEdge  = 0b000010000;
 const constWallSolveEdge = 0b000100000;
 const constWallDot       = 0b001000000;
 const constWallX         = 0b010000000;
+const constWallDotWhite  = 0b100000000;  // hollow star on edge/corner (with constWallDot)
 
 const constRibbonColorWhite = "white";
 const constRibbonColorRed   = "#ffc0c0";
@@ -948,6 +950,14 @@ function drawBoard() {
       drawWall(constVert,y,x,globalWallStates[y][x],globalWallColors[y][x],globalDotColors[y][x]);
     }
   }
+  // draw corner stars (Tentai Show etc.) without drawing edge segments
+  for (let y=0;y<=2*globalPuzzleH;y+=2) {
+    for (let x=0;x<=2*globalPuzzleW;x+=2) {
+      if (globalWallStates[y][x] & constWallDot) {
+        drawWallDot(y,x,globalWallStates[y][x],globalDotColors[y][x]);
+      }
+    }
+  }
   if (globalCursorOn) {
     drawCursor();
   }
@@ -974,7 +984,7 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
   // draw circle next if it exists
   if (circle) {
     // "circle" might be a triangle for Shakashaka
-    if (circle >= constCircleTriNE) {
+    if (circle >= constCircleTriNE && circle <= constCircleTriNW) {
       let cornersY = [drawY,drawY,drawY+globalGridSize,drawY+globalGridSize];
       let cornersX = [drawX,drawX+globalGridSize,drawX+globalGridSize,drawX];
       let drawY1 = cornersY[(circle-constCircleTriNE)%4];
@@ -991,17 +1001,27 @@ function drawTile(y,x,color,value,isbold,circle,circlecolor,line,lineColor,lineF
       globalContext.closePath();
       globalContext.fill();
     } else {
-      let radius = (circle==constCircleDot) ? globalCircleRadius*globalGridSize*0.35 :
+      let isSmallDot = (circle==constCircleDot || circle==constCircleDotWhite);
+      let radius = isSmallDot ?
+                                          globalCircleRadius*globalGridSize*0.35 :
                                           globalCircleRadius*globalGridSize;
-      globalContext.lineWidth = 4.0;
+      // Small dots match drawWallDot (lineWidth 2, fill then stroke); full
+      // Masyu-style circles keep the thicker stroke-then-fill look.
+      globalContext.lineWidth = isSmallDot ? 2.0 : 4.0;
       globalContext.strokeStyle = circlecolor;
-      globalContext.fillStyle = (circle>=constCircleBlack) ? circlecolor : "white";
+      globalContext.fillStyle =
+          (circle>=constCircleBlack && circle!=constCircleDotWhite) ? circlecolor : "white";
       globalContext.beginPath();
       globalContext.arc(drawX+globalGridSize/2,
                         drawY+globalGridSize/2,
                         radius,0,2*Math.PI);
-      globalContext.stroke();
-      globalContext.fill();
+      if (isSmallDot) {
+        globalContext.fill();
+        globalContext.stroke();
+      } else {
+        globalContext.stroke();
+        globalContext.fill();
+      }
       // if constCircleMoon draw another white one to eclipse the original one
       if (circle==constCircleMoon) {
         globalContext.strokeStyle = "white";
@@ -1128,14 +1148,7 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
   // reset dash
   globalContext.setLineDash([]);
   if (wallState & constWallDot) {
-    let radius = globalCircleRadius*globalGridSize*0.35;
-    globalContext.lineWidth = 4.0;
-    globalContext.strokeStyle = dotColor;
-    globalContext.fillStyle = dotColor;
-    globalContext.beginPath();
-    globalContext.arc(drawXM,drawYM,radius,0,2*Math.PI);
-    globalContext.stroke();
-    globalContext.fill();
+    drawWallDot(y,x,wallState,dotColor);
   }
   if (wallState & constWallX) {
     let xw = globalGridSize*0.06;
@@ -1148,6 +1161,24 @@ function drawWall(horv,y,x,wallState,lineColor,dotColor) {
     globalContext.stroke();
   }
   // reset lineWidth
+  globalContext.lineWidth = 1;
+}
+
+function drawWallDot(y,x,wallState,dotColor) {
+  let drawXM = x*globalGridSize*0.5+globalBorderMargin;
+  let drawYM = y*globalGridSize*0.5+globalBorderMargin;
+  let radius = globalCircleRadius*globalGridSize*0.35;
+  globalContext.lineWidth = 2.0;
+  globalContext.strokeStyle = "black";
+  globalContext.beginPath();
+  globalContext.arc(drawXM,drawYM,radius,0,2*Math.PI);
+  if (wallState & constWallDotWhite) {
+    globalContext.fillStyle = "white";
+  } else {
+    globalContext.fillStyle = (dotColor && dotColor!="white") ? dotColor : "black";
+  }
+  globalContext.fill();
+  globalContext.stroke();
   globalContext.lineWidth = 1;
 }
 
